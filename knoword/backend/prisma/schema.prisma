@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["users", "communities"]
+}
+
+model User {
+  id                         Int               @id @default(autoincrement())
+  username                   String            @unique
+  email                      String            @unique
+  password                   String
+  realName                   String
+  avatar                     String?
+  bio                        String?
+  emailVerificationToken     String?           @unique
+  emailVerificationExpiresAt DateTime?
+  isEmailVerified            Boolean           @default(false)
+  passwordResetToken         String?           @unique
+  passwordResetExpiresAt     DateTime?
+  createdAt                  DateTime          @default(now())
+  updatedAt                  DateTime          @updatedAt
+  deletedAt                  DateTime?
+  // Relaciones
+  memberships                CommunityMember[]
+  communities                Community[]
+
+  @@index([deletedAt])
+  @@map("users")
+  @@schema("users")
+}
+
+model Community {
+  id          Int               @id @default(autoincrement())
+  name        String            @unique
+  description String
+  avatar      String?
+  banner      String?
+  isPrivate   Boolean           @default(false)
+  createdById Int
+  createdBy   User              @relation(fields: [createdById], references: [id])
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  deletedAt   DateTime?
+  // Relaciones
+  members     CommunityMember[]
+  tags        Tag[]
+
+  @@index([deletedAt, createdById])
+  @@map("communities")
+  @@schema("communities")
+}
+
+// Tabla de union para miembros de una comunidad con roles
+model CommunityMember {
+  userId      Int
+  communityId Int
+  role        CommunityRole @default(MEMBER)
+
+  user      User      @relation(fields: [userId], references: [id])
+  community Community @relation(fields: [communityId], references: [id])
+
+  // Clave compuesta para evitar duplicados
+  @@id([userId, communityId])
+  @@map("community_members")
+  @@schema("communities")
+}
+
+// Modelo para etiquetas de comunidades
+model Tag {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  communities Community[]
+
+  @@map("tags")
+  @@schema("communities")
+}
+
+// Enum para los roles de los miembros de la comunidad
+enum CommunityRole {
+  ADMIN
+  MODERATOR
+  MEMBER
+
+  @@schema("communities")
+}
