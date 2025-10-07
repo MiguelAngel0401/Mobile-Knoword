@@ -17,7 +17,8 @@ export const registerSchema = z.object({
     .max(50, "Tu nombre real no puede tener más de 50 caracteres."),
   bio: z
     .string()
-    .max(160, "Tu biografía no puede tener más de 160 caracteres.")
+    .max(160, "Tu biografía no puede tener más de 160 caracteres.") 
     .optional(),
   avatar: z.string().optional(),
+  
 });
