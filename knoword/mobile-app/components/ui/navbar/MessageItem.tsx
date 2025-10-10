@@ -7,7 +7,7 @@ interface Message {
   message: string;
   time: string;
   avatar: string;
-  active: boolean;
+  active?: boolean;
 }
 
 export function MessageItem({ message }: { message: Message }) {

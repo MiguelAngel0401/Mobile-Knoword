@@ -1,8 +1,8 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import SearchBar from "./SearchBar";
-import NotificationsMenu from "./NotificationsMenu";
-import ProfileMenu from "./ProfileMenu";
+import { NotificationsMenu } from "./NotificationsMenu";
+import { ProfileMenu } from "./ProfileMenu";
 
 export default function Navbar() {
   // En React Native no existe usePathname de Next.js

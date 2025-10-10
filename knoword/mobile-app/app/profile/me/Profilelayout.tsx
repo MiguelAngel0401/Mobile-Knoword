@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import LateralMenu from "@/components/shared/LateralMenu";
+import LateralMenu from "../../../components/shared/LateraMenu";
 import Navbar from "@/components/ui/navbar/Navbar";
 
 export default function ProfileLayout({

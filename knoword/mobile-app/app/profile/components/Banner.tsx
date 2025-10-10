@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView } from "react-native";
-import Avatar from "@/components/ui/userProfile/Avatar";
+import { Avatar } from "../../../components/ui/userProfile/Avatar";
 import Posts from "./Posts";
 import Communities from "./Communities";
 import Followers from "./Followers";
-import { getMe } from "@/services/users/userServices";
-import { User } from "@/types/users/user";
+import { getMe } from "../../../../shared-core/src/services/users/userServices";
+import { User } from "../../../../shared-core/src/types/users/user";
 import ErrorMessageScreen from "@/components/shared/ErrorMessageScreen";
 
 type ActiveTab = "posts" | "communities" | "followers";

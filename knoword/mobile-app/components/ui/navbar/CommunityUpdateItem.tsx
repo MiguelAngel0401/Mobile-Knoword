@@ -7,7 +7,7 @@ interface CommunityUpdate {
   title: string;
   date: string;
   description: string;
-  active: boolean;
+  active?: boolean;
 }
 
 export function CommunityUpdateItem({ update }: { update: CommunityUpdate }) {

@@ -156,7 +156,7 @@ export function NotificationsMenu() {
                     Mensajes
                   </Text>
                   {messages.length > 0 ? (
-                    messages.map((m) => <MessageItem key={m.id} message={m} />)
+                    messages.map((m) => <MessageItem key={m.id} message={m}  />)
                   ) : (
                     <Text className="px-4 py-3 text-center text-gray-500">
                       No tienes mensajes.

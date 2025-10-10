@@ -12,12 +12,12 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import Avatar from "@/components/ui/userProfile/Avatar";
+import { Avatar } from "@/components/ui/userProfile/Avatar";
 import { Pencil } from "lucide-react-native";
-import { profileSchema } from "../../schemas";
-import { uploadToCloudinary } from "@/services/cloudinary/cloudinaryService";
-import { getMe, updateUserData } from "@/services/users/userServices";
-import { User } from "@/types/users/user";
+import { profileSchema } from "../../../../../shared-core/src/validators/users/index";
+import { uploadToCloudinary } from "../../../../../shared-core/src/services/cloudinary/cloudinaryService";
+import { getMe, updateUserData } from "../../../../../shared-core/src/services/users/userServices";
+import { User } from "../../../../../shared-core/src/types/users/user";
 import ErrorMessageScreen from "@/components/shared/ErrorMessageScreen";
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -206,7 +206,7 @@ export default function ProfileEditor() {
                             placeholder="Escribe tu biografía"
                             placeholderTextColor="#9CA3AF"
                             onChangeText={(text) => setValue("bio", text, { shouldDirty: true })}
-                            defaultValue={user?.bio}
+                            defaultValue={user?.bio ?? ""}
                             className="w-full px-3 py-2 border border-gray-600 rounded-md text-white"
                         />
                     ) : (
