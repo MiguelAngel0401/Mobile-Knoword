@@ -4,7 +4,8 @@ import {
   Community,
   CommunityCreateData,
   CommunityUpdateData,
-} from "@/types/community";
+} from "../../types/community";
+import { Tag } from "../../types/community/communityTag";
 
 export const getTagRecommendations = async (query: string) => {
   try {
@@ -42,7 +43,7 @@ export const exploreCommunities = async () => {
   }
 };
 
-export const getCommunityById = async (communityId: number) => {
+export const getCommunityById = async (communityId: string) => {
   try {
     const response = await privateApiClient.get(
       `/communities/community/${communityId}`,
@@ -115,7 +116,7 @@ export const getUserCommunities = async () => {
 export const updateCommunity = async (
   communityId: number,
   communityData: CommunityUpdateData,
-) => {
+): Promise<any> => {
   try {
     const response = await privateApiClient.patch(
       `/communities/community/${communityId}`,

@@ -1,4 +1,4 @@
-export const uploadToCloudinary = async (file: File): Promise<string> => {
+export const uploadToCloudinary = async (uri: string): Promise<string> => {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
@@ -7,7 +7,12 @@ export const uploadToCloudinary = async (file: File): Promise<string> => {
   }
 
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append("file", {
+    uri,
+    name: "upload.jpg",
+    type: "image/jpeg",
+  } as any); // 👈 tipado forzado para evitar errores
+
   formData.append("upload_preset", uploadPreset);
 
   const response = await fetch(
@@ -15,14 +20,12 @@ export const uploadToCloudinary = async (file: File): Promise<string> => {
     {
       method: "POST",
       body: formData,
-    },
+    }
   );
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(
-      errorData.error.message || "Failed to upload to Cloudinary",
-    );
+    throw new Error(errorData.error.message || "Failed to upload to Cloudinary");
   }
 
   const data = await response.json();

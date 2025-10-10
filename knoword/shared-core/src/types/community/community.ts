@@ -13,4 +13,15 @@ export interface Community {
   deletedAt: string | null;
   tags: Tag[];
   memberCount: number;
+  isOwner?: boolean;
+  isMember?: boolean;
+}
+
+export interface CommunityUpdateData {
+  name?: string;
+  description?: string;
+  avatar?: string | null;
+  banner?: string | null;
+  isPrivate?: boolean;
+  tags?: { name: string }[];
 }

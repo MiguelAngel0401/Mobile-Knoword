@@ -22,10 +22,11 @@ import {
     getTagRecommendations,
 } from "@shared/services/community/communityServices";
 import { uploadToCloudinary } from "@shared/services/cloudinary/cloudinaryService";
-import { Community, Tag } from "../../../../../../shared-core/src/types/community/community";
-import ErrorMessageScreen from "@components/shared/ErrorMessageScreen";
-import CommunitySuccessModal from "@components/modals/CommunitySuccessModal";
-import CommunityErrorModal from "@components/modals/CommunityErrorModal";
+import { Community, Tag, CommunityUpdateData,} from "../../../../../../shared-core/src/types/community";
+import ErrorMessageScreen from "../../../../../components/shared/ErrorMessageScreen";
+import CommunitySuccessModal from "../../../components/modals/CommunitySuccessModal";
+import CommunityErrorModal from "../../../components/modals/CommuntyErrorModal";
+
 
 type FormData = z.infer<typeof createCommunitySchema>;
 
@@ -60,10 +61,11 @@ export default function EditCommunityScreen() {
         mode: "onBlur",
     });
 
+    // ✅ Cargar comunidad
     useEffect(() => {
         const fetchCommunity = async () => {
             try {
-                const data = await getCommunityById(idCommunity);
+                const data = await getCommunityById(idCommunity); // idCommunity es string
                 setCommunity(data);
                 setValue("name", data.name);
                 setValue("description", data.description);
@@ -86,6 +88,7 @@ export default function EditCommunityScreen() {
         if (idCommunity) fetchCommunity();
     }, [idCommunity]);
 
+    // ✅ Tags
     const handleAddTag = (tag: string) => {
         const newTag = tag.trim().toLowerCase();
         if (!newTag) return;
@@ -115,7 +118,7 @@ export default function EditCommunityScreen() {
             }
             setIsSearching(true);
             try {
-                const response = await getTagRecommendations(query);
+                const response = await getTagRecommendations(query) as Tag[];
                 const newSuggestions = response
                     .filter((s) => !selectedTags.includes(s.name.toLowerCase()))
                     .map((s) => s.name);
@@ -137,6 +140,73 @@ export default function EditCommunityScreen() {
         };
     }, [inputValue]);
 
+    // ✅ Upload imágenes
+    const handleImageUpload = async (type: "banner" | "avatar") => {
+        try {
+            if (type === "banner") setIsUploadingBanner(true);
+            if (type === "avatar") setIsUploadingAvatar(true);
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                quality: 0.9,
+            });
+
+            if (!result.canceled) {
+                const uri = result.assets[0].uri;
+                const uploadedUrl = await uploadToCloudinary(uri);
+
+                if (type === "banner") {
+                    setBannerPreview(uploadedUrl);
+                    setValue("banner", uploadedUrl);
+                } else {
+                    setAvatarPreview(uploadedUrl);
+                    setValue("avatar", uploadedUrl);
+                }
+            }
+        } catch (err) {
+            console.error("Error subiendo imagen", err);
+        } finally {
+            if (type === "banner") setIsUploadingBanner(false);
+            if (type === "avatar") setIsUploadingAvatar(false);
+        }
+    };
+    // ✅ Submit
+    const onSubmit = async (values: FormData) => {
+  try {
+    setSubmitting(true);
+    setSubmissionError(null);
+
+    const id = Number(community?.id ?? idCommunity);
+    if (Number.isNaN(id)) {
+      setSubmissionError("ID de comunidad inválido");
+      return;
+    }
+
+    const payload: CommunityUpdateData = {
+      ...values,
+      tags: selectedTags.map((tagName) => ({
+        id: "", // relleno si el backend lo ignora
+        name: tagName,
+        createdAt: "", // relleno si el backend lo ignora
+      })),
+    };
+
+    await updateCommunity(id, payload);
+    setIsSubmitCorrect(true);
+  } catch (err) {
+    console.error(err);
+    setSubmissionError("No se pudo actualizar la comunidad.");
+  } finally {
+    setSubmitting(false);
+  }
+};
+
+    // ✅ Handlers para modales
+    const handleCloseSuccessModal = () => setIsSubmitCorrect(false);
+    const handleCloseErrorModal = () => setSubmissionError(null);
+
+    // ✅ Render
     if (loading) {
         return (
             <View className="flex-1 justify-center items-center bg-black">
@@ -228,6 +298,7 @@ export default function EditCommunityScreen() {
             )}
 
             {tagError && <Text className="text-red-500 text-sm mt-2">{tagError}</Text>}
+
             {/* Imágenes */}
             <View className="mt-6 space-y-6">
                 {/* Banner */}
