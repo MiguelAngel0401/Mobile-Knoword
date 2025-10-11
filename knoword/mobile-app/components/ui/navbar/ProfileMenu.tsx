@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, Modal } from "react-native";
 import { User } from "lucide-react-native";
-import privateApiClient from "@/services/client/privateApiClient";
+import { logout } from "../../../../shared-core/src/services/auth/logout";
+import privateApiClient from "../../../../shared-core/src/services/client/privateApiClient";
 
 export function ProfileMenu() {
   const [isOpen, setIsOpen] = useState(false);
 
   const logoutFromBackend = async () => {
     try {
-      await privateApiClient.post(`/auth/logout`);
+      await logout(privateApiClient); // ✅ cliente inyectado
       console.log("Sesión cerrada");
       // Aquí puedes navegar a la pantalla de login con React Navigation
     } catch (error) {

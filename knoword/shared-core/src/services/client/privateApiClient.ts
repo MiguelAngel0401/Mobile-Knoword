@@ -1,10 +1,14 @@
-import axios from "axios";
-//import { logout } from "@/services/auth/authService";
+import axios, { AxiosInstance } from "axios";
+import { getBackendUrl } from "../../config";
 import { logout } from "../auth/logout";
 
-const privateApiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: true, // ¡Muy importante! Envía cookies con cada petición.
+const privateApiClient: AxiosInstance = axios.create({
+  baseURL: getBackendUrl(), // ✅ IP local directa
+  withCredentials: true, // ✅ Envía cookies con cada petición
+  timeout: 10000,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 let isRefreshing = false;
@@ -26,43 +30,32 @@ const processQueue = (error: any, token: string | null = null) => {
 };
 
 privateApiClient.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Si el error es 401 y no es un reintento
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
-        // Si ya se está refrescando, pone la petición en cola
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
-          .then((token) => {
-            return privateApiClient(originalRequest);
-          })
-          .catch((err) => {
-            return Promise.reject(err);
-          });
+          .then(() => privateApiClient(originalRequest))
+          .catch((err) => Promise.reject(err));
       }
 
       originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        // Intenta refrescar el token
-        await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
-          { withCredentials: true },
-        );
+        await axios.get(`${getBackendUrl()}/auth/refresh-token`, {
+          withCredentials: true,
+        });
 
-        processQueue(null, "new-token"); // Procesa la cola con éxito
-        return privateApiClient(originalRequest); // Reintenta la petición original
+        processQueue(null, "new-token");
+        return privateApiClient(originalRequest);
       } catch (refreshError) {
-        processQueue(refreshError, null); // Procesa la cola con error
-        // Si el refresco falla, es un logout definitivo.
-        logout();
+        processQueue(refreshError, null);
+        await logout(privateApiClient); // ✅ cliente inyectado, sin ciclo
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -70,7 +63,7 @@ privateApiClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  },
+  }
 );
 
 export default privateApiClient;

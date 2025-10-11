@@ -17,7 +17,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "@shared/types/navigation";
 import { useAxiosErrorHandler } from "@shared/hooks/useAxiosErrorHandler";
 import { checkEmail, checkUsername, registerUser } from "@shared/services/auth/register";
-import { uploadToCloudinary } from "../../../../shared-core/src/services/cloudinary/upload";
+import { uploadToCloudinary } from "@shared/services/cloudinary/upload";
 import { debounce } from "lodash";
 
 type RegisterFormData = z.infer<typeof registerSchema>;

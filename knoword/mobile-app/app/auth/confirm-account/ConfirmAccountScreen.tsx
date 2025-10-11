@@ -5,7 +5,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RouteProp } from "@react-navigation/native";
 import { AuthStackParamList } from "@shared/types/navigation";
 import { useAxiosErrorHandler } from "../../../../shared-core/src/hooks/useAxiosErrorHandler";
-import { confirmEmail } from "../../../../shared-core/src/services/auth/confirm";
+import { confirmEmail } from "@shared/services/auth/confirm";
 
 export default function ConfirmAccountScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();

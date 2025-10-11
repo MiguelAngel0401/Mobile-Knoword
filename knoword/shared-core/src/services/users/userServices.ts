@@ -1,10 +1,11 @@
-import privateApiClient from "@/services/client/privateApiClient";
-import { ProfileFormData, UserProfileResponse } from "@shared-core/src/types/users";
+import { AxiosInstance } from "axios";
+import { ProfileFormData, UserProfileResponse } from "../../../../shared-core/src/types/users";
 
-export const getMe = async (): Promise<UserProfileResponse> => {
+export const getMe = async (
+  client: AxiosInstance
+): Promise<UserProfileResponse> => {
   try {
-    const response =
-      await privateApiClient.get<UserProfileResponse>("/users/me");
+    const response = await client.get<UserProfileResponse>("/users/me");
     return response.data;
   } catch (error) {
     console.error("Error fetching user profile:", error);
@@ -13,13 +14,11 @@ export const getMe = async (): Promise<UserProfileResponse> => {
 };
 
 export const updateUserData = async (
-  data: ProfileFormData,
+  client: AxiosInstance,
+  data: ProfileFormData
 ): Promise<UserProfileResponse> => {
   try {
-    const response = await privateApiClient.patch<UserProfileResponse>(
-      "/users/me",
-      data,
-    );
+    const response = await client.patch<UserProfileResponse>("/users/me", data);
     return response.data;
   } catch (error) {
     console.error("Error updating user data:", error);

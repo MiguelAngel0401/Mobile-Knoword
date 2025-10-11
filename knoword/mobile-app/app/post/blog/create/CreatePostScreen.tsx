@@ -6,7 +6,7 @@ import { useRouter } from "expo-router";
 import CreateBlogHeader from "../components/CreateBlogHeader";
 import BlogPreview from "../components/BlogPreview";
 import RichTextEditor from "../components/RichTextEditor"; // wrapper que hicimos con pell
-import { useDebounce } from "../hooks/useDebounce";
+import { useDebounce } from "../../../../../mobile-app/src/hooks/useDebounce";
 
 interface BlogDraft {
   title: string;

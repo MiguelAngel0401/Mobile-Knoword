@@ -6,7 +6,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { getCommunitiesByTag } from "@shared/services/community/communityServices";
 import { Community } from "@shared/types/community/community";
 import { RootStackParamList } from "@shared/types/navigation";
-import ErrorMessageScreen from "../../../components/shared/ErrorMessageScreen";
+import ErrorMessageScreen from "@/components/shared/ErrorMessageScreen";
 
 // 👇 Tipamos la navegación
 type CommunityNavProp = NativeStackNavigationProp<

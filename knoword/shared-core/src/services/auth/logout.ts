@@ -1,8 +1,8 @@
-import privateApiClient from "../client/privateApiClient";
+import { AxiosInstance } from "axios";
 
-export const logout = async () => {
+export const logout = async (client: AxiosInstance) => {
   try {
-    await privateApiClient.post("/auth/logout");
+    await client.post("/auth/logout");
   } catch (error) {
     console.error("Backend logout failed:", error);
   }

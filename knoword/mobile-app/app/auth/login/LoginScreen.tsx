@@ -5,6 +5,10 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
+  StyleSheet,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -68,74 +72,157 @@ export default function LoginScreen() {
   };
 
   return (
-    <View className="flex-1 justify-center px-6 bg-gray-900">
-      <View className="bg-gray-800 rounded-lg shadow-lg p-6">
-        <Text className="text-3xl font-bold text-white text-center mb-6">
-          Inicia sesión en tu cuenta
-        </Text>
+    <KeyboardAvoidingView
+      style={styles.keyboard}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView contentContainerStyle={styles.scroll}>
+        <View style={styles.container}>
+          <View style={styles.card}>
+            <Text style={styles.title}>Inicia sesión en tu cuenta</Text>
+            <Text style={styles.subtitle}>
+              Aprende, comparte y crece junto a una comunidad que ama el conocimiento.
+            </Text>
 
-        <Text className="text-gray-300 text-center mb-4">
-          Aprende, comparte y crece junto a una comunidad que ama el conocimiento.
-        </Text>
+            <Text style={styles.label}>Correo Electrónico</Text>
+            <TextInput
+              style={[styles.input, errors.email && styles.inputError]}
+              placeholder="correo@ejemplo.com"
+              placeholderTextColor="#9CA3AF"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              onChangeText={(text) => setValue("email", text)}
+            />
+            {errors.email && (
+              <Text style={styles.error}>{errors.email.message}</Text>
+            )}
 
-        <Text className="text-sm font-medium text-white mb-1">Correo Electrónico</Text>
-        <TextInput
-          className={`w-full border rounded-md py-2 px-3 text-white bg-gray-700 ${
-            errors.email ? "border-red-500" : "border-gray-600"
-          }`}
-          placeholder="correo@ejemplo.com"
-          placeholderTextColor="#9CA3AF"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          onChangeText={(text) => setValue("email", text)}
-        />
-        {errors.email && (
-          <Text className="text-red-500 font-light text-sm mt-2">{errors.email.message}</Text>
-        )}
+            <Text style={[styles.label, { marginTop: 16 }]}>Contraseña</Text>
+            <TextInput
+              style={[styles.input, errors.password && styles.inputError]}
+              placeholder="••••••••"
+              placeholderTextColor="#9CA3AF"
+              secureTextEntry
+              autoCapitalize="none"
+              onChangeText={(text) => setValue("password", text)}
+            />
+            {errors.password && (
+              <Text style={styles.error}>{errors.password.message}</Text>
+            )}
 
-        <Text className="text-sm font-medium text-white mt-4 mb-1">Contraseña</Text>
-        <TextInput
-          className={`w-full border rounded-md py-2 px-3 text-white bg-gray-700 ${
-            errors.password ? "border-red-500" : "border-gray-600"
-          }`}
-          placeholder="••••••••"
-          placeholderTextColor="#9CA3AF"
-          secureTextEntry
-          autoCapitalize="none"
-          onChangeText={(text) => setValue("password", text)}
-        />
-        {errors.password && (
-          <Text className="text-red-500 font-light text-sm mt-2">{errors.password.message}</Text>
-        )}
+            {backendError && (
+              <Text style={styles.backendError}>{backendError}</Text>
+            )}
 
-        {backendError && (
-          <Text className="text-red-500 font-medium text-md text-center mt-4">{backendError}</Text>
-        )}
+            <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
+              <Text style={styles.link}>
+                ¿Olvidaste tu contraseña? Recupérala en segundos.
+              </Text>
+            </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
-          <Text className="text-primary hover:text-primary-hover text-sm text-center mt-4">
-            ¿Olvidaste tu contraseña? Recupérala en segundos.
-          </Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleSubmit(onSubmit)}
+              disabled={isSubmitting}
+              style={styles.button}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.buttonText}>Iniciar sesión</Text>
+              )}
+            </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={handleSubmit(onSubmit)}
-          disabled={isSubmitting}
-          className="w-full bg-primary hover:bg-primary-hover py-3 rounded-lg mt-6"
-        >
-          {isSubmitting ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <Text className="text-white font-bold text-center">Iniciar sesión</Text>
-          )}
-        </TouchableOpacity>
-
-        {submissionError && (
-          <Text className="text-red-500 font-medium text-sm text-center mt-4">
-            {submissionError}
-          </Text>
-        )}
-      </View>
-    </View>
+            {submissionError && (
+              <Text style={styles.backendError}>{submissionError}</Text>
+            )}
+          </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
+
+const styles = StyleSheet.create({
+  keyboard: {
+    flex: 1,
+    backgroundColor: "#0f0f0f",
+  },
+  scroll: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  card: {
+    backgroundColor: "#1f2937",
+    borderRadius: 12,
+    padding: 24,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#fff",
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#d1d5db",
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  input: {
+    backgroundColor: "#374151",
+    color: "#fff",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#4b5563",
+  },
+  inputError: {
+    borderColor: "#ef4444",
+  },
+  error: {
+    color: "#ef4444",
+    fontSize: 12,
+    marginTop: 6,
+  },
+  backendError: {
+    color: "#ef4444",
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 16,
+  },
+  link: {
+    color: "#e11d48",
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 16,
+  },
+  button: {
+    backgroundColor: "#e11d48",
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 24,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+});

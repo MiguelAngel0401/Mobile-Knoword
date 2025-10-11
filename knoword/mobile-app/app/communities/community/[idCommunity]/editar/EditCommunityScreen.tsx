@@ -22,7 +22,7 @@ import {
     getTagRecommendations,
 } from "@shared/services/community/communityServices";
 import { uploadToCloudinary } from "@shared/services/cloudinary/cloudinaryService";
-import { Community, Tag, CommunityUpdateData,} from "../../../../../../shared-core/src/types/community";
+import { Community, Tag, CommunityUpdateData, } from "../../../../../../shared-core/src/types/community";
 import ErrorMessageScreen from "../../../../../components/shared/ErrorMessageScreen";
 import CommunitySuccessModal from "../../../components/modals/CommunitySuccessModal";
 import CommunityErrorModal from "../../../components/modals/CommuntyErrorModal";
@@ -173,34 +173,31 @@ export default function EditCommunityScreen() {
     };
     // ✅ Submit
     const onSubmit = async (values: FormData) => {
-  try {
-    setSubmitting(true);
-    setSubmissionError(null);
+        try {
+            setSubmitting(true);
+            setSubmissionError(null);
 
-    const id = Number(community?.id ?? idCommunity);
-    if (Number.isNaN(id)) {
-      setSubmissionError("ID de comunidad inválido");
-      return;
-    }
+            const id = Number(community?.id ?? idCommunity);
+            if (Number.isNaN(id)) {
+                setSubmissionError("ID de comunidad inválido");
+                return;
+            }
 
-    const payload: CommunityUpdateData = {
-      ...values,
-      tags: selectedTags.map((tagName) => ({
-        id: "", // relleno si el backend lo ignora
-        name: tagName,
-        createdAt: "", // relleno si el backend lo ignora
-      })),
+            const payload: CommunityUpdateData = {
+                ...values,
+                tags: selectedTags, // ✅ ya es string[]
+            };
+
+
+            await updateCommunity(id, payload);
+            setIsSubmitCorrect(true);
+        } catch (err) {
+            console.error(err);
+            setSubmissionError("No se pudo actualizar la comunidad.");
+        } finally {
+            setSubmitting(false);
+        }
     };
-
-    await updateCommunity(id, payload);
-    setIsSubmitCorrect(true);
-  } catch (err) {
-    console.error(err);
-    setSubmissionError("No se pudo actualizar la comunidad.");
-  } finally {
-    setSubmitting(false);
-  }
-};
 
     // ✅ Handlers para modales
     const handleCloseSuccessModal = () => setIsSubmitCorrect(false);

@@ -15,7 +15,7 @@ export default function VerifyAccountScreen() {
         </Text>
 
         <Image
-          source={require("@assets/email.png")} // Asegúrate de tener esta imagen en tu carpeta de assets
+          source={require("../../../assets/images/email.png")} // Asegúrate de tener esta imagen en tu carpeta de assets
           style={{ width: 100, height: 100, alignSelf: "center", marginVertical: 24 }}
         />
 
