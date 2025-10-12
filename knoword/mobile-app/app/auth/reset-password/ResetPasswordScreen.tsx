@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  StyleSheet,
 } from "react-native";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -99,15 +100,13 @@ export default function ResetPasswordScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-900 px-6 py-8">
-      <View className="bg-gray-800 rounded-lg shadow-lg p-6">
-        <Text className="text-3xl font-bold text-white text-center mb-6">
-          Crea una nueva contraseña
-        </Text>
+    <ScrollView style={styles.scroll}>
+      <View style={styles.card}>
+        <Text style={styles.title}>Crea una nueva contraseña</Text>
 
-        <Text className="text-white mb-1">Nueva contraseña</Text>
+        <Text style={styles.label}>Nueva contraseña</Text>
         <TextInput
-          className="bg-gray-700 text-white rounded-md px-3 py-2"
+          style={[styles.input, errors.password && styles.inputError]}
           placeholder="••••••••"
           placeholderTextColor="#9CA3AF"
           secureTextEntry
@@ -115,12 +114,12 @@ export default function ResetPasswordScreen() {
           onChangeText={(text) => setValue("password", text)}
         />
         {errors.password && (
-          <Text className="text-red-500 text-sm mt-2">{errors.password.message}</Text>
+          <Text style={styles.error}>{errors.password.message}</Text>
         )}
 
-        <Text className="text-white mt-4 mb-1">Confirmar contraseña</Text>
+        <Text style={[styles.label, { marginTop: 16 }]}>Confirmar contraseña</Text>
         <TextInput
-          className="bg-gray-700 text-white rounded-md px-3 py-2"
+          style={[styles.input, errors.confirmPassword && styles.inputError]}
           placeholder="••••••••"
           placeholderTextColor="#9CA3AF"
           secureTextEntry
@@ -128,37 +127,123 @@ export default function ResetPasswordScreen() {
           onChangeText={(text) => setValue("confirmPassword", text)}
         />
         {errors.confirmPassword && (
-          <Text className="text-red-500 text-sm mt-2">{errors.confirmPassword.message}</Text>
+          <Text style={styles.error}>{errors.confirmPassword.message}</Text>
         )}
 
         {backendError && (
-          <Text className="text-red-500 text-sm text-center mt-4">{backendError}</Text>
+          <Text style={[styles.error, { textAlign: "center", marginTop: 16 }]}>
+            {backendError}
+          </Text>
         )}
 
         <TouchableOpacity
-          className="bg-primary py-3 rounded-lg mt-6 disabled:opacity-50"
+          style={[
+            styles.primaryButton,
+            (!isValid || isSubmitting) && styles.disabledButton,
+          ]}
           disabled={!isValid || isSubmitting}
           onPress={handleSubmit(onSubmit)}
         >
           {isSubmitting ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text className="text-white text-center font-bold">Guardar nueva contraseña</Text>
+            <Text style={styles.buttonText}>Guardar nueva contraseña</Text>
           )}
         </TouchableOpacity>
       </View>
 
       {showErrorModal && submissionError && (
-        <View className="mt-6 bg-red-900 p-4 rounded-lg">
-          <Text className="text-white text-center mb-2">{submissionError}</Text>
+        <View style={styles.errorBox}>
+          <Text style={styles.errorText}>{submissionError}</Text>
           <TouchableOpacity
-            className="bg-red-600 py-2 px-4 rounded-lg"
+            style={styles.errorRetry}
             onPress={() => handleSubmit(onSubmit)()}
           >
-            <Text className="text-white text-center font-bold">Reintentar</Text>
+            <Text style={styles.buttonText}>Reintentar</Text>
           </TouchableOpacity>
         </View>
       )}
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  scroll: {
+    flex: 1,
+    backgroundColor: "#0f0f0f",
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+  },
+  card: {
+    backgroundColor: "#1f2937",
+    borderRadius: 12,
+    padding: 24,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#ffffff",
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#ffffff",
+    marginBottom: 6,
+  },
+  input: {
+    backgroundColor: "#374151",
+    color: "#ffffff",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#4b5563",
+  },
+  inputError: {
+    borderColor: "#ef4444",
+  },
+  error: {
+    color: "#ef4444",
+    fontSize: 12,
+    marginTop: 6,
+  },
+  primaryButton: {
+    backgroundColor: "#e11d48",
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 24,
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  buttonText: {
+    color: "#ffffff",
+    fontWeight: "bold",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  errorBox: {
+    marginTop: 24,
+    backgroundColor: "#7f1d1d",
+    padding: 16,
+    borderRadius: 8,
+  },
+  errorText: {
+    color: "#ffffff",
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  errorRetry: {
+    backgroundColor: "#dc2626",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+});

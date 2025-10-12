@@ -6,21 +6,17 @@ const sharedRoot = path.resolve(projectRoot, "../shared-core");
 
 const config = getDefaultConfig(projectRoot);
 
-// Asegura que Metro observe shared-core
+// Observa la carpeta compartida
 config.watchFolders = [sharedRoot];
 
-// Fuerza resolución de módulos compartidos desde mobile-app
+// Extiende en lugar de sobrescribir
 config.resolver.extraNodeModules = {
-  react: path.resolve(projectRoot, "node_modules/react"),
-  "react-native": path.resolve(projectRoot, "node_modules/react-native"),
-  axios: path.resolve(projectRoot, "node_modules/axios"),
-  zod: path.resolve(projectRoot, "node_modules/zod"),
-  zustand: path.resolve(projectRoot, "node_modules/zustand"),
+  ...config.resolver.extraNodeModules,
   "@shared": path.resolve(sharedRoot, "src"),
 };
 
-// Asegura que las extensiones se resuelvan bien
+// Manejo de SVG
 config.resolver.assetExts = config.resolver.assetExts.filter(ext => ext !== "svg");
-config.resolver.sourceExts = [...config.resolver.sourceExts, "svg", "ts", "tsx"];
+config.resolver.sourceExts = [...config.resolver.sourceExts, "svg"];
 
 module.exports = config;

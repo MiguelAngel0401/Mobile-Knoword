@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, Button } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+  Image,
+} from "react-native";
 import { router } from "expo-router";
 import { getBackendUrl } from "@shared/config";
-import { ROUTES } from "@/constants/routes"; // ← nuevo import
+import { ROUTES } from "@/constants/routes";
 
 export default function IndexScreen() {
   const [status, setStatus] = useState("Cargando...");
@@ -28,22 +35,109 @@ export default function IndexScreen() {
   }, []);
 
   useEffect(() => {
-    if (ready) {
-      const targetRoute = isAuthenticated ? ROUTES.community : ROUTES.login;
-      router.replace(targetRoute as any); // ✅ navegación segura con rutas centralizadas
+    if (ready && isAuthenticated) {
+      router.replace(ROUTES.community as any);
     }
   }, [ready, isAuthenticated]);
 
+  if (!ready) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.status}>{status}</Text>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text style={{ fontSize: 18, marginBottom: 20 }}>{status}</Text>
-      {!ready && <ActivityIndicator size="large" />}
-      {ready && (
-        <Button
-          title="Forzar ir a comunidades"
-          onPress={() => router.push(ROUTES.community as any)} // ✅ limpio y centralizado
-        />
-      )}
+    <View style={styles.container}>
+      {/* 
+<Image
+  source={require("../assets/images/logo.png")} // opcional
+  style={styles.logo}
+/> 
+*/}
+
+
+      <Text style={styles.title}>Bienvenido a la comunidad</Text>
+      <Text style={styles.subtitle}>
+        Aprende, comparte y crece junto a personas que aman el conocimiento.
+      </Text>
+
+      <TouchableOpacity
+        style={styles.primaryButton}
+        onPress={() => router.push(ROUTES.register as any)}
+      >
+        <Text style={styles.buttonText}>Registrarse</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.secondaryButton}
+        onPress={() => router.push(ROUTES.login as any)}
+      >
+        <Text style={styles.buttonText}>Iniciar sesión</Text>
+      </TouchableOpacity>
+
+      <Text style={styles.status}>{status}</Text>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#0f0f0f",
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#0f0f0f",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    marginBottom: 24,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#ffffff",
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#d1d5db",
+    textAlign: "center",
+    marginBottom: 32,
+  },
+  primaryButton: {
+    backgroundColor: "#e11d48",
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  secondaryButton: {
+    backgroundColor: "#374151",
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: "#ffffff",
+    fontWeight: "bold",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  status: {
+    marginTop: 32,
+    fontSize: 14,
+    color: "#9ca3af",
+    textAlign: "center",
+  },
+});

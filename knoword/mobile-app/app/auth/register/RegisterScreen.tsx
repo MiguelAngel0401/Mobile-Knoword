@@ -7,6 +7,7 @@ import {
     Image,
     ActivityIndicator,
     ScrollView,
+    StyleSheet,
 } from "react-native";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -177,9 +178,9 @@ export default function RegisterScreen() {
     };
 
     return (
-        <ScrollView className="flex-1 bg-gray-900 px-6 py-8">
-            <View className="bg-gray-800 rounded-lg shadow-lg p-6">
-                <Text className="text-3xl font-bold text-white text-center mb-6">
+        <ScrollView style={styles.scroll}>
+            <View style={styles.card}>
+                <Text style={styles.title}>
                     {step === 1 && "¡Bienvenido! Empecemos creando tu cuenta"}
                     {step === 2 && "¿Cómo te gustaría que te conozcan?"}
                     {step === 3 && "Haz que tu perfil cuente"}
@@ -188,13 +189,13 @@ export default function RegisterScreen() {
                 {/* Paso 1 */}
                 {step === 1 && (
                     <>
-                        <Text className="text-gray-300 text-center mb-4">
+                        <Text style={styles.subtitle}>
                             Solo necesitamos tu correo y una contraseña segura.
                         </Text>
 
-                        <Text className="text-white mb-1">Correo electrónico</Text>
+                        <Text style={styles.label}>Correo electrónico</Text>
                         <TextInput
-                            className="bg-gray-700 text-white rounded-md px-3 py-2"
+                            style={[styles.input, errors.email && styles.inputError]}
                             placeholder="correo@ejemplo.com"
                             placeholderTextColor="#9CA3AF"
                             keyboardType="email-address"
@@ -202,15 +203,15 @@ export default function RegisterScreen() {
                             onChangeText={(text) => setValue("email", text)}
                         />
                         {isEmailAvailable && !errors.email && email && (
-                            <Text className="text-green-500 text-sm mt-2">Correo disponible 👍</Text>
+                            <Text style={styles.success}>Correo disponible 👍</Text>
                         )}
                         {errors.email && (
-                            <Text className="text-red-500 text-sm mt-2">{errors.email.message}</Text>
+                            <Text style={styles.error}>{errors.email.message}</Text>
                         )}
 
-                        <Text className="text-white mt-4 mb-1">Contraseña</Text>
+                        <Text style={[styles.label, { marginTop: 16 }]}>Contraseña</Text>
                         <TextInput
-                            className="bg-gray-700 text-white rounded-md px-3 py-2"
+                            style={[styles.input, errors.password && styles.inputError]}
                             placeholder="••••••••"
                             placeholderTextColor="#9CA3AF"
                             secureTextEntry={!showPassword}
@@ -219,20 +220,21 @@ export default function RegisterScreen() {
                             onChangeText={(text) => setValue("password", text)}
                         />
                         {errors.password && (
-                            <Text className="text-red-500 text-sm mt-2">{errors.password.message}</Text>
+                            <Text style={styles.error}>{errors.password.message}</Text>
                         )}
 
                         <TouchableOpacity
-                            className="bg-primary py-3 rounded-lg mt-6 disabled:opacity-50"
+                            style={[
+                                styles.primaryButton,
+                                (!email || !password || isEmailChecking || isEmailAvailable === false) &&
+                                styles.disabledButton,
+                            ]}
                             disabled={
-                                !email ||
-                                !password ||
-                                isEmailChecking ||
-                                isEmailAvailable === false
+                                !email || !password || isEmailChecking || isEmailAvailable === false
                             }
                             onPress={handleNextStep}
                         >
-                            <Text className="text-white text-center font-bold">Continuar</Text>
+                            <Text style={styles.buttonText}>Continuar</Text>
                         </TouchableOpacity>
                     </>
                 )}
@@ -240,56 +242,54 @@ export default function RegisterScreen() {
                 {/* Paso 2 */}
                 {step === 2 && (
                     <>
-                        <Text className="text-gray-300 text-center mb-4">
+                        <Text style={styles.subtitle}>
                             Tu nombre de usuario será visible para otros. El nombre real es opcional, pero puede ayudar a conectar mejor.
                         </Text>
 
-                        <Text className="text-white mb-1">Nombre de usuario</Text>
+                        <Text style={styles.label}>Nombre de usuario</Text>
                         <TextInput
-                            className="bg-gray-700 text-white rounded-md px-3 py-2"
+                            style={[styles.input, errors.username && styles.inputError]}
                             placeholder="usuario123"
                             placeholderTextColor="#9CA3AF"
                             autoCapitalize="none"
+                            onChangeText={(text) => setValue("username", text)}
                         />
-
                         {isUsernameAvailable && !errors.username && username && (
-                            <Text className="text-green-500 text-sm mt-2">Nombre de usuario disponible 👍</Text>
+                            <Text style={styles.success}>Nombre de usuario disponible 👍</Text>
                         )}
                         {errors.username && (
-                            <Text className="text-red-500 text-sm mt-2">{errors.username.message}</Text>
+                            <Text style={styles.error}>{errors.username.message}</Text>
                         )}
 
-                        <Text className="text-white mt-4 mb-1">Nombre real</Text>
+                        <Text style={[styles.label, { marginTop: 16 }]}>Nombre real</Text>
                         <TextInput
-                            className="bg-gray-700 text-white rounded-md px-3 py-2"
+                            style={[styles.input, errors.realName && styles.inputError]}
                             placeholder="Miguel Hernández"
                             placeholderTextColor="#9CA3AF"
                             autoCapitalize="words"
                             onChangeText={(text) => setValue("realName", text)}
                         />
                         {errors.realName && (
-                            <Text className="text-red-500 text-sm mt-2">{errors.realName.message}</Text>
+                            <Text style={styles.error}>{errors.realName.message}</Text>
                         )}
 
-                        <View className="flex-row justify-between mt-6">
-                            <TouchableOpacity
-                                className="bg-gray-600 py-3 px-4 rounded-lg"
-                                onPress={handlePrevStep}
-                            >
-                                <Text className="text-white font-bold">Atrás</Text>
+                        <View style={styles.row}>
+                            <TouchableOpacity style={styles.secondaryButton} onPress={handlePrevStep}>
+                                <Text style={styles.buttonText}>Atrás</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                className="bg-primary py-3 px-4 rounded-lg disabled:opacity-50"
+                                style={[
+                                    styles.primaryButton,
+                                    (!username || !realName || isUsernameChecking || isUsernameAvailable === false) &&
+                                    styles.disabledButton,
+                                ]}
                                 disabled={
-                                    !username ||
-                                    !realName ||
-                                    isUsernameChecking ||
-                                    isUsernameAvailable === false
+                                    !username || !realName || isUsernameChecking || isUsernameAvailable === false
                                 }
                                 onPress={handleNextStep}
                             >
-                                <Text className="text-white font-bold">Siguiente</Text>
+                                <Text style={styles.buttonText}>Siguiente</Text>
                             </TouchableOpacity>
                         </View>
                     </>
@@ -298,17 +298,17 @@ export default function RegisterScreen() {
                 {/* Paso 3 */}
                 {step === 3 && (
                     <>
-                        <Text className="text-gray-300 text-center mb-4">
+                        <Text style={styles.subtitle}>
                             Agrega una imagen y una pequeña descripción para mostrar tu personalidad desde el primer día.
                         </Text>
 
-                        <Text className="text-white mb-1">Imagen de perfil (Opcional)</Text>
+                        <Text style={styles.label}>Imagen de perfil (Opcional)</Text>
                         <TouchableOpacity
-                            className="bg-accent py-2 px-4 rounded-lg mt-2 disabled:opacity-50"
+                            style={styles.accentButton}
                             onPress={handleImageUpload}
                             disabled={isUploadingAvatar}
                         >
-                            <Text className="text-white text-center font-bold">
+                            <Text style={styles.buttonText}>
                                 {isUploadingAvatar
                                     ? "Subiendo..."
                                     : avatarPreview
@@ -318,21 +318,23 @@ export default function RegisterScreen() {
                         </TouchableOpacity>
 
                         {avatarPreview && (
-                            <View className="items-center mt-4">
+                            <View style={styles.avatarPreview}>
                                 <Image
                                     source={{ uri: avatarPreview }}
-                                    className="w-16 h-16 rounded-full"
+                                    style={{ width: 64, height: 64, borderRadius: 32 }}
                                 />
                             </View>
                         )}
 
                         {avatarError && (
-                            <Text className="text-red-500 text-sm mt-2 text-center">{avatarError}</Text>
+                            <Text style={[styles.error, { textAlign: "center" }]}>{avatarError}</Text>
                         )}
 
-                        <Text className="text-white mt-6 mb-1">Descripción (opcional pero recomendado 🥸)</Text>
+                        <Text style={[styles.label, { marginTop: 24 }]}>
+                            Descripción (opcional pero recomendado 🥸)
+                        </Text>
                         <TextInput
-                            className="bg-gray-700 text-white rounded-md px-3 py-2"
+                            style={[styles.input, { minHeight: 80, textAlignVertical: "top" }]}
                             placeholder="Cuéntanos algo sobre ti..."
                             placeholderTextColor="#9CA3AF"
                             multiline
@@ -340,23 +342,20 @@ export default function RegisterScreen() {
                             onChangeText={(text) => setValue("bio", text)}
                         />
                         {errors.bio && (
-                            <Text className="text-red-500 text-sm mt-2">{errors.bio.message}</Text>
+                            <Text style={styles.error}>{errors.bio.message}</Text>
                         )}
 
-                        <View className="flex-row justify-between mt-6">
-                            <TouchableOpacity
-                                className="bg-gray-600 py-3 px-4 rounded-lg"
-                                onPress={handlePrevStep}
-                            >
-                                <Text className="text-white font-bold">Atrás</Text>
+                        <View style={styles.row}>
+                            <TouchableOpacity style={styles.secondaryButton} onPress={handlePrevStep}>
+                                <Text style={styles.buttonText}>Atrás</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                className="bg-primary py-3 px-4 rounded-lg disabled:opacity-50"
+                                style={[styles.primaryButton, isSubmitting && styles.disabledButton]}
                                 disabled={isSubmitting}
                                 onPress={handleSubmit(onSubmit)}
                             >
-                                <Text className="text-white font-bold">
+                                <Text style={styles.buttonText}>
                                     {isSubmitting ? "Registrando..." : "Finalizar registro"}
                                 </Text>
                             </TouchableOpacity>
@@ -364,21 +363,145 @@ export default function RegisterScreen() {
                     </>
                 )}
 
-                {/* Indicador de progreso */}
-                <Text className="text-center text-sm text-gray-400 mt-6">Paso {step} de 3</Text>
+                <Text style={styles.progress}>Paso {step} de 3</Text>
             </View>
 
             {submissionError && (
-                <View className="mt-6 bg-red-900 p-4 rounded-lg">
-                    <Text className="text-white text-center mb-2">{submissionError}</Text>
+                <View style={styles.errorBox}>
+                    <Text style={styles.errorText}>{submissionError}</Text>
                     <TouchableOpacity
-                        className="bg-red-600 py-2 px-4 rounded-lg"
+                        style={styles.errorRetry}
                         onPress={() => handleSubmit(onSubmit)()}
                     >
-                        <Text className="text-white text-center font-bold">Reintentar</Text>
+                        <Text style={styles.buttonText}>Reintentar</Text>
                     </TouchableOpacity>
                 </View>
             )}
         </ScrollView>
     );
 }
+
+const styles = StyleSheet.create({
+    scroll: {
+        flex: 1,
+        backgroundColor: "#0f0f0f",
+        paddingHorizontal: 24,
+        paddingVertical: 32,
+    },
+    card: {
+        backgroundColor: "#1f2937",
+        borderRadius: 12,
+        padding: 24,
+        shadowColor: "#000",
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 4,
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: "bold",
+        color: "#ffffff",
+        textAlign: "center",
+        marginBottom: 24,
+    },
+    subtitle: {
+        fontSize: 14,
+        color: "#d1d5db",
+        textAlign: "center",
+        marginBottom: 16,
+    },
+    label: {
+        fontSize: 14,
+        fontWeight: "500",
+        color: "#ffffff",
+        marginBottom: 6,
+    },
+    input: {
+        backgroundColor: "#374151",
+        color: "#ffffff",
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#4b5563",
+    },
+    inputError: {
+        borderColor: "#ef4444",
+    },
+    error: {
+        color: "#ef4444",
+        fontSize: 12,
+        marginTop: 6,
+    },
+    success: {
+        color: "#22c55e",
+        fontSize: 12,
+        marginTop: 6,
+    },
+    primaryButton: {
+        backgroundColor: "#e11d48",
+        paddingVertical: 14,
+        paddingHorizontal: 24,
+        borderRadius: 8,
+        alignItems: "center",
+        marginTop: 24,
+    },
+    secondaryButton: {
+        backgroundColor: "#4b5563",
+        paddingVertical: 14,
+        paddingHorizontal: 24,
+        borderRadius: 8,
+        alignItems: "center",
+        marginTop: 24,
+    },
+    accentButton: {
+        backgroundColor: "#7c3aed",
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        marginTop: 8,
+        alignItems: "center",
+    },
+    disabledButton: {
+        opacity: 0.5,
+    },
+    buttonText: {
+        color: "#ffffff",
+        fontWeight: "bold",
+        fontSize: 16,
+        textAlign: "center",
+    },
+    row: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        gap: 12,
+        marginTop: 24,
+    },
+    avatarPreview: {
+        alignItems: "center",
+        marginTop: 16,
+    },
+    progress: {
+        textAlign: "center",
+        fontSize: 14,
+        color: "#9ca3af",
+        marginTop: 24,
+    },
+    errorBox: {
+        marginTop: 24,
+        backgroundColor: "#7f1d1d",
+        padding: 16,
+        borderRadius: 8,
+    },
+    errorText: {
+        color: "#ffffff",
+        textAlign: "center",
+        marginBottom: 12,
+    },
+    errorRetry: {
+        backgroundColor: "#dc2626",
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: "center",
+    },
+});

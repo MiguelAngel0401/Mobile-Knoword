@@ -20,8 +20,8 @@ export default function RootLayout() {
         <Stack.Screen name="auth/confirm-account/ConfirmAccountScreen" options={{ title: 'Confirmar cuenta' }} />
 
         {/* Pantallas de comunidad */}
-        <Stack.Screen name="communities/create/CreateCommunitytScreen" options={{ title: 'Crear comunidad' }} />
-        <Stack.Screen name="communities/explore/ExploreCommuntyScreen" options={{ title: 'Explorar comunidades' }} />
+        <Stack.Screen name="create/CreateCommunityScreen" options={{ title: 'Crear comunidad' }} />
+        <Stack.Screen name="explore/ExploreCommunityScreen" options={{ title: 'Explorar comunidades' }} />
         <Stack.Screen name="communities/member/MemberCommunityScreen" options={{ title: 'Miembros' }} />
         <Stack.Screen name="communities/my/MyCommunityScreen" options={{ title: 'Mis comunidades' }} />
         <Stack.Screen name="communities/community/[idCommunity]/CommunityDetailScreen" options={{ title: 'Detalle comunidad' }} />

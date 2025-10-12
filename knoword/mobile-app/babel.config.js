@@ -6,10 +6,9 @@ module.exports = function (api) {
       [
         "module-resolver",
         {
-          extensions: [".js", ".jsx", ".ts", ".tsx"],
-          root: ["./"],
+          extensions: [".js", ".jsx", ".ts", ".tsx", ".json"],
           alias: {
-            "@": "./",
+            "@": "./app", // ← CORREGIDO
             "@shared": "../shared-core/src",
             "@assets": "./assets",
           },

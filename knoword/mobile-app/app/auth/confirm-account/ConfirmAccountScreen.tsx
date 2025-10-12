@@ -1,5 +1,11 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RouteProp } from "@react-navigation/native";
@@ -46,46 +52,110 @@ export default function ConfirmAccountScreen() {
   }, [token]);
 
   return (
-    <View className="flex-1 justify-center items-center bg-gray-900 px-6">
+    <View style={styles.container}>
       {status === "loading" && (
         <>
-          <Text className="text-2xl font-semibold text-white mb-4 text-center">{message}</Text>
+          <Text style={styles.loadingTitle}>{message}</Text>
           <ActivityIndicator size="large" color="#3B82F6" />
-          <Text className="mt-4 text-gray-300 text-center">Por favor, espera un momento...</Text>
+          <Text style={styles.subtext}>Por favor, espera un momento...</Text>
         </>
       )}
 
       {status === "success" && (
         <>
-          <Text className="text-green-500 text-6xl mb-4">✅</Text>
-          <Text className="text-3xl font-bold text-green-500 mb-4 text-center">{message}</Text>
-          <Text className="text-gray-300 mb-6 text-center">
+          <Text style={styles.successIcon}>✅</Text>
+          <Text style={styles.successTitle}>{message}</Text>
+          <Text style={styles.subtext}>
             Serás redirigido a la página de inicio de sesión en breve.
           </Text>
           <TouchableOpacity
             onPress={() => navigation.navigate("Login")}
-            className="bg-primary hover:bg-primary-hover text-white font-bold py-3 px-6 rounded-lg"
+            style={styles.primaryButton}
           >
-            <Text className="text-white text-center">Ir a Iniciar Sesión</Text>
+            <Text style={styles.buttonText}>Ir a Iniciar Sesión</Text>
           </TouchableOpacity>
         </>
       )}
 
       {status === "error" && (
         <>
-          <Text className="text-red-500 text-6xl mb-4">❌</Text>
-          <Text className="text-3xl font-bold text-red-500 mb-4 text-center">Error de Verificación</Text>
-          <Text className="text-gray-300 mb-6 text-center">
+          <Text style={styles.errorIcon}>❌</Text>
+          <Text style={styles.errorTitle}>Error de Verificación</Text>
+          <Text style={styles.subtext}>
             {message}. Vuelve a generar un enlace de verificación.
           </Text>
-          <TouchableOpacity
-           //onPress={() => navigation.navigate("Home")}
-            className="bg-error hover:bg-error-hover text-white font-bold py-3 px-6 rounded-lg"
-          >
-            <Text className="text-white text-center">Volver a Inicio</Text>
+          <TouchableOpacity style={styles.errorButton}>
+            <Text style={styles.buttonText}>Volver a Inicio</Text>
           </TouchableOpacity>
         </>
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#0f0f0f",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  loadingTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#ffffff",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  subtext: {
+    marginTop: 16,
+    color: "#d1d5db",
+    textAlign: "center",
+    fontSize: 14,
+  },
+  successIcon: {
+    fontSize: 48,
+    color: "#22c55e",
+    marginBottom: 16,
+  },
+  successTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#22c55e",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  errorIcon: {
+    fontSize: 48,
+    color: "#ef4444",
+    marginBottom: 16,
+  },
+  errorTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#ef4444",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  primaryButton: {
+    backgroundColor: "#e11d48",
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    marginTop: 24,
+  },
+  errorButton: {
+    backgroundColor: "#ef4444",
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    marginTop: 24,
+  },
+  buttonText: {
+    color: "#ffffff",
+    fontWeight: "bold",
+    fontSize: 16,
+    textAlign: "center",
+  },
+});
