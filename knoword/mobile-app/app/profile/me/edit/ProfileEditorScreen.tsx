@@ -12,13 +12,14 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Avatar } from "@/components/ui/userProfile/Avatar";
+import { Avatar } from "../../../../components/ui/userProfile/Avatar";
 import { Pencil } from "lucide-react-native";
 import { profileSchema } from "../../../../../shared-core/src/validators/users/index";
 import { uploadToCloudinary } from "../../../../../shared-core/src/services/cloudinary/cloudinaryService";
 import { getMe, updateUserData } from "../../../../../shared-core/src/services/users/userServices";
 import { User } from "../../../../../shared-core/src/types/users/user";
-import ErrorMessageScreen from "@/components/shared/ErrorMessageScreen";
+import client from "../../../lib/axios";
+import ErrorMessageScreen from "../../../../components/shared/ErrorMessageScreen";
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
@@ -48,7 +49,7 @@ export default function ProfileEditor() {
         const fetchProfile = async () => {
             try {
                 setLoading(true);
-                const response = await getMe();
+                const response = await getMe(client);
                 setUser(response.user);
             } catch (error) {
                 console.error("Error fetching user profile:", error);
@@ -97,8 +98,8 @@ export default function ProfileEditor() {
         setIsSubmitting(true);
         const updatedData = { ...data, avatar: getValues("avatar") };
         try {
-            const response = await updateUserData(updatedData);
-            setUser(response.user);
+            const updated = await updateUserData(client, updatedData);
+            setUser(updated.user);
             setIsEditing(false);
             setIsOpen(true);
         } catch (error) {

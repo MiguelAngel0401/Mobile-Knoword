@@ -2,12 +2,16 @@ import { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator, Button } from "react-native";
 import { router } from "expo-router";
 import { getBackendUrl } from "@shared/config";
-import { ROUTES } from "@/constants/routes"; // ← nuevo import
+
+const ROUTES = {
+  login: "/auth/login/LoginScreen",
+  community: "/communities/my/MyCommunityScreen",
+};
 
 export default function IndexScreen() {
   const [status, setStatus] = useState("Cargando...");
   const [ready, setReady] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // ← luego lo conectas con tu auth real
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     fetch(`${getBackendUrl()}/ping`)
@@ -30,7 +34,7 @@ export default function IndexScreen() {
   useEffect(() => {
     if (ready) {
       const targetRoute = isAuthenticated ? ROUTES.community : ROUTES.login;
-      router.replace(targetRoute as any); // ✅ navegación segura con rutas centralizadas
+      router.replace(targetRoute as any);
     }
   }, [ready, isAuthenticated]);
 
@@ -41,7 +45,7 @@ export default function IndexScreen() {
       {ready && (
         <Button
           title="Forzar ir a comunidades"
-          onPress={() => router.push(ROUTES.community as any)} // ✅ limpio y centralizado
+          onPress={() => router.push(ROUTES.community as any)}
         />
       )}
     </View>

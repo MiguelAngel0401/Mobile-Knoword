@@ -1,16 +1,16 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { View } from 'react-native';
+import { View, useColorScheme } from 'react-native';
 
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+const Colors = {
+  light: { tint: '#2f95dc' },
+  dark: { tint: '#fff' },
+};
 
-// 🔧 Componente inline que reemplaza el import roto
 const HapticTab = ({ children }: { children: React.ReactNode }) => {
   return children;
 };
 
-// 🔧 Componente inline que simula el ícono sin romper diseño
 const IconSymbol = ({ size = 24, color = '#000', name = 'circle.fill', style }: any) => {
   return (
     <View

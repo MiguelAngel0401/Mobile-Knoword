@@ -6,7 +6,7 @@ import Communities from "./Communities";
 import Followers from "./Followers";
 import { getMe } from "../../../../shared-core/src/services/users/userServices";
 import { User } from "../../../../shared-core/src/types/users/user";
-import ErrorMessageScreen from "@/components/shared/ErrorMessageScreen";
+import ErrorMessageScreen from "../../../components/shared/ErrorMessageScreen";
 import privateApiClient from "../../../../shared-core/src/services/client/privateApiClient";
 
 

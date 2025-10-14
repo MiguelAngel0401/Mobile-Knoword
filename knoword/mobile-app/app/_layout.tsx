@@ -3,7 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '../hooks/use-color-scheme';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -11,6 +11,9 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
+        {/* ✅ Pantalla raíz */}
+        <Stack.Screen name="index" options={{ title: 'Inicio', headerShown: false }} />
+
         {/* Pantallas de autenticación */}
         <Stack.Screen name="auth/login/LoginScreen" options={{ title: 'Login' }} />
         <Stack.Screen name="auth/register/RegisterScreen" options={{ title: 'Registro' }} />
@@ -35,9 +38,6 @@ export default function RootLayout() {
 
         {/* Modales */}
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-
-        {/* Navegación principal si usas tabs */}
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

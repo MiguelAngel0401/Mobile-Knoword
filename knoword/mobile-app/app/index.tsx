@@ -9,13 +9,14 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { getBackendUrl } from "@shared/config";
-import { ROUTES } from "@/constants/routes";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function IndexScreen() {
   const [status, setStatus] = useState("Cargando...");
   const [ready, setReady] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // ← luego lo conectas con tu auth real
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // Verifica conexión al backend
   useEffect(() => {
     fetch(`${getBackendUrl()}/ping`)
       .then((res) => (res.ok ? res.json() : Promise.reject("Respuesta no válida")))
@@ -34,9 +35,21 @@ export default function IndexScreen() {
       });
   }, []);
 
+  // Verifica si hay token en AsyncStorage
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = await AsyncStorage.getItem("access_token");
+      if (token) {
+        setIsAuthenticated(true);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  // Redirige si está autenticado
   useEffect(() => {
     if (ready && isAuthenticated) {
-      router.replace(ROUTES.community as any);
+      router.replace("/communities/my/MyCommunityScreen");
     }
   }, [ready, isAuthenticated]);
 
@@ -51,13 +64,8 @@ export default function IndexScreen() {
 
   return (
     <View style={styles.container}>
-      {/* 
-<Image
-  source={require("../assets/images/logo.png")} // opcional
-  style={styles.logo}
-/> 
-*/}
-
+      {/* Logo opcional */}
+      {/* <Image source={require("../assets/images/logo.png")} style={styles.logo} /> */}
 
       <Text style={styles.title}>Bienvenido a la comunidad</Text>
       <Text style={styles.subtitle}>
@@ -66,14 +74,14 @@ export default function IndexScreen() {
 
       <TouchableOpacity
         style={styles.primaryButton}
-        onPress={() => router.push(ROUTES.register as any)}
+        onPress={() => router.push("/auth/register/RegisterScreen")}
       >
         <Text style={styles.buttonText}>Registrarse</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.secondaryButton}
-        onPress={() => router.push(ROUTES.login as any)}
+        onPress={() => router.push("/auth/login/LoginScreen")}
       >
         <Text style={styles.buttonText}>Iniciar sesión</Text>
       </TouchableOpacity>
@@ -123,7 +131,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   secondaryButton: {
-    backgroundColor: "#374151",
+    backgroundColor: "#2563eb",
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: 8,
