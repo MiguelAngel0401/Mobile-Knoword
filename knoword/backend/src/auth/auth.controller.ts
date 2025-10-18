@@ -43,22 +43,24 @@ export class AuthController {
     return this.authService.confirmEmail(query.token);
   }
 
-  @HttpCode(200)
-  @Post('login')
-  async login(
-    @Body() dto: LoginDto,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    const { accessToken, refreshToken } =
-      await this.authService.validateUserLogin(dto);
+@HttpCode(200)
+@Post('login')
+async login(
+  @Body() dto: LoginDto,
+  @Res({ passthrough: true }) response: Response,
+) {
+  const { accessToken, refreshToken } =
+    await this.authService.validateUserLogin(dto);
 
-    this.setAccessTokenInCookie(response, accessToken);
-    this.setRefreshTokenInCookie(response, refreshToken);
+  this.setAccessTokenInCookie(response, accessToken);
+  this.setRefreshTokenInCookie(response, refreshToken);
 
-    return {
-      message: 'Login exitoso',
-    };
-  }
+  return {
+    message: 'Login exitoso',
+    accessToken, // ✅ Devuelto explícitamente para móvil
+    refreshToken, // ✅ Devuelto explícitamente para móvil
+  };
+}
 
   @HttpCode(200)
   @Post('logout')

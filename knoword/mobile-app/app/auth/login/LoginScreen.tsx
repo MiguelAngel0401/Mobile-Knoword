@@ -9,6 +9,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,15 +19,14 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "@shared/types/navigation";
 import { useAuthStore } from "@shared/store/authStore";
-import { useAxiosErrorHandler } from "@shared/hooks/useAxiosErrorHandler";
-import { login } from "@shared/services/auth/login";
+import { login } from "../../../../shared-core/src/services/auth/login.native";
+import { saveTokens, getTokens } from "@shared/utils/storageToken";
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
   const { isAuthenticated, setIsAuthenticated } = useAuthStore();
-  const { handleAxiosError } = useAxiosErrorHandler();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [backendError, setBackendError] = useState<string | null>(null);
@@ -49,22 +49,38 @@ export default function LoginScreen() {
   }, [isAuthenticated]);
 
   const onSubmit = async (data: LoginFormData) => {
+    console.log("🚀 Iniciando login...");
+
     setIsSubmitting(true);
     setBackendError(null);
     setSubmissionError(null);
 
     try {
-      await login(data);
+      const tokens = await login(data);
+      console.log("✅ Login exitoso, tokens recibidos");
+
+      await saveTokens(tokens);
+      const stored = await getTokens();
+
+      if (!stored) {
+        Alert.alert("Error", "No se pudieron guardar los tokens");
+        return;
+      }
+
       setIsAuthenticated(true);
       navigation.navigate("Profile");
+      console.log("🎉 Usuario autenticado y redirigido a Profile");
     } catch (error: any) {
-      if (error.response?.data?.message) {
+      console.log("❌ Error en login:", error?.message || error);
+
+      if (error?.response?.data?.message) {
         setBackendError(error.response.data.message);
         setError("email", { type: "manual" });
         setError("password", { type: "manual" });
+      } else if (error?.message) {
+        setSubmissionError(error.message);
       } else {
-        handleAxiosError(error);
-        setSubmissionError("Ocurrió un error al iniciar sesión. Intenta más tarde.");
+        setSubmissionError("Error desconocido al iniciar sesión.");
       }
     } finally {
       setIsSubmitting(false);
@@ -93,9 +109,7 @@ export default function LoginScreen() {
               autoCapitalize="none"
               onChangeText={(text) => setValue("email", text)}
             />
-            {errors.email && (
-              <Text style={styles.error}>{errors.email.message}</Text>
-            )}
+            {errors.email && <Text style={styles.error}>{errors.email.message}</Text>}
 
             <Text style={[styles.label, { marginTop: 16 }]}>Contraseña</Text>
             <TextInput
@@ -106,13 +120,9 @@ export default function LoginScreen() {
               autoCapitalize="none"
               onChangeText={(text) => setValue("password", text)}
             />
-            {errors.password && (
-              <Text style={styles.error}>{errors.password.message}</Text>
-            )}
+            {errors.password && <Text style={styles.error}>{errors.password.message}</Text>}
 
-            {backendError && (
-              <Text style={styles.backendError}>{backendError}</Text>
-            )}
+            {backendError && <Text style={styles.backendError}>{backendError}</Text>}
 
             <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
               <Text style={styles.link}>
@@ -121,7 +131,7 @@ export default function LoginScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={handleSubmit(onSubmit)}
+              onPress={() => handleSubmit(onSubmit)()}
               disabled={isSubmitting}
               style={styles.button}
             >
@@ -132,9 +142,7 @@ export default function LoginScreen() {
               )}
             </TouchableOpacity>
 
-            {submissionError && (
-              <Text style={styles.backendError}>{submissionError}</Text>
-            )}
+            {submissionError && <Text style={styles.backendError}>{submissionError}</Text>}
           </View>
         </View>
       </ScrollView>

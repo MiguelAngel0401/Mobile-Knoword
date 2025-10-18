@@ -4,6 +4,9 @@
     "@types/react": "^19.1.15"
   },
   "dependencies": {
+    "expo": "^54.0.13",
+    "expo-constants": "~18.0.9",
+    "expo-secure-store": "~15.0.7",
     "react": "^19.1.1"
   }
 }

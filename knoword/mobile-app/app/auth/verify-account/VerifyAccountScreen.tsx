@@ -5,13 +5,17 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
+  Alert,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { AuthStackParamList } from "@shared/types/navigation";
+import { router, useLocalSearchParams } from "expo-router";
 
 export default function VerifyAccountScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
+  const { email } = useLocalSearchParams();
+
+  const handleResend = () => {
+    // Aquí puedes conectar con tu endpoint de reenvío si lo tienes
+    Alert.alert("Correo reenviado", "Revisa nuevamente tu bandeja de entrada.");
+  };
 
   return (
     <View style={styles.container}>
@@ -24,19 +28,20 @@ export default function VerifyAccountScreen() {
         />
 
         <Text style={styles.subtitle}>
-          Te hemos enviado un enlace para verificar tu cuenta. Si no ves el correo, revisa tu carpeta de spam.
+          Te hemos enviado un enlace para verificar tu cuenta
+          {email ? ` a ${email}` : ""}. Si no lo ves, revisa tu carpeta de spam.
         </Text>
 
         <View style={styles.row}>
-          <TouchableOpacity style={styles.resendButton}>
+          <TouchableOpacity style={styles.resendButton} onPress={handleResend}>
             <Text style={styles.resendText}>Reenviar</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.primaryButton}
-            onPress={() => navigation.navigate("Login")}
+            onPress={() => router.replace("/auth/login/LoginScreen")}
           >
-            <Text style={styles.buttonText}>¡Lo he recibido!</Text>
+            <Text style={styles.buttonText}>¡Ya confirmé!</Text>
           </TouchableOpacity>
         </View>
       </View>

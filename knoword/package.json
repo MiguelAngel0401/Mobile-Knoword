@@ -2,11 +2,15 @@
   "dependencies": {
     "axios": "^1.12.2",
     "confbox": "^0.2.2",
+    "expo-constants": "~18.0.9",
+    "expo-secure-store": "~15.0.7",
     "react": "^19.1.1",
     "zod": "^4.1.11",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@types/node": "^24.6.0"
+    "@types/node": "^24.6.0",
+    "@types/react-native": "^0.72.8",
+    "@types/react-native-keychain": "^3.0.0"
   }
 }

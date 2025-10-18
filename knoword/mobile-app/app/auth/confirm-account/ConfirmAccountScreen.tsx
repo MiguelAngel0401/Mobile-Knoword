@@ -1,94 +1,68 @@
-import React, { useEffect, useRef } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
-  ActivityIndicator,
+  TextInput,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { RouteProp } from "@react-navigation/native";
-import { AuthStackParamList } from "@shared/types/navigation";
-import { useAxiosErrorHandler } from "../../../../shared-core/src/hooks/useAxiosErrorHandler";
-import { confirmEmail } from "@shared/services/auth/confirm";
+import { useLocalSearchParams, router } from "expo-router";
+import axios from "axios";
+import { getBackendUrl } from "@shared/config";
 
 export default function ConfirmAccountScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
-  const route = useRoute<RouteProp<AuthStackParamList, "ConfirmAccount">>();
-  const { token } = route.params;
+  const { email } = useLocalSearchParams();
+  const [code, setCode] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { status, message, setStatus, setMessage, handleAxiosError } = useAxiosErrorHandler();
-  const hasVerified = useRef(false);
+  const handleConfirm = async () => {
+    if (!code) return Alert.alert("Código requerido", "Ingresa el código de verificación");
 
-  useEffect(() => {
-    if (hasVerified.current || !token) {
-      if (!token && status === "loading") {
-        setStatus("error");
-        setMessage("Token de verificación no proporcionado.");
-      }
-      return;
+    setIsSubmitting(true);
+    try {
+      await axios.post(`${getBackendUrl()}/auth/confirm`, {
+        email,
+        code,
+      });
+
+      Alert.alert("✅ Cuenta verificada", "Ahora puedes iniciar sesión", [
+        { text: "OK", onPress: () => router.replace("/auth/login/LoginScreen") },
+      ]);
+    } catch (error) {
+      console.error("❌ Error al confirmar cuenta:", error);
+      Alert.alert("Error", "Código inválido o expirado");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    hasVerified.current = true;
-
-    const verifyAccount = async () => {
-      setStatus("loading");
-      setMessage("Verificando tu cuenta...");
-
-      try {
-        const response = await confirmEmail(token);
-        setStatus("success");
-        setMessage(response.message || "Cuenta verificada exitosamente.");
-        setTimeout(() => {
-          navigation.navigate("Login");
-        }, 3000);
-      } catch (error) {
-        handleAxiosError(error);
-      }
-    };
-
-    verifyAccount();
-  }, [token]);
+  };
 
   return (
     <View style={styles.container}>
-      {status === "loading" && (
-        <>
-          <Text style={styles.loadingTitle}>{message}</Text>
-          <ActivityIndicator size="large" color="#3B82F6" />
-          <Text style={styles.subtext}>Por favor, espera un momento...</Text>
-        </>
-      )}
+      <Text style={styles.title}>Confirmar cuenta</Text>
+      <Text style={styles.subtitle}>
+        Ingresa el código enviado a <Text style={styles.email}>{email}</Text>
+      </Text>
 
-      {status === "success" && (
-        <>
-          <Text style={styles.successIcon}>✅</Text>
-          <Text style={styles.successTitle}>{message}</Text>
-          <Text style={styles.subtext}>
-            Serás redirigido a la página de inicio de sesión en breve.
-          </Text>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Login")}
-            style={styles.primaryButton}
-          >
-            <Text style={styles.buttonText}>Ir a Iniciar Sesión</Text>
-          </TouchableOpacity>
-        </>
-      )}
+      <TextInput
+        style={styles.input}
+        placeholder="Código de verificación"
+        placeholderTextColor="#9CA3AF"
+        value={code}
+        onChangeText={setCode}
+        autoCapitalize="none"
+        keyboardType="default"
+      />
 
-      {status === "error" && (
-        <>
-          <Text style={styles.errorIcon}>❌</Text>
-          <Text style={styles.errorTitle}>Error de Verificación</Text>
-          <Text style={styles.subtext}>
-            {message}. Vuelve a generar un enlace de verificación.
-          </Text>
-          <TouchableOpacity style={styles.errorButton}>
-            <Text style={styles.buttonText}>Volver a Inicio</Text>
-          </TouchableOpacity>
-        </>
-      )}
+      <TouchableOpacity
+        style={[styles.button, isSubmitting && styles.disabled]}
+        onPress={handleConfirm}
+        disabled={isSubmitting}
+      >
+        <Text style={styles.buttonText}>
+          {isSubmitting ? "Verificando..." : "Confirmar"}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -97,65 +71,48 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#0f0f0f",
+    padding: 24,
     justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 24,
   },
-  loadingTitle: {
-    fontSize: 20,
-    fontWeight: "600",
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
     color: "#ffffff",
     marginBottom: 16,
     textAlign: "center",
   },
-  subtext: {
-    marginTop: 16,
-    color: "#d1d5db",
-    textAlign: "center",
+  subtitle: {
     fontSize: 14,
-  },
-  successIcon: {
-    fontSize: 48,
-    color: "#22c55e",
-    marginBottom: 16,
-  },
-  successTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#22c55e",
-    marginBottom: 16,
+    color: "#d1d5db",
+    marginBottom: 24,
     textAlign: "center",
   },
-  errorIcon: {
-    fontSize: 48,
-    color: "#ef4444",
-    marginBottom: 16,
-  },
-  errorTitle: {
-    fontSize: 24,
+  email: {
     fontWeight: "bold",
-    color: "#ef4444",
-    marginBottom: 16,
-    textAlign: "center",
+    color: "#ffffff",
   },
-  primaryButton: {
+  input: {
+    backgroundColor: "#374151",
+    color: "#ffffff",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#4b5563",
+    marginBottom: 16,
+  },
+  button: {
     backgroundColor: "#e11d48",
     paddingVertical: 14,
-    paddingHorizontal: 24,
     borderRadius: 8,
-    marginTop: 24,
+    alignItems: "center",
   },
-  errorButton: {
-    backgroundColor: "#ef4444",
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    marginTop: 24,
+  disabled: {
+    opacity: 0.5,
   },
   buttonText: {
     color: "#ffffff",
     fontWeight: "bold",
     fontSize: 16,
-    textAlign: "center",
   },
 });

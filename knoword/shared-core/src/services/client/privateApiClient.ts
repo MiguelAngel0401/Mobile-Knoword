@@ -3,11 +3,12 @@ import { getBackendUrl } from "../../config";
 import { logout } from "../auth/logout";
 
 const privateApiClient: AxiosInstance = axios.create({
-  baseURL: getBackendUrl(), // ✅ IP local directa
-  withCredentials: true, // ✅ Envía cookies con cada petición
+  baseURL: getBackendUrl(),
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "69420",
+    "User-Agent": "CustomClient",
   },
 });
 
@@ -25,7 +26,6 @@ const processQueue = (error: any, token: string | null = null) => {
       prom.resolve(token);
     }
   });
-
   failedQueue = [];
 };
 
@@ -48,14 +48,18 @@ privateApiClient.interceptors.response.use(
 
       try {
         await axios.get(`${getBackendUrl()}/auth/refresh-token`, {
-          withCredentials: true,
+          withCredentials: false,
+          headers: {
+            "ngrok-skip-browser-warning": "69420",
+            "User-Agent": "CustomClient",
+          },
         });
 
         processQueue(null, "new-token");
         return privateApiClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        await logout(privateApiClient); // ✅ cliente inyectado, sin ciclo
+        await logout(privateApiClient);
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

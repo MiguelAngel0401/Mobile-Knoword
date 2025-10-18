@@ -20,6 +20,7 @@ import { useAxiosErrorHandler } from "@shared/hooks/useAxiosErrorHandler";
 import { checkEmail, checkUsername, registerUser } from "@shared/services/auth/register";
 import { uploadToCloudinary } from "@shared/services/cloudinary/upload";
 import { debounce } from "lodash";
+import { router } from "expo-router";
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -168,7 +169,11 @@ export default function RegisterScreen() {
 
         try {
             await registerUser({ ...data, avatar: avatarPreview ?? undefined });
-            navigation.navigate("Login");
+
+            router.replace({
+                pathname: "/auth/verify-account/VerifyAccountScreen",
+                params: { email: data.email },
+            });
         } catch (error) {
             handleAxiosError(error);
             setSubmissionError("No se pudo completar el registro. Intenta más tarde.");
