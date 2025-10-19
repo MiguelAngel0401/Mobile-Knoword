@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
+  StyleSheet,
 } from "react-native";
 import { Bell, Trophy, MessageSquare, Users } from "lucide-react-native";
 import { NotificationItem } from "./NotificationItem";
@@ -85,10 +86,7 @@ export function NotificationsMenu() {
   return (
     <View>
       {/* Botón campana */}
-      <TouchableOpacity
-        onPress={() => setIsOpen(true)}
-        className="p-2 rounded-full bg-gray-800"
-      >
+      <TouchableOpacity onPress={() => setIsOpen(true)} style={styles.bellButton}>
         <Bell size={24} color="white" />
       </TouchableOpacity>
 
@@ -99,51 +97,50 @@ export function NotificationsMenu() {
         animationType="fade"
         onRequestClose={() => setIsOpen(false)}
       >
-        <View className="flex-1 bg-black/70 justify-center items-center">
-          <View className="w-80 max-h-[500px] bg-[#1f1e28] rounded-md shadow-lg">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
             {/* Tabs */}
-            <View className="flex-row justify-around items-center py-3 border-b border-gray-700">
+            <View style={styles.tabs}>
               <TouchableOpacity
                 onPress={() => setActiveTab("notifications")}
-                className={`p-2 rounded-md ${
-                  activeTab === "notifications"
-                    ? "bg-gray-800"
-                    : "bg-transparent"
-                }`}
+                style={[
+                  styles.tabButton,
+                  activeTab === "notifications" && styles.tabButtonActive,
+                ]}
               >
                 <Trophy size={24} color="white" />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setActiveTab("messages")}
-                className={`p-2 rounded-md ${
-                  activeTab === "messages" ? "bg-gray-800" : "bg-transparent"
-                }`}
+                style={[
+                  styles.tabButton,
+                  activeTab === "messages" && styles.tabButtonActive,
+                ]}
               >
                 <MessageSquare size={24} color="white" />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setActiveTab("community")}
-                className={`p-2 rounded-md ${
-                  activeTab === "community" ? "bg-gray-800" : "bg-transparent"
-                }`}
+                style={[
+                  styles.tabButton,
+                  activeTab === "community" && styles.tabButtonActive,
+                ]}
               >
                 <Users size={24} color="white" />
               </TouchableOpacity>
             </View>
 
             {/* Contenido */}
-            <ScrollView className="max-h-96">
+            <ScrollView style={styles.scrollContent}>
               {activeTab === "notifications" && (
                 <View>
-                  <Text className="px-4 py-4 font-bold text-lg text-white border-b border-gray-700">
-                    Notificaciones
-                  </Text>
+                  <Text style={styles.sectionTitle}>Notificaciones</Text>
                   {notifications.length > 0 ? (
                     notifications.map((n) => (
                       <NotificationItem key={n.id} notification={n} />
                     ))
                   ) : (
-                    <Text className="px-4 py-3 text-center text-gray-500">
+                    <Text style={styles.emptyText}>
                       No tienes notificaciones de logros.
                     </Text>
                   )}
@@ -152,30 +149,24 @@ export function NotificationsMenu() {
 
               {activeTab === "messages" && (
                 <View>
-                  <Text className="px-4 py-4 font-bold text-lg text-white border-b border-gray-700">
-                    Mensajes
-                  </Text>
+                  <Text style={styles.sectionTitle}>Mensajes</Text>
                   {messages.length > 0 ? (
-                    messages.map((m) => <MessageItem key={m.id} message={m}  />)
+                    messages.map((m) => <MessageItem key={m.id} message={m} />)
                   ) : (
-                    <Text className="px-4 py-3 text-center text-gray-500">
-                      No tienes mensajes.
-                    </Text>
+                    <Text style={styles.emptyText}>No tienes mensajes.</Text>
                   )}
                 </View>
               )}
 
               {activeTab === "community" && (
                 <View>
-                  <Text className="px-4 py-4 font-bold text-lg text-white border-b border-gray-700">
-                    Tus Comunidades
-                  </Text>
+                  <Text style={styles.sectionTitle}>Tus Comunidades</Text>
                   {communityUpdates.length > 0 ? (
                     communityUpdates.map((u) => (
                       <CommunityUpdateItem key={u.id} update={u} />
                     ))
                   ) : (
-                    <Text className="px-4 py-3 text-center text-gray-500">
+                    <Text style={styles.emptyText}>
                       No hay actualizaciones de la comunidad.
                     </Text>
                   )}
@@ -186,11 +177,9 @@ export function NotificationsMenu() {
             {/* Botón cerrar */}
             <TouchableOpacity
               onPress={() => setIsOpen(false)}
-              className="p-3 bg-red-600 rounded-b-md"
+              style={styles.closeButton}
             >
-              <Text className="text-white text-center font-semibold">
-                Cerrar
-              </Text>
+              <Text style={styles.closeButtonText}>Cerrar</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -198,3 +187,71 @@ export function NotificationsMenu() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  bellButton: {
+    padding: 8,
+    borderRadius: 9999,
+    backgroundColor: "#1f2937",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: 320,
+    maxHeight: 500,
+    backgroundColor: "#1f1e28",
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  tabs: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#374151",
+  },
+  tabButton: {
+    padding: 8,
+    borderRadius: 6,
+  },
+  tabButtonActive: {
+    backgroundColor: "#1f2937",
+  },
+  scrollContent: {
+    maxHeight: 384,
+  },
+  sectionTitle: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    fontWeight: "700",
+    fontSize: 18,
+    color: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#374151",
+  },
+  emptyText: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    textAlign: "center",
+    color: "#6b7280",
+  },
+  closeButton: {
+    padding: 12,
+    backgroundColor: "#dc2626",
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+  },
+  closeButtonText: {
+    color: "white",
+    textAlign: "center",
+    fontWeight: "600",
+  },
+});

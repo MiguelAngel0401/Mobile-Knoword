@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, View, Text, TouchableOpacity } from "react-native";
+import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
 type ErrorModalProps = {
   message: string;
@@ -15,30 +15,18 @@ export default function ErrorModal({ message, onClose, onRetry }: ErrorModalProp
       animationType="fade"
       onRequestClose={onClose}
     >
-      {/* Fondo oscuro */}
-      <View className="flex-1 bg-black/50 justify-center items-center">
-        {/* Contenedor del modal */}
-        <View className="bg-gray-800 rounded-lg shadow-xl p-6 w-80">
-          <Text className="text-2xl font-bold text-red-400 mb-4 text-center">
-            ¡Upps! 😢
-          </Text>
+      <View style={styles.overlay}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.title}>¡Upps! 😢</Text>
+          <Text style={styles.message}>{message}</Text>
 
-          <Text className="text-white mb-6 text-center">{message}</Text>
-
-          {/* Botones */}
-          <View className="flex-row justify-end space-x-4">
-            <TouchableOpacity
-              onPress={onClose}
-              className="px-4 py-2 bg-gray-600 rounded"
-            >
-              <Text className="text-white font-medium">Cerrar</Text>
+          <View style={styles.buttonsContainer}>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Text style={styles.buttonText}>Cerrar</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={onRetry}
-              className="px-4 py-2 bg-blue-600 rounded"
-            >
-              <Text className="text-white font-medium">Reintentar</Text>
+            <TouchableOpacity onPress={onRetry} style={styles.retryButton}>
+              <Text style={styles.buttonText}>Reintentar</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -46,3 +34,55 @@ export default function ErrorModal({ message, onClose, onRetry }: ErrorModalProp
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    backgroundColor: "#1f2937",
+    borderRadius: 8,
+    padding: 24,
+    width: 320,
+    shadowColor: "#000",
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#F87171",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  message: {
+    color: "white",
+    marginBottom: 24,
+    textAlign: "center",
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+  },
+  closeButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: "#4B5563",
+    borderRadius: 6,
+    marginRight: 16,
+  },
+  retryButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: "#2563EB",
+    borderRadius: 6,
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "500",
+  },
+});

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 
 interface Message {
   id: number;
@@ -12,24 +12,57 @@ interface Message {
 
 export function MessageItem({ message }: { message: Message }) {
   return (
-    <View className="flex-row items-start p-4 border-b border-gray-700">
-      {/* Avatar */}
-      <View className="mr-3">
+    <View style={styles.container}>
+      <View style={styles.avatarContainer}>
         <Image
           source={{ uri: message.avatar }}
-          className="w-10 h-10 rounded-full"
+          style={styles.avatar}
           resizeMode="cover"
         />
       </View>
 
-      {/* Contenido */}
-      <View className="flex-1">
-        <Text className="text-sm font-bold text-white">{message.sender}</Text>
-        <Text className="text-sm font-light text-gray-200 mt-0.5">
-          {message.message}
-        </Text>
-        <Text className="text-xs text-gray-400 mt-1">{message.time}</Text>
+      <View style={styles.content}>
+        <Text style={styles.sender}>{message.sender}</Text>
+        <Text style={styles.message}>{message.message}</Text>
+        <Text style={styles.time}>{message.time}</Text>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#374151",
+  },
+  avatarContainer: {
+    marginRight: 12,
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  content: {
+    flex: 1,
+  },
+  sender: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "white",
+  },
+  message: {
+    fontSize: 14,
+    fontWeight: "300",
+    color: "#E5E7EB",
+    marginTop: 2,
+  },
+  time: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    marginTop: 4,
+  },
+});

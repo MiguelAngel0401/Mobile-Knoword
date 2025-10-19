@@ -1,48 +1,94 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { AlertTriangle } from "lucide-react-native";
 
 type ErrorMessageScreenProps = { error: string };
 
 export default function ErrorMessageScreen({ error }: ErrorMessageScreenProps) {
   const handleRetry = () => {
-    // En mobile no existe window.location.reload()
-    // Aquí puedes implementar lógica de reintento (ej: volver a llamar a la API)
     console.log("Reintentar acción");
   };
 
   return (
-    <View className="flex-1 items-center justify-center p-4 bg-black">
-      <View className="w-full max-w-md bg-gray-900 rounded-xl border border-gray-700 shadow-lg p-6 items-center space-y-4">
-        {/* Icono */}
-        <View className="bg-red-100 p-3 rounded-full">
+    <View style={styles.container}>
+      <View style={styles.card}>
+        <View style={styles.iconWrapper}>
           <AlertTriangle size={48} color="#EF4444" />
         </View>
 
-        {/* Título */}
-        <Text className="text-2xl font-bold text-gray-200 text-center">
-          ¡Ups! Algo salió mal
-        </Text>
+        <Text style={styles.title}>¡Ups! Algo salió mal</Text>
 
-        {/* Mensaje */}
-        <Text className="text-gray-400 text-center">
+        <Text style={styles.message}>
           No pudimos conectar con el servidor. ¡Pero no te preocupes!{"\n"}
           Estamos trabajando para solucionarlo.
         </Text>
 
-        {/* Error específico */}
-        <Text className="text-sm text-red-400 font-medium text-center">
-          {error}
-        </Text>
+        <Text style={styles.errorText}>{error}</Text>
 
-        {/* Botón Reintentar */}
-        <TouchableOpacity
-          onPress={handleRetry}
-          className="mt-4 px-4 py-2 bg-blue-600 rounded-md"
-        >
-          <Text className="text-white font-semibold">Reintentar</Text>
+        <TouchableOpacity onPress={handleRetry} style={styles.retryButton}>
+          <Text style={styles.retryButtonText}>Reintentar</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  card: {
+    width: "100%",
+    maxWidth: 400,
+    backgroundColor: "#111827",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#374151",
+    shadowColor: "#000",
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 10,
+    padding: 24,
+    alignItems: "center",
+  },
+  iconWrapper: {
+    backgroundColor: "#FEE2E2",
+    padding: 12,
+    borderRadius: 9999,
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#E5E7EB",
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  message: {
+    color: "#9CA3AF",
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  errorText: {
+    fontSize: 14,
+    color: "#F87171",
+    fontWeight: "500",
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  retryButton: {
+    marginTop: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: "#2563EB",
+    borderRadius: 6,
+  },
+  retryButtonText: {
+    color: "white",
+    fontWeight: "600",
+  },
+});

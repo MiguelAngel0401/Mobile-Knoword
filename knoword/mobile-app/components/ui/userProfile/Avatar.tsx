@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Image, Text } from "react-native";
+import { View, Image, Text, StyleSheet } from "react-native";
 
 type AvatarProps = {
   src?: string;
@@ -18,7 +18,7 @@ export function Avatar({ src, size = "md", editable = false }: AvatarProps) {
   const avatarSize = pixelSizes[size] || pixelSizes.md;
 
   return (
-    <View className="items-center">
+    <View style={styles.container}>
       <Image
         source={{ uri: src || "https://via.placeholder.com/150" }}
         style={{
@@ -28,9 +28,18 @@ export function Avatar({ src, size = "md", editable = false }: AvatarProps) {
         }}
         resizeMode="cover"
       />
-      {editable && (
-        <Text className="text-blue-500 text-sm mt-2">Editar</Text>
-      )}
+      {editable && <Text style={styles.editText}>Editar</Text>}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: "center", // items-center
+  },
+  editText: {
+    color: "#3B82F6", // text-blue-500
+    fontSize: 14, // text-sm
+    marginTop: 8, // mt-2
+  },
+});

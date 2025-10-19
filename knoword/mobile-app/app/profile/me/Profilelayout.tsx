@@ -1,5 +1,5 @@
 import React from "react";
-import { View } from "react-native";
+import { View, StyleSheet } from "react-native";
 import LateralMenu from "../../../components/shared/LateraMenu";
 import Navbar from "../../../components/ui/navbar/Navbar";
 
@@ -9,15 +9,29 @@ export default function ProfileLayout({
   children: React.ReactNode;
 }) {
   return (
-    <View className="flex-1 bg-black">
+    <View style={styles.container}>
       {/* Navbar arriba */}
       <Navbar />
 
       {/* Contenedor principal */}
-      <View className="flex-row flex-1">
+      <View style={styles.mainContent}>
         <LateralMenu />
-        <View className="flex-1">{children}</View>
+        <View style={styles.childrenWrapper}>{children}</View>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "black",
+  },
+  mainContent: {
+    flex: 1,
+    flexDirection: "row",
+  },
+  childrenWrapper: {
+    flex: 1,
+  },
+});

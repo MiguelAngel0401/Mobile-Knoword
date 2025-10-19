@@ -1,10 +1,23 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 
 export default function Posts() {
   return (
-    <View className="flex-1 items-center justify-center">
-      <Text className="text-white text-lg font-semibold">Posts</Text>
+    <View style={styles.container}>
+      <Text style={styles.text}>Posts</Text>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",   // items-center
+    justifyContent: "center", // justify-center
+  },
+  text: {
+    color: "white",        // text-white
+    fontSize: 18,          // text-lg
+    fontWeight: "600",     // font-semibold
+  },
+});

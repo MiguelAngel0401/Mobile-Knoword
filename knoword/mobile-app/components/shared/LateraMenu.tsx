@@ -1,6 +1,13 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
-import { Home, Compass, Users, Bookmark, Settings, ChevronRight } from "lucide-react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  Home,
+  Compass,
+  Users,
+  Bookmark,
+  Settings,
+  ChevronRight,
+} from "lucide-react-native";
 
 const navigation = [
   { name: "Inicio", icon: Home },
@@ -24,38 +31,38 @@ export default function LateralMenu() {
   };
 
   return (
-    <View className="p-4">
-      <View className="flex-col space-y-2">
+    <View style={styles.container}>
+      <View style={styles.menuList}>
         {navigation.map((item) => {
           const Icon = item.icon;
           return (
-            <View key={item.name}>
+            <View key={item.name} style={styles.menuItemWrapper}>
               {item.submenu ? (
                 <View>
                   <TouchableOpacity
                     onPress={() => toggleSubmenu(item.name)}
-                    className="w-full flex-row items-center justify-between rounded-md py-2 px-4 bg-gray-800"
+                    style={styles.menuButton}
                   >
-                    <View className="flex-row items-center space-x-2">
+                    <View style={styles.menuButtonContent}>
                       <Icon size={20} color="white" />
-                      <Text className="text-white">{item.name}</Text>
+                      <Text style={styles.menuText}>{item.name}</Text>
                     </View>
                     <ChevronRight
                       size={16}
                       color="white"
-                      className={openSubmenu === item.name ? "rotate-90" : ""}
+                      style={openSubmenu === item.name ? styles.rotateIcon : undefined}
                     />
                   </TouchableOpacity>
 
                   {openSubmenu === item.name && (
-                    <View className="ml-6 mt-2 flex-col space-y-1">
+                    <View style={styles.submenuContainer}>
                       {communitySubmenu.map((subItem) => (
                         <TouchableOpacity
                           key={subItem.name}
-                          className="py-2 px-4 rounded-md bg-gray-700"
+                          style={styles.submenuButton}
                           onPress={() => console.log("Navigate to", subItem.name)}
                         >
-                          <Text className="text-gray-300">{subItem.name}</Text>
+                          <Text style={styles.submenuText}>{subItem.name}</Text>
                         </TouchableOpacity>
                       ))}
                     </View>
@@ -63,11 +70,13 @@ export default function LateralMenu() {
                 </View>
               ) : (
                 <TouchableOpacity
-                  className="flex-row items-center space-x-2 rounded-md py-2 px-4 bg-gray-800"
+                  style={styles.menuButton}
                   onPress={() => console.log("Navigate to", item.name)}
                 >
-                  <Icon size={20} color="white" />
-                  <Text className="text-white">{item.name}</Text>
+                  <View style={styles.menuButtonContent}>
+                    <Icon size={20} color="white" />
+                    <Text style={styles.menuText}>{item.name}</Text>
+                  </View>
                 </TouchableOpacity>
               )}
             </View>
@@ -77,3 +86,50 @@ export default function LateralMenu() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+  },
+  menuList: {
+    flexDirection: "column",
+  },
+  menuItemWrapper: {
+    marginBottom: 8,
+  },
+  menuButton: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: "#1f2937",
+  },
+  menuButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  menuText: {
+    color: "white",
+    marginLeft: 8,
+  },
+  rotateIcon: {
+    transform: [{ rotate: "90deg" }],
+  },
+  submenuContainer: {
+    marginLeft: 24,
+    marginTop: 8,
+  },
+  submenuButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    backgroundColor: "#374151",
+    marginBottom: 4,
+  },
+  submenuText: {
+    color: "#D1D5DB",
+  },
+});

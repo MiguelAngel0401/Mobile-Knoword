@@ -21,6 +21,7 @@ import { AuthStackParamList } from "@shared/types/navigation";
 import { useAuthStore } from "@shared/store/authStore";
 import { login } from "../../../../shared-core/src/services/auth/login.native";
 import { saveTokens, getTokens } from "@shared/utils/storageToken";
+import { router } from "expo-router";
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
@@ -43,64 +44,23 @@ export default function LoginScreen() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    console.log("🚀 onSubmit INICIADO");
-    console.log("📤 Data:", JSON.stringify(data, null, 2));
-    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    
     setIsSubmitting(true);
     setBackendError(null);
     setSubmissionError(null);
 
     try {
-      console.log("⏳ Llamando a login()...");
       const tokens = await login(data);
-      
-      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-      console.log("✅ LOGIN EXITOSO - Tokens recibidos:");
-      console.log("✅ accessToken:", tokens.accessToken ? "✓" : "✗");
-      console.log("✅ refreshToken:", tokens.refreshToken ? "✓" : "✗");
-      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-
-      console.log("💾 Guardando tokens...");
       await saveTokens(tokens);
-      console.log("✅ Tokens guardados");
 
-      console.log("📦 Verificando tokens guardados...");
       const stored = await getTokens();
-      
       if (!stored) {
-        console.error("❌ No se pudieron recuperar tokens");
         Alert.alert("Error", "No se pudieron guardar los tokens");
         return;
       }
 
-      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-      console.log("🔧 Llamando a setIsAuthenticated(true)...");
       setIsAuthenticated(true);
-      console.log("✅ setIsAuthenticated(true) ejecutado");
-      
-      // Verificar estado después de 500ms
-      setTimeout(() => {
-        const currentState = useAuthStore.getState();
-        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        console.log("⏱️ Estado del store después de 500ms:");
-        console.log("⏱️ isAuthenticated:", currentState.isAuthenticated);
-        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-      }, 500);
-      
-      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-      console.log("🎉 PROCESO DE LOGIN COMPLETADO");
-      console.log("⚠️ Esperando navegación automática...");
-      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-      
+      router.replace("/profile");
     } catch (error: any) {
-      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-      console.log("❌ ERROR EN onSubmit");
-      console.log("❌ Error:", error);
-      console.log("❌ Message:", error?.message);
-      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-      
       if (error?.response?.data?.message) {
         setBackendError(error.response.data.message);
         setError("email", { type: "manual" });
@@ -111,7 +71,6 @@ export default function LoginScreen() {
         setSubmissionError("Error desconocido al iniciar sesión.");
       }
     } finally {
-      console.log("🏁 onSubmit finalizando");
       setIsSubmitting(false);
     }
   };
@@ -160,10 +119,7 @@ export default function LoginScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => {
-                console.log("🔘 Botón presionado");
-                handleSubmit(onSubmit)();
-              }}
+              onPress={handleSubmit(onSubmit)}
               disabled={isSubmitting}
               style={styles.button}
             >

@@ -1,34 +1,28 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import SearchBar from "./SearchBar";
 import { NotificationsMenu } from "./NotificationsMenu";
 import { ProfileMenu } from "./ProfileMenu";
 
 export default function Navbar() {
-  // En React Native no existe usePathname de Next.js
-  // Si usas React Navigation, puedes obtener la ruta con useRoute()
-  const pathname = "/communities"; // <-- simulado, reemplaza con tu lógica de navegación
+  const pathname = "/communities"; // Simulado, reemplaza con tu lógica real
 
   return (
-    <View className="p-4 flex-row items-center justify-between border-b border-gray-900 bg-black">
-      {/* Logo */}
-      <View className="flex-row items-center">
-        <Text className="text-2xl font-bold text-white mr-8">KnoWord</Text>
+    <View style={styles.container}>
+      {/* Sección izquierda: logo + búsqueda */}
+      <View style={styles.leftSection}>
+        <Text style={styles.logoText}>KnoWord</Text>
+        <SearchBar />
       </View>
 
-      {/* Barra de búsqueda */}
-      <SearchBar />
-
-      {/* Menús */}
-      <View className="flex-row items-center space-x-4 ml-4">
+      {/* Sección derecha: menús */}
+      <View style={styles.rightSection}>
         {pathname.includes("communities") && (
           <TouchableOpacity
             onPress={() => console.log("Ir a crear comunidad")}
-            className="bg-blue-600 px-4 py-2 rounded"
+            style={styles.createButton}
           >
-            <Text className="text-sm text-white font-medium">
-              Crear comunidad
-            </Text>
+            <Text style={styles.createButtonText}>Crear comunidad</Text>
           </TouchableOpacity>
         )}
         <NotificationsMenu />
@@ -37,3 +31,41 @@ export default function Navbar() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#111827",
+    backgroundColor: "black",
+  },
+  leftSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  rightSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  logoText: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "white",
+  },
+  createButton: {
+    backgroundColor: "#2563EB",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  createButtonText: {
+    fontSize: 14,
+    color: "white",
+    fontWeight: "500",
+  },
+});

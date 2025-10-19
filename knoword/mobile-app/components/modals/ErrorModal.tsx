@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, View, Text, TouchableOpacity } from "react-native";
+import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
 type ErrorProps = {
   message: string;
@@ -16,31 +16,89 @@ export default function ErrorModal({ message, isOpen, onClose }: ErrorProps) {
       onRequestClose={onClose}
     >
       {/* Fondo oscuro */}
-      <View className="flex-1 bg-black/50 justify-center items-center">
+      <View style={styles.overlay}>
         {/* Contenedor del modal */}
-        <View className="bg-white rounded-lg p-6 w-80 shadow-lg">
+        <View style={styles.modalContainer}>
           {/* Icono + mensaje */}
-          <View className="flex-row items-center mb-4">
-            <View className="h-12 w-12 rounded-full bg-red-100 justify-center items-center mr-3">
-              <Text className="text-red-600 text-xl">!</Text>
+          <View style={styles.header}>
+            <View style={styles.iconWrapper}>
+              <Text style={styles.iconText}>!</Text>
             </View>
-            <View className="flex-1">
-              <Text className="text-lg font-semibold text-gray-900">
-                Error de conexión
-              </Text>
-              <Text className="text-sm text-gray-600 mt-1">{message}</Text>
+            <View style={styles.textWrapper}>
+              <Text style={styles.title}>Error de conexión</Text>
+              <Text style={styles.subtitle}>{message}</Text>
             </View>
           </View>
 
           {/* Botón de cierre */}
-          <TouchableOpacity
-            onPress={onClose}
-            className="mt-2 px-4 py-2 bg-red-600 rounded-md"
-          >
-            <Text className="text-white font-medium text-center">Entendido</Text>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>Entendido</Text>
           </TouchableOpacity>
         </View>
       </View>
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 24,
+    width: 320,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  iconWrapper: {
+    height: 48,
+    width: 48,
+    borderRadius: 24,
+    backgroundColor: "#FEE2E2",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  iconText: {
+    color: "#DC2626",
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  textWrapper: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#4B5563",
+    marginTop: 4, // mt-1
+  },
+  closeButton: {
+    marginTop: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: "#DC2626",
+    borderRadius: 6,
+  },
+  closeButtonText: {
+    color: "white",
+    fontWeight: "500",
+    textAlign: "center",
+  },
+});

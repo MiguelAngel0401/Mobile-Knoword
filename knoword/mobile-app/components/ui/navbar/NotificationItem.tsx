@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Trophy, Users } from "lucide-react-native";
 
 interface Notification {
@@ -17,20 +17,19 @@ export function NotificationItem({ notification }: { notification: Notification 
     switch (notification.type) {
       case "achievement":
         return (
-          <View className="w-10 h-10 rounded-full bg-blue-100 justify-center items-center">
+          <View style={[styles.iconWrapper, styles.iconBlue]}>
             <Trophy size={24} color="#3B82F6" />
           </View>
         );
       case "rank":
         return (
-          <View className="w-10 h-10 rounded-full bg-pink-100 justify-center items-center">
-            {/* Puedes reemplazar este SVG por un ícono de lucide-react-native */}
-            <Text className="text-pink-500 font-bold">★</Text>
+          <View style={[styles.iconWrapper, styles.iconPink]}>
+            <Text style={styles.rankStar}>★</Text>
           </View>
         );
       case "achievement-knoword":
         return (
-          <View className="w-10 h-10 rounded-full bg-purple-100 justify-center items-center">
+          <View style={[styles.iconWrapper, styles.iconPurple]}>
             <Users size={24} color="#A855F7" />
           </View>
         );
@@ -40,34 +39,99 @@ export function NotificationItem({ notification }: { notification: Notification 
   };
 
   return (
-    <View className="flex-row items-start p-4 border-b border-gray-700">
-      {/* Icono */}
-      <View className="mr-3">{renderIcon()}</View>
+    <View style={styles.container}>
+      <View style={styles.iconContainer}>{renderIcon()}</View>
 
-      {/* Contenido */}
-      <View className="flex-1">
-        <Text className="text-sm font-medium text-white">{notification.title}</Text>
+      <View style={styles.content}>
+        <Text style={styles.title}>{notification.title}</Text>
 
         {notification.points && (
-          <Text className="text-xs text-gray-400 mt-0.5">
-            <Text className="font-bold text-green-500">{notification.points}</Text>{" "}
-            añadidos a tu cuenta.
+          <Text style={styles.pointsText}>
+            <Text style={styles.pointsValue}>{notification.points}</Text> añadidos a tu cuenta.
           </Text>
         )}
 
-        <Text className="text-xs text-gray-500 mt-1">{notification.date}</Text>
+        <Text style={styles.date}>{notification.date}</Text>
 
         {notification.actionText && (
           <TouchableOpacity
             onPress={() => console.log("Acción:", notification.actionText)}
-            className="mt-2 px-4 py-1.5 bg-blue-600 rounded-full"
+            style={styles.actionButton}
           >
-            <Text className="text-white text-xs font-semibold text-center">
-              {notification.actionText}
-            </Text>
+            <Text style={styles.actionButtonText}>{notification.actionText}</Text>
           </TouchableOpacity>
         )}
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#374151",
+  },
+  iconContainer: {
+    marginRight: 12,
+  },
+  iconWrapper: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  iconBlue: {
+    backgroundColor: "#DBEAFE",
+  },
+  iconPink: {
+    backgroundColor: "#FCE7F3",
+  },
+  iconPurple: {
+    backgroundColor: "#F3E8FF",
+  },
+  rankStar: {
+    color: "#EC4899",
+    fontWeight: "700",
+    fontSize: 16,
+  },
+  content: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "white",
+  },
+  pointsText: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    marginTop: 2,
+  },
+  pointsValue: {
+    fontWeight: "700",
+    color: "#22C55E",
+  },
+  date: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 4,
+  },
+  actionButton: {
+    marginTop: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    backgroundColor: "#2563EB",
+    borderRadius: 9999,
+    alignSelf: "flex-start",
+  },
+  actionButtonText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+});

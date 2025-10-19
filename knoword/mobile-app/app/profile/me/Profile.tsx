@@ -1,11 +1,18 @@
 import React from "react";
-import { View } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Banner } from "../../../src/components/profile/Banner";
 
 export default function ProfilePage() {
   return (
-    <View className="flex-1 bg-black">
+    <View style={styles.container}>
       <Banner />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,            
+    backgroundColor: "black",
+  },
+});
