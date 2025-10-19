@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -26,7 +26,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
-  const { isAuthenticated, setIsAuthenticated } = useAuthStore();
+  const { setIsAuthenticated } = useAuthStore();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [backendError, setBackendError] = useState<string | null>(null);
@@ -42,37 +42,65 @@ export default function LoginScreen() {
     mode: "onTouched",
   });
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigation.navigate("Profile");
-    }
-  }, [isAuthenticated]);
-
   const onSubmit = async (data: LoginFormData) => {
-    console.log("🚀 Iniciando login...");
-
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    console.log("🚀 onSubmit INICIADO");
+    console.log("📤 Data:", JSON.stringify(data, null, 2));
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    
     setIsSubmitting(true);
     setBackendError(null);
     setSubmissionError(null);
 
     try {
+      console.log("⏳ Llamando a login()...");
       const tokens = await login(data);
-      console.log("✅ Login exitoso, tokens recibidos");
+      
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log("✅ LOGIN EXITOSO - Tokens recibidos:");
+      console.log("✅ accessToken:", tokens.accessToken ? "✓" : "✗");
+      console.log("✅ refreshToken:", tokens.refreshToken ? "✓" : "✗");
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
+      console.log("💾 Guardando tokens...");
       await saveTokens(tokens);
-      const stored = await getTokens();
+      console.log("✅ Tokens guardados");
 
+      console.log("📦 Verificando tokens guardados...");
+      const stored = await getTokens();
+      
       if (!stored) {
+        console.error("❌ No se pudieron recuperar tokens");
         Alert.alert("Error", "No se pudieron guardar los tokens");
         return;
       }
 
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log("🔧 Llamando a setIsAuthenticated(true)...");
       setIsAuthenticated(true);
-      navigation.navigate("Profile");
-      console.log("🎉 Usuario autenticado y redirigido a Profile");
+      console.log("✅ setIsAuthenticated(true) ejecutado");
+      
+      // Verificar estado después de 500ms
+      setTimeout(() => {
+        const currentState = useAuthStore.getState();
+        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        console.log("⏱️ Estado del store después de 500ms:");
+        console.log("⏱️ isAuthenticated:", currentState.isAuthenticated);
+        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      }, 500);
+      
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log("🎉 PROCESO DE LOGIN COMPLETADO");
+      console.log("⚠️ Esperando navegación automática...");
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      
     } catch (error: any) {
-      console.log("❌ Error en login:", error?.message || error);
-
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log("❌ ERROR EN onSubmit");
+      console.log("❌ Error:", error);
+      console.log("❌ Message:", error?.message);
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      
       if (error?.response?.data?.message) {
         setBackendError(error.response.data.message);
         setError("email", { type: "manual" });
@@ -83,6 +111,7 @@ export default function LoginScreen() {
         setSubmissionError("Error desconocido al iniciar sesión.");
       }
     } finally {
+      console.log("🏁 onSubmit finalizando");
       setIsSubmitting(false);
     }
   };
@@ -131,7 +160,10 @@ export default function LoginScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => handleSubmit(onSubmit)()}
+              onPress={() => {
+                console.log("🔘 Botón presionado");
+                handleSubmit(onSubmit)();
+              }}
               disabled={isSubmitting}
               style={styles.button}
             >

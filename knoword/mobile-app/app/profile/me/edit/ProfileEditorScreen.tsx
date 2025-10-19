@@ -8,14 +8,13 @@ import {
     Modal,
     Alert,
     ScrollView,
+    StyleSheet,
 } from "react-native";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Avatar } from "../../../../components/ui/userProfile/Avatar";
-import { Pencil } from "lucide-react-native";
 import { profileSchema } from "../../../../../shared-core/src/validators/users/index";
-import { uploadToCloudinary } from "../../../../../shared-core/src/services/cloudinary/cloudinaryService";
 import { getMe, updateUserData } from "../../../../../shared-core/src/services/users/userServices";
 import { User } from "../../../../../shared-core/src/types/users/user";
 import client from "../../../lib/axios";
@@ -23,14 +22,13 @@ import ErrorMessageScreen from "../../../../components/shared/ErrorMessageScreen
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
-export default function ProfileEditor() {
+export default function ProfileScreen() {
     const [loading, setLoading] = useState(false);
     const [errorFetchingProfile, setErrorFetchingProfile] = useState<string | null>(null);
     const [user, setUser] = useState<User | null>(null);
     const [isEditing, setIsEditing] = useState(false);
-    const [isOpen, setIsOpen] = useState(false); // Modal confirmación
+    const [isOpen, setIsOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [submissionError, setSubmissionError] = useState<string | null>(null);
 
@@ -74,23 +72,7 @@ export default function ProfileEditor() {
         }
     }, [user, reset]);
 
-    const handleEditClick = () => {
-        if (isEditing && user) {
-            reset({
-                realName: user.realName || "",
-                email: user.email || "",
-                username: user.username || "",
-                bio: user.bio || "",
-                avatar: user.avatar || "",
-            });
-            setAvatarPreview(user.avatar || null);
-            setSubmissionError(null);
-        }
-        setIsEditing((prev) => !prev);
-    };
-
     const handleImageUpload = async () => {
-        // Aquí deberías usar expo-image-picker en mobile
         Alert.alert("Subir imagen", "Implementa expo-image-picker aquí");
     };
 
@@ -112,7 +94,7 @@ export default function ProfileEditor() {
 
     if (loading) {
         return (
-            <View className="flex-1 justify-center items-center">
+            <View style={styles.centered}>
                 <ActivityIndicator size="large" color="#3B82F6" />
             </View>
         );
@@ -123,110 +105,46 @@ export default function ProfileEditor() {
     }
 
     return (
-        <ScrollView className="flex-1 bg-black px-6 py-8">
-            <Text className="text-2xl font-semibold text-white mb-6">Editar Perfil</Text>
+        <ScrollView contentContainerStyle={styles.container}>
+            <Text style={styles.title}>Editar Perfil</Text>
 
-            {/* Avatar */}
-            <View className="flex-col items-center border-b border-gray-700 pb-6 mb-6">
+            <View style={styles.avatarSection}>
                 <Avatar src={avatarPreview || "/default-avatar.jpeg"} size="lg" editable={isEditing} />
                 {isEditing && (
-                    <View className="mt-4 items-center">
+                    <View style={styles.uploadSection}>
                         <TouchableOpacity
                             onPress={handleImageUpload}
-                            disabled={isUploadingAvatar}
-                            className="px-4 py-2 bg-blue-600 rounded-lg"
+                            disabled={isSubmitting}
+                            style={styles.uploadButton}
                         >
-                            <Text className="text-white font-medium">
-                                {isUploadingAvatar ? "Subiendo..." : "Subir nueva imagen"}
+                            <Text style={styles.uploadText}>
+                                {isSubmitting ? "Subiendo..." : "Subir nueva imagen"}
                             </Text>
                         </TouchableOpacity>
-                        {submissionError && <Text className="text-red-500 mt-2">{submissionError}</Text>}
-                        <Text className="text-gray-400 text-xs mt-4 text-center">
+                        {submissionError && <Text style={styles.error}>{submissionError}</Text>}
+                        <Text style={styles.hint}>
                             Recomendamos una imagen de al menos 800×800 pixeles.{"\n"}Formato JPG o PNG
                         </Text>
                     </View>
                 )}
             </View>
-            {/* Formulario */}
-            <View>
-                {/* Nombre */}
-                <View className="mb-4">
-                    <Text className="text-gray-400 text-sm mb-2">Nombre Completo</Text>
-                    {isEditing ? (
-                        <TextInput
-                            placeholder="Nombre completo"
-                            placeholderTextColor="#9CA3AF"
-                            onChangeText={(text) => setValue("realName", text, { shouldDirty: true })}
-                            defaultValue={user?.realName}
-                            className="w-full px-3 py-2 border border-gray-600 rounded-md text-white"
-                        />
-                    ) : (
-                        <Text className="font-medium text-white">{user?.realName}</Text>
-                    )}
-                </View>
+            <View style={styles.form}>
+                {renderField("Nombre Completo", "realName", user?.realName)}
+                {renderField("Correo Electrónico", "email", user?.email)}
+                {renderField("Nombre de usuario", "username", user?.username)}
+                {renderField("Biografía", "bio", user?.bio ?? "", true)}
 
-                {/* Email */}
-                <View className="mb-4">
-                    <Text className="text-gray-400 text-sm mb-2">Correo Electrónico</Text>
-                    {isEditing ? (
-                        <TextInput
-                            placeholder="Correo electrónico"
-                            placeholderTextColor="#9CA3AF"
-                            onChangeText={(text) => setValue("email", text, { shouldDirty: true })}
-                            defaultValue={user?.email}
-                            className="w-full px-3 py-2 border border-gray-600 rounded-md text-white"
-                        />
-                    ) : (
-                        <Text className="font-medium text-white">{user?.email}</Text>
-                    )}
-                </View>
-
-                {/* Username */}
-                <View className="mb-4">
-                    <Text className="text-gray-400 text-sm mb-2">Nombre de usuario</Text>
-                    {isEditing ? (
-                        <TextInput
-                            placeholder="Usuario"
-                            placeholderTextColor="#9CA3AF"
-                            onChangeText={(text) => setValue("username", text, { shouldDirty: true })}
-                            defaultValue={user?.username}
-                            className="w-full px-3 py-2 border border-gray-600 rounded-md text-white"
-                        />
-                    ) : (
-                        <Text className="font-medium text-white">{user?.username}</Text>
-                    )}
-                </View>
-
-                {/* Bio */}
-                <View className="mb-4">
-                    <Text className="text-lg font-semibold text-white mb-2">Biografía</Text>
-                    {isEditing ? (
-                        <TextInput
-                            multiline
-                            numberOfLines={4}
-                            placeholder="Escribe tu biografía"
-                            placeholderTextColor="#9CA3AF"
-                            onChangeText={(text) => setValue("bio", text, { shouldDirty: true })}
-                            defaultValue={user?.bio ?? ""}
-                            className="w-full px-3 py-2 border border-gray-600 rounded-md text-white"
-                        />
-                    ) : (
-                        <Text className="font-medium text-white">{user?.bio}</Text>
-                    )}
-                </View>
-
-                {/* Botón Guardar */}
                 {isEditing && (
-                    <View className="mt-6 flex-row justify-end">
+                    <View style={styles.buttonRow}>
                         <TouchableOpacity
                             onPress={handleSubmit(onSubmit)}
                             disabled={!isDirty || isSubmitting}
-                            className={`px-6 py-2 rounded-lg ${!isDirty || isSubmitting
-                                    ? "bg-gray-600"
-                                    : "bg-blue-600"
-                                }`}
+                            style={[
+                                styles.saveButton,
+                                (!isDirty || isSubmitting) && styles.disabledButton,
+                            ]}
                         >
-                            <Text className="text-white font-semibold">
+                            <Text style={styles.saveText}>
                                 {isSubmitting ? "Guardando..." : "Guardar Cambios"}
                             </Text>
                         </TouchableOpacity>
@@ -234,25 +152,172 @@ export default function ProfileEditor() {
                 )}
             </View>
 
-            {/* Modal de confirmación */}
             <Modal visible={isOpen} transparent animationType="fade">
-                <View className="flex-1 bg-black/50 justify-center items-center">
-                    <View className="bg-gray-900 rounded-2xl p-6 w-80">
-                        <Text className="text-lg font-medium text-white mb-2">
-                            Perfil Actualizado Con Éxito 🎉
-                        </Text>
-                        <Text className="text-sm text-gray-400 mb-4">
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalCard}>
+                        <Text style={styles.modalTitle}>Perfil Actualizado Con Éxito 🎉</Text>
+                        <Text style={styles.modalText}>
                             Tu información de perfil se ha actualizado correctamente.
                         </Text>
-                        <TouchableOpacity
-                            onPress={() => setIsOpen(false)}
-                            className="px-4 py-2 bg-blue-600 rounded-md"
-                        >
-                            <Text className="text-white font-medium">Entendido, gracias</Text>
+                        <TouchableOpacity onPress={() => setIsOpen(false)} style={styles.modalButton}>
+                            <Text style={styles.modalButtonText}>Entendido, gracias</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
             </Modal>
         </ScrollView>
     );
+
+    function renderField(
+        label: string,
+        key: keyof ProfileFormData,
+        value?: string,
+        multiline = false
+    ) {
+        return (
+            <View style={styles.field}>
+                <Text style={styles.label}>{label}</Text>
+                {isEditing ? (
+                    <TextInput
+                        placeholder={label}
+                        placeholderTextColor="#9CA3AF"
+                        onChangeText={(text) => setValue(key, text, { shouldDirty: true })}
+                        defaultValue={value}
+                        multiline={multiline}
+                        numberOfLines={multiline ? 4 : 1}
+                        style={styles.input}
+                    />
+                ) : (
+                    <Text style={styles.value}>{value}</Text>
+                )}
+            </View>
+        );
+    }
 }
+
+const styles = StyleSheet.create({
+    container: {
+        padding: 24,
+        backgroundColor: "#000",
+    },
+    centered: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#000",
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: "600",
+        color: "#fff",
+        marginBottom: 24,
+    },
+    avatarSection: {
+        alignItems: "center",
+        borderBottomWidth: 1,
+        borderBottomColor: "#374151",
+        paddingBottom: 24,
+        marginBottom: 24,
+    },
+    uploadSection: {
+        marginTop: 16,
+        alignItems: "center",
+    },
+    uploadButton: {
+        backgroundColor: "#2563EB",
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+    },
+    uploadText: {
+        color: "#fff",
+        fontWeight: "500",
+    },
+    hint: {
+        color: "#9CA3AF",
+        fontSize: 12,
+        marginTop: 12,
+        textAlign: "center",
+    },
+    error: {
+        color: "#EF4444",
+        marginTop: 8,
+        fontSize: 14,
+    },
+    form: {
+        marginBottom: 32,
+    },
+    field: {
+        marginBottom: 16,
+    },
+    label: {
+        color: "#9CA3AF",
+        fontSize: 14,
+        marginBottom: 6,
+    },
+    input: {
+        backgroundColor: "#1F2937",
+        color: "#fff",
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#4B5563",
+    },
+    value: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "500",
+    },
+    buttonRow: {
+        marginTop: 24,
+        alignItems: "flex-end",
+    },
+    saveButton: {
+        backgroundColor: "#2563EB",
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        borderRadius: 8,
+    },
+    disabledButton: {
+        backgroundColor: "#4B5563",
+    },
+    saveText: {
+        color: "#fff",
+        fontWeight: "600",
+        fontSize: 16,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.5)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    modalCard: {
+        backgroundColor: "#1F2937",
+        borderRadius: 16,
+        padding: 24,
+        width: 320,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: "#fff",
+        marginBottom: 8,
+    },
+    modalText: {
+        fontSize: 14,
+        color: "#9CA3AF",
+        marginBottom: 16,
+    },
+    modalButton: {
+        backgroundColor: "#2563EB",
+        paddingVertical: 10,
+        borderRadius: 8,
+        alignItems: "center",
+    },
+    modalButtonText: {
+        color: "#fff",
+        fontWeight: "500",
+    },
+});

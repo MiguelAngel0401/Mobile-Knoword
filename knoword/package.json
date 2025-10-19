@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0",
     "axios": "^1.12.2",
     "confbox": "^0.2.2",
     "expo-constants": "~18.0.9",
