@@ -12,4 +12,5 @@ export default function ProfileIndex() {
     }
 
     return <ProfileScreen />;
+    // return <ProfileScreen userId={userId} />; // si quieres pasar userId
 }
