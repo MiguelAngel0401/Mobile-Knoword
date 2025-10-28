@@ -6,10 +6,10 @@ import {
   TextInput,
   TouchableOpacity,
   Pressable,
+  StyleSheet,
 } from "react-native";
 import { Link as LinkIcon } from "lucide-react-native";
 
-// Si usas un editor compatible en RN, pásalo como prop
 interface LinkModalProps {
   editor?: any;
 }
@@ -19,7 +19,6 @@ export default function LinkModal({ editor }: LinkModalProps) {
   const [url, setUrl] = useState("");
   const [text, setText] = useState("");
 
-  // Actualizar texto seleccionado (si tu editor lo soporta)
   useEffect(() => {
     if (!editor) return;
 
@@ -85,77 +84,59 @@ export default function LinkModal({ editor }: LinkModalProps) {
 
   return (
     <View>
-      {/* Botón para abrir modal */}
       <TouchableOpacity
         onPress={() => setIsOpen(true)}
-        className={`p-2 rounded-md ${
-          isLinkActive()
-            ? "bg-gray-700"
-            : "bg-transparent"
-        }`}
+        style={[
+          styles.trigger,
+          isLinkActive() ? styles.triggerActive : styles.triggerIdle,
+        ]}
       >
         <LinkIcon size={18} color={isLinkActive() ? "white" : "#9CA3AF"} />
       </TouchableOpacity>
 
-      {/* Modal */}
       <Modal visible={isOpen} transparent animationType="fade">
-        <Pressable
-          className="flex-1 bg-black/50 justify-center items-center"
-          onPress={() => setIsOpen(false)}
-        >
-          <View className="bg-gray-800 rounded-lg p-6 w-80">
-            <Text className="text-lg font-semibold text-white mb-4">
+        <Pressable style={styles.overlay} onPress={() => setIsOpen(false)}>
+          <View style={styles.modal}>
+            <Text style={styles.modalTitle}>
               {isLinkActive() ? "Editar enlace" : "Insertar enlace"}
             </Text>
 
-            {/* Texto */}
-            <View className="mb-4">
-              <Text className="text-sm text-gray-300 mb-1">Texto a mostrar</Text>
+            <View style={styles.field}>
+              <Text style={styles.label}>Texto a mostrar</Text>
               <TextInput
                 value={text}
                 onChangeText={setText}
                 placeholder="Texto del enlace"
                 placeholderTextColor="#9CA3AF"
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                style={styles.input}
               />
-              <Text className="mt-1 text-xs text-gray-400">
+              <Text style={styles.helper}>
                 Si no se especifica, se usará la URL como texto
               </Text>
             </View>
 
-            {/* URL */}
-            <View className="mb-4">
-              <Text className="text-sm text-gray-300 mb-1">URL</Text>
+            <View style={styles.field}>
+              <Text style={styles.label}>URL</Text>
               <TextInput
                 value={url}
                 onChangeText={setUrl}
                 placeholder="https://example.com"
                 placeholderTextColor="#9CA3AF"
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                style={styles.input}
               />
             </View>
 
-            {/* Botones */}
-            <View className="flex-row justify-end gap-3">
+            <View style={styles.actions}>
               {isLinkActive() && (
-                <TouchableOpacity
-                  onPress={handleUnlink}
-                  className="px-4 py-2 bg-red-600 rounded-md"
-                >
-                  <Text className="text-white font-semibold">Eliminar</Text>
+                <TouchableOpacity onPress={handleUnlink} style={styles.unlink}>
+                  <Text style={styles.buttonText}>Eliminar</Text>
                 </TouchableOpacity>
               )}
-              <TouchableOpacity
-                onPress={() => setIsOpen(false)}
-                className="px-4 py-2"
-              >
-                <Text className="text-gray-300 font-semibold">Cancelar</Text>
+              <TouchableOpacity onPress={() => setIsOpen(false)} style={styles.cancel}>
+                <Text style={styles.cancelText}>Cancelar</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleSubmit}
-                className="px-4 py-2 bg-blue-600 rounded-md"
-              >
-                <Text className="text-white font-semibold">
+              <TouchableOpacity onPress={handleSubmit} style={styles.submit}>
+                <Text style={styles.buttonText}>
                   {isLinkActive() ? "Actualizar" : "Insertar"}
                 </Text>
               </TouchableOpacity>
@@ -166,3 +147,86 @@ export default function LinkModal({ editor }: LinkModalProps) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  trigger: {
+    padding: 8,
+    borderRadius: 8,
+  },
+  triggerIdle: {
+    backgroundColor: "transparent",
+  },
+  triggerActive: {
+    backgroundColor: "#374151",
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modal: {
+    backgroundColor: "#1f2937",
+    borderRadius: 12,
+    padding: 24,
+    width: 320,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#fff",
+    marginBottom: 16,
+  },
+  field: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
+    color: "#d1d5db",
+    marginBottom: 4,
+  },
+  input: {
+    width: "100%",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "#374151",
+    borderColor: "#4b5563",
+    borderWidth: 1,
+    borderRadius: 8,
+    color: "#fff",
+  },
+  helper: {
+    marginTop: 4,
+    fontSize: 12,
+    color: "#9CA3AF",
+  },
+  actions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 12,
+  },
+  unlink: {
+    backgroundColor: "#dc2626",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  cancel: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  cancelText: {
+    color: "#d1d5db",
+    fontWeight: "600",
+  },
+  submit: {
+    backgroundColor: "#2563eb",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+});

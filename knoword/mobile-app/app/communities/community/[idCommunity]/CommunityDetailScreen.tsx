@@ -6,6 +6,7 @@ import {
     Image,
     TouchableOpacity,
     ActivityIndicator,
+    StyleSheet,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { Calendar, Users, Tag, Lock, Globe } from "lucide-react-native";
@@ -66,7 +67,7 @@ export default function CommunityDetailScreen() {
 
     if (loading) {
         return (
-            <View className="flex-1 justify-center items-center">
+            <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#3B82F6" />
             </View>
         );
@@ -74,8 +75,8 @@ export default function CommunityDetailScreen() {
 
     if (error || !community) {
         return (
-            <View className="flex-1 justify-center items-center px-4">
-                <Text className="text-center text-lg text-red-500">
+            <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>
                     {error || "Comunidad no encontrada."}
                 </Text>
             </View>
@@ -83,44 +84,41 @@ export default function CommunityDetailScreen() {
     }
 
     return (
-        <ScrollView className="flex-1 bg-white dark:bg-black">
-            {/* Banner */}
-            <View className="h-64 w-full">
+        <ScrollView style={styles.container}>
+            <View style={styles.bannerContainer}>
                 {community.banner ? (
                     <Image
                         source={{ uri: community.banner }}
-                        className="w-full h-full"
+                        style={styles.banner}
                         resizeMode="cover"
                     />
                 ) : (
-                    <View className="w-full h-full bg-blue-500 justify-center items-center">
-                        <Text className="text-white text-2xl font-bold">
+                    <View style={styles.bannerPlaceholder}>
+                        <Text style={styles.bannerPlaceholderText}>
                             {community.name}
                         </Text>
                     </View>
                 )}
             </View>
 
-            {/* Avatar */}
-            <View className="absolute top-52 left-6">
+            <View style={styles.avatarContainer}>
                 {community.avatar ? (
                     <Image
                         source={{ uri: community.avatar }}
-                        className="w-24 h-24 rounded-full border-4 border-white"
+                        style={styles.avatar}
                     />
                 ) : (
-                    <View className="w-24 h-24 rounded-full border-4 border-white bg-gray-200 justify-center items-center">
-                        <Text className="text-3xl font-bold text-gray-600">
+                    <View style={styles.avatarPlaceholder}>
+                        <Text style={styles.avatarPlaceholderText}>
                             {community.name.charAt(0).toUpperCase()}
                         </Text>
                     </View>
                 )}
             </View>
 
-            {/* Info */}
-            <View className="mt-20 px-6">
-                <View className="flex-row items-center gap-2 mb-2">
-                    <Text className="text-2xl font-bold text-black dark:text-white">
+            <View style={styles.content}>
+                <View style={styles.titleContainer}>
+                    <Text style={styles.title}>
                         {community.name}
                     </Text>
                     {community.isPrivate ? (
@@ -129,19 +127,15 @@ export default function CommunityDetailScreen() {
                         <Globe size={20} color="#3B82F6" />
                     )}
                 </View>
-                <Text className="text-gray-600 dark:text-gray-300">
+                <Text style={styles.description}>
                     {community.description}
                 </Text>
 
-                {/* Tags */}
-                <View className="flex-row flex-wrap gap-2 mt-4">
+                <View style={styles.tagsContainer}>
                     {community.tags.map((tag) => (
-                        <View
-                            key={tag.id}
-                            className="flex-row items-center px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900"
-                        >
+                        <View key={tag.id} style={styles.tag}>
                             <Tag size={16} color="#2563EB" />
-                            <Text className="ml-1 text-sm text-blue-800 dark:text-blue-100">
+                            <Text style={styles.tagText}>
                                 {tag.name}
                             </Text>
                         </View>
@@ -149,19 +143,19 @@ export default function CommunityDetailScreen() {
                 </View>
 
                 {community.isOwner && (
-                    <Text className="text-yellow-600 italic mt-4">
+                    <Text style={styles.ownerText}>
                         ¡Eres dueño de esta comunidad!
                     </Text>
                 )}
-                {/* Botones de acción */}
-                <View className="flex-row flex-wrap gap-3 mt-6">
+
+                <View style={styles.actionsContainer}>
                     {!community.isOwner && !community.isMember && (
                         <TouchableOpacity
-                            className="px-4 py-2 bg-blue-600 rounded-lg"
+                            style={styles.joinButton}
                             onPress={handleJoin}
                             disabled={isJoining}
                         >
-                            <Text className="text-white">
+                            <Text style={styles.buttonText}>
                                 {isJoining ? "Uniendo..." : "Unirse"}
                             </Text>
                         </TouchableOpacity>
@@ -169,71 +163,67 @@ export default function CommunityDetailScreen() {
 
                     {!community.isOwner && community.isMember && (
                         <TouchableOpacity
-                            className="px-4 py-2 bg-gray-500 rounded-lg"
+                            style={styles.leaveButton}
                             onPress={() => setIsLeaving(true)}
                         >
-                            <Text className="text-white">Salir</Text>
+                            <Text style={styles.buttonText}>Salir</Text>
                         </TouchableOpacity>
                     )}
 
                     {community.isOwner && (
                         <>
-                            <TouchableOpacity className="px-4 py-2 bg-blue-600 rounded-lg">
-                                <Text className="text-white">Editar</Text>
+                            <TouchableOpacity style={styles.editButton}>
+                                <Text style={styles.buttonText}>Editar</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
-                                className="px-4 py-2 bg-red-600 rounded-lg"
+                                style={styles.deleteButton}
                                 onPress={() => setIsDeleting(true)}
                             >
-                                <Text className="text-white">Eliminar</Text>
+                                <Text style={styles.buttonText}>Eliminar</Text>
                             </TouchableOpacity>
                         </>
                     )}
 
-                    <TouchableOpacity className="px-4 py-2 border border-gray-300 rounded-lg">
-                        <Text className="text-gray-700 dark:text-gray-300">Compartir</Text>
+                    <TouchableOpacity style={styles.shareButton}>
+                        <Text style={styles.shareButtonText}>Compartir</Text>
                     </TouchableOpacity>
                 </View>
 
-                {/* Información adicional */}
-                <View className="mt-8 border-t border-gray-300 pt-4">
-                    <View className="flex-row items-center mb-4">
+                <View style={styles.infoSection}>
+                    <View style={styles.infoRow}>
                         <Calendar size={20} color="#6B7280" />
-                        <Text className="ml-2 text-gray-700 dark:text-gray-400">
+                        <Text style={styles.infoText}>
                             Creada: {formatDate(community.createdAt)}
                         </Text>
                     </View>
-                    <View className="flex-row items-center mb-4">
+                    <View style={styles.infoRow}>
                         <Users size={20} color="#6B7280" />
-                        <Text className="ml-2 text-gray-700 dark:text-gray-400">
+                        <Text style={styles.infoText}>
                             Miembros: {community.memberCount}
                         </Text>
                     </View>
-                    <View className="flex-row items-center mb-4">
-                        <View className="w-16 h-16 bg-gray-200 border-2 border-dashed rounded-xl" />
-                        <View className="ml-3">
-                            <Text className="text-sm text-gray-500 dark:text-gray-400">
+                    <View style={styles.infoRow}>
+                        <View style={styles.creatorAvatar} />
+                        <View style={styles.creatorInfo}>
+                            <Text style={styles.creatorLabel}>
                                 Creador
                             </Text>
-                            <Text className="font-medium text-gray-900 dark:text-white">
+                            <Text style={styles.creatorName}>
                                 Usuario
                             </Text>
                         </View>
                     </View>
                 </View>
 
-                {/* Navegación de secciones */}
-                <View className="mt-12">
-                    <View className="flex-row justify-around border-b border-gray-700 py-2">
-                        <Text className="text-blue-600 font-medium">Publicaciones</Text>
-                        <Text className="text-gray-400">Encuestas</Text>
-                        <Text className="text-gray-400">Miembros</Text>
+                <View style={styles.navigation}>
+                    <View style={styles.navigationTabs}>
+                        <Text style={styles.navigationActive}>Publicaciones</Text>
+                        <Text style={styles.navigationInactive}>Encuestas</Text>
+                        <Text style={styles.navigationInactive}>Miembros</Text>
                     </View>
-                    {/*<PostComponent />*/}
                 </View>
             </View>
 
-            {/* Modals */}
             {isDeleting && (
                 <DeleteCommunityModal
                     isOpen={isDeleting}
@@ -260,3 +250,219 @@ export default function CommunityDetailScreen() {
         </ScrollView>
     );
 }
+
+const styles = StyleSheet.create({
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+    },
+    errorText: {
+        textAlign: 'center',
+        fontSize: 18,
+        color: '#ef4444',
+    },
+    container: {
+        flex: 1,
+        backgroundColor: '#000000',
+    },
+    bannerContainer: {
+        height: 256,
+        width: '100%',
+    },
+    banner: {
+        width: '100%',
+        height: '100%',
+    },
+    bannerPlaceholder: {
+        width: '100%',
+        height: '100%',
+        backgroundColor: '#3b82f6',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    bannerPlaceholderText: {
+        color: '#ffffff',
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
+    avatarContainer: {
+        position: 'absolute',
+        top: 208,
+        left: 24,
+    },
+    avatar: {
+        width: 96,
+        height: 96,
+        borderRadius: 48,
+        borderWidth: 4,
+        borderColor: '#ffffff',
+    },
+    avatarPlaceholder: {
+        width: 96,
+        height: 96,
+        borderRadius: 48,
+        borderWidth: 4,
+        borderColor: '#ffffff',
+        backgroundColor: '#e5e7eb',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    avatarPlaceholderText: {
+        fontSize: 30,
+        fontWeight: 'bold',
+        color: '#4b5563',
+    },
+    content: {
+        marginTop: 80,
+        paddingHorizontal: 24,
+    },
+    titleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#ffffff',
+        marginRight: 8,
+    },
+    description: {
+        color: '#d1d5db',
+    },
+    tagsContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginTop: 16,
+    },
+    tag: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: 16,
+        backgroundColor: '#1e3a8a',
+        marginRight: 8,
+        marginBottom: 8,
+    },
+    tagText: {
+        marginLeft: 4,
+        fontSize: 14,
+        color: '#bfdbfe',
+    },
+    ownerText: {
+        color: '#ca8a04',
+        fontStyle: 'italic',
+        marginTop: 16,
+    },
+    actionsContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginTop: 24,
+    },
+    joinButton: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        backgroundColor: '#2563eb',
+        borderRadius: 8,
+        marginRight: 12,
+        marginBottom: 12,
+    },
+    leaveButton: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        backgroundColor: '#6b7280',
+        borderRadius: 8,
+        marginRight: 12,
+        marginBottom: 12,
+    },
+    editButton: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        backgroundColor: '#2563eb',
+        borderRadius: 8,
+        marginRight: 12,
+        marginBottom: 12,
+    },
+    deleteButton: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        backgroundColor: '#dc2626',
+        borderRadius: 8,
+        marginRight: 12,
+        marginBottom: 12,
+    },
+    shareButton: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderWidth: 1,
+        borderColor: '#d1d5db',
+        borderRadius: 8,
+        marginRight: 12,
+        marginBottom: 12,
+    },
+    buttonText: {
+        color: '#ffffff',
+    },
+    shareButtonText: {
+        color: '#d1d5db',
+    },
+    infoSection: {
+        marginTop: 32,
+        borderTopWidth: 1,
+        borderTopColor: '#d1d5db',
+        paddingTop: 16,
+    },
+    infoRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    infoText: {
+        marginLeft: 8,
+        color: '#9ca3af',
+    },
+    creatorAvatar: {
+        width: 64,
+        height: 64,
+        backgroundColor: '#e5e7eb',
+        borderWidth: 2,
+        borderStyle: 'dashed',
+        borderRadius: 12,
+    },
+    creatorInfo: {
+        marginLeft: 12,
+    },
+    creatorLabel: {
+        fontSize: 14,
+        color: '#6b7280',
+    },
+    creatorName: {
+        fontWeight: '500',
+        color: '#ffffff',
+    },
+    navigation: {
+        marginTop: 48,
+    },
+    navigationTabs: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        borderBottomWidth: 1,
+        borderBottomColor: '#374151',
+        paddingVertical: 8,
+    },
+    navigationActive: {
+        color: '#2563eb',
+        fontWeight: '500',
+    },
+    navigationInactive: {
+        color: '#9ca3af',
+    },
+});

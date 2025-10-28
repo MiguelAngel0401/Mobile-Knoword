@@ -1,12 +1,17 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Image as ImageIcon, Upload } from "lucide-react-native";
-import { uploadToCloudinary } from "@shared/services/cloudinary/cloudinaryService";
+import { uploadToCloudinary } from "@shared/services/cloudinary/upload";
 
-// Si usas un editor tipo Tiptap RN wrapper, lo puedes pasar como prop
 interface ImageUploadProps {
-  editor?: any; // en RN no existe Tiptap oficial, pero puedes integrar un wrapper
+  editor?: any;
 }
 
 export default function ImageUpload({ editor }: ImageUploadProps) {
@@ -14,14 +19,12 @@ export default function ImageUpload({ editor }: ImageUploadProps) {
 
   const handleImagePick = async () => {
     try {
-      // Pedir permisos
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
         alert("Se requieren permisos para acceder a la galería.");
         return;
       }
 
-      // Abrir galería
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         quality: 0.8,
@@ -31,7 +34,6 @@ export default function ImageUpload({ editor }: ImageUploadProps) {
 
       const asset = result.assets[0];
 
-      // Validar tamaño máximo (5MB aprox)
       if (asset.fileSize && asset.fileSize > 5 * 1024 * 1024) {
         alert("La imagen es demasiado grande. El tamaño máximo es 5MB.");
         return;
@@ -39,14 +41,11 @@ export default function ImageUpload({ editor }: ImageUploadProps) {
 
       setIsUploading(true);
 
-      // Subir a Cloudinary
-      const imageUrl = await uploadToCloudinary(asset.uri);
+      const imageUrl = await uploadToCloudinary();
 
-      // Insertar en el editor si existe
       if (editor) {
         editor.chain().focus().setImage({ src: imageUrl }).run();
       }
-
     } catch (error) {
       console.error("Error al subir la imagen:", error);
       alert("Error al subir la imagen. Por favor, inténtalo de nuevo.");
@@ -61,18 +60,17 @@ export default function ImageUpload({ editor }: ImageUploadProps) {
         onPress={handleImagePick}
         disabled={isUploading}
         activeOpacity={0.7}
-        className={`p-2 rounded-md flex-row items-center justify-center ${
-          isUploading
-            ? "bg-gray-700"
-            : "bg-transparent"
-        }`}
+        style={[
+          styles.button,
+          isUploading ? styles.buttonUploading : styles.buttonIdle,
+        ]}
       >
         {isUploading ? (
-          <>
-            <Upload size={18} color="#9CA3AF" className="mr-2" />
+          <View style={styles.uploadingContent}>
+            <Upload size={18} color="#9CA3AF" style={styles.iconMarginRight} />
             <ActivityIndicator size="small" color="#9CA3AF" />
-            <Text className="text-xs text-gray-400 ml-2">Subiendo...</Text>
-          </>
+            <Text style={styles.uploadingText}>Subiendo...</Text>
+          </View>
         ) : (
           <ImageIcon size={20} color="#9CA3AF" />
         )}
@@ -80,3 +78,31 @@ export default function ImageUpload({ editor }: ImageUploadProps) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    padding: 8,
+    borderRadius: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonIdle: {
+    backgroundColor: "transparent",
+  },
+  buttonUploading: {
+    backgroundColor: "#374151",
+  },
+  uploadingContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  iconMarginRight: {
+    marginRight: 8,
+  },
+  uploadingText: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    marginLeft: 8,
+  },
+});

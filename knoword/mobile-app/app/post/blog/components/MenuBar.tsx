@@ -1,5 +1,5 @@
 import React from "react";
-import { View, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
 import {
   AlignCenter,
   AlignLeft,
@@ -19,7 +19,7 @@ import YoutubeUpload from "./YoutubeUpload";
 import LinkModal from "./LinkModal";
 
 interface MenuBarProps {
-  editor: any; // En RN no hay tipado oficial de Tiptap, puedes usar any o tu wrapper
+  editor: any;
 }
 
 export default function MenuBar({ editor }: MenuBarProps) {
@@ -84,23 +84,48 @@ export default function MenuBar({ editor }: MenuBarProps) {
   ];
 
   return (
-    <View className="border border-blue-500 rounded-md p-1 mb-4 bg-gray-900 flex-row flex-wrap z-50">
+    <View style={styles.container}>
       {options.map((option, index) => (
         <TouchableOpacity
           key={index}
           onPress={option.onClick}
-          className={`p-2 rounded-md m-1 ${
-            option.pressed ? "bg-gray-700" : "bg-transparent"
-          }`}
+          style={[
+            styles.button,
+            option.pressed ? styles.buttonActive : styles.buttonIdle,
+          ]}
         >
           {option.icon}
         </TouchableOpacity>
       ))}
 
-      {/* Extras */}
       <LinkModal editor={editor} />
       <ImageUpload editor={editor} />
       <YoutubeUpload editor={editor} />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    borderWidth: 1,
+    borderColor: "#3B82F6",
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 16,
+    backgroundColor: "#111827",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    zIndex: 50,
+  },
+  button: {
+    padding: 8,
+    borderRadius: 8,
+    margin: 4,
+  },
+  buttonIdle: {
+    backgroundColor: "transparent",
+  },
+  buttonActive: {
+    backgroundColor: "#374151",
+  },
+});

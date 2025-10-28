@@ -21,6 +21,8 @@ import { checkEmail, checkUsername, registerUser } from "@shared/services/auth/r
 import { uploadToCloudinary } from "@shared/services/cloudinary/upload";
 import { debounce } from "lodash";
 import { router } from "expo-router";
+import { Eye, EyeOff } from "lucide-react-native";
+import * as ImagePicker from "expo-image-picker";
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -31,7 +33,7 @@ export default function RegisterScreen() {
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submissionError, setSubmissionError] = useState<string | null>(null);
-    const [showPassword, setShowPassword] = useState(false);
+    const [showPassword, setShowPassword] = useState(false); // 👁️ Estado para toggle
     const [avatarError, setAvatarError] = useState<string | null>(null);
     const { handleAxiosError } = useAxiosErrorHandler();
 
@@ -215,15 +217,26 @@ export default function RegisterScreen() {
                         )}
 
                         <Text style={[styles.label, { marginTop: 16 }]}>Contraseña</Text>
-                        <TextInput
-                            style={[styles.input, errors.password && styles.inputError]}
-                            placeholder="••••••••"
-                            placeholderTextColor="#9CA3AF"
-                            secureTextEntry={!showPassword}
-                            onFocus={() => setShowPassword(true)}
-                            onBlur={() => setShowPassword(false)}
-                            onChangeText={(text) => setValue("password", text)}
-                        />
+                        <View style={[styles.inputWrapper, errors.password && styles.inputError]}>
+                            <TextInput
+                                style={styles.inputPassword}
+                                placeholder="••••••••"
+                                placeholderTextColor="#9CA3AF"
+                                secureTextEntry={!showPassword}
+                                autoCapitalize="none"
+                                onChangeText={(text) => setValue("password", text)}
+                            />
+                            <TouchableOpacity
+                                onPress={() => setShowPassword(!showPassword)}
+                                style={styles.icon}
+                            >
+                                {showPassword ? (
+                                    <EyeOff size={20} color="white" />
+                                ) : (
+                                    <Eye size={20} color="white" />
+                                )}
+                            </TouchableOpacity>
+                        </View>
                         {errors.password && (
                             <Text style={styles.error}>{errors.password.message}</Text>
                         )}
@@ -243,7 +256,6 @@ export default function RegisterScreen() {
                         </TouchableOpacity>
                     </>
                 )}
-
                 {/* Paso 2 */}
                 {step === 2 && (
                     <>
@@ -429,6 +441,24 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: "#4b5563",
+    },
+    inputPassword: {
+        flex: 1,
+        color: "#fff",
+        fontSize: 16,
+        paddingVertical: 12,
+    },
+    inputWrapper: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#374151",
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#4b5563",
+        paddingHorizontal: 12,
+    },
+    icon: {
+        paddingLeft: 8,
     },
     inputError: {
         borderColor: "#ef4444",

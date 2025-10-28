@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   Pressable,
+  StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
 
@@ -25,7 +26,6 @@ export default function CommunitySuccessModal({
 
   const handleGoToCommunity = () => {
     if (communityId) {
-      // ✅ Navegación directa con string interpolado
       router.push(`/communities/community/${communityId}` as any);
     }
     onClose();
@@ -38,43 +38,28 @@ export default function CommunitySuccessModal({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <Pressable
-        className="flex-1 bg-black/70 justify-center items-center"
-        onPress={onClose}
-      >
-        <View className="bg-gray-900 rounded-xl border border-gray-700 shadow-2xl w-80 overflow-hidden">
+      <Pressable style={styles.overlay} onPress={onClose}>
+        <View style={styles.modalContainer}>
           {/* Header */}
-          <View className="px-6 pt-6 pb-4">
-            <Text className="text-2xl font-bold text-green-400 text-center">
-              ✅ Comunidad Creada
-            </Text>
+          <View style={styles.header}>
+            <Text style={styles.headerText}>✅ Comunidad Creada</Text>
           </View>
 
           {/* Body */}
-          <View className="px-6 pb-4">
-            <Text className="text-gray-300 text-sm text-center leading-relaxed">
+          <View style={styles.body}>
+            <Text style={styles.bodyText}>
               {message || "Tu comunidad ha sido creada exitosamente."}
             </Text>
           </View>
 
           {/* Footer */}
-          <View className="flex-col gap-3 px-6 pb-6 pt-4 bg-gray-800/50 border-t border-gray-700">
-            <TouchableOpacity
-              onPress={onClose}
-              className="px-4 py-2.5 bg-blue-600 rounded-lg"
-            >
-              <Text className="text-white font-medium text-center">
-                OK, lo he entendido
-              </Text>
+          <View style={styles.footer}>
+            <TouchableOpacity onPress={onClose} style={styles.buttonBlue}>
+              <Text style={styles.buttonText}>OK, lo he entendido</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={handleGoToCommunity}
-              className="px-4 py-2.5 bg-purple-600 rounded-lg"
-            >
-              <Text className="text-white font-medium text-center">
-                Muéstrame mi comunidad
-              </Text>
+            <TouchableOpacity onPress={handleGoToCommunity} style={styles.buttonPurple}>
+              <Text style={styles.buttonText}>Muéstrame mi comunidad</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -82,3 +67,72 @@ export default function CommunitySuccessModal({
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    backgroundColor: "#1f2937",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#374151",
+    width: 320,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    elevation: 10,
+  },
+  header: {
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 16,
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#34d399",
+    textAlign: "center",
+  },
+  body: {
+    paddingHorizontal: 24,
+    paddingBottom: 16,
+  },
+  bodyText: {
+    color: "#d1d5db",
+    fontSize: 14,
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  footer: {
+    flexDirection: "column",
+    gap: 12,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+    paddingTop: 16,
+    backgroundColor: "rgba(31,41,55,0.5)",
+    borderTopWidth: 1,
+    borderColor: "#374151",
+  },
+  buttonBlue: {
+    backgroundColor: "#2563eb",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  buttonPurple: {
+    backgroundColor: "#7c3aed",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "500",
+    textAlign: "center",
+  },
+});

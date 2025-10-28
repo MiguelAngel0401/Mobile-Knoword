@@ -1,5 +1,6 @@
-import React from "react";
-import { View, Image, Text, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { View, Image, Text, StyleSheet, TouchableOpacity } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 
 type AvatarProps = {
   src?: string;
@@ -8,6 +9,8 @@ type AvatarProps = {
 };
 
 export function Avatar({ src, size = "md", editable = false }: AvatarProps) {
+  const [localUri, setLocalUri] = useState<string | null>(src || null);
+
   const pixelSizes = {
     sm: 40,
     md: 80,
@@ -17,17 +20,41 @@ export function Avatar({ src, size = "md", editable = false }: AvatarProps) {
 
   const avatarSize = pixelSizes[size] || pixelSizes.md;
 
+  // 👉 Función para abrir la galería
+  const pickImage = async () => {
+    // Pedir permisos
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      alert("Necesitas dar permiso para acceder a tus fotos.");
+      return;
+    }
+
+    // Abrir galería
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true, // recorte
+      aspect: [1, 1], // cuadrado
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setLocalUri(result.assets[0].uri);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Image
-        source={{ uri: src || "https://via.placeholder.com/150" }}
-        style={{
-          width: avatarSize,
-          height: avatarSize,
-          borderRadius: avatarSize / 2,
-        }}
-        resizeMode="cover"
-      />
+      <TouchableOpacity disabled={!editable} onPress={pickImage}>
+        <Image
+          source={{ uri: localUri || "https://via.placeholder.com/150" }}
+          style={{
+            width: avatarSize,
+            height: avatarSize,
+            borderRadius: avatarSize / 2,
+          }}
+          resizeMode="cover"
+        />
+      </TouchableOpacity>
       {editable && <Text style={styles.editText}>Editar</Text>}
     </View>
   );
@@ -35,11 +62,11 @@ export function Avatar({ src, size = "md", editable = false }: AvatarProps) {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center", // items-center
+    alignItems: "center",
   },
   editText: {
-    color: "#3B82F6", // text-blue-500
-    fontSize: 14, // text-sm
-    marginTop: 8, // mt-2
+    color: "#3B82F6",
+    fontSize: 14,
+    marginTop: 8,
   },
 });

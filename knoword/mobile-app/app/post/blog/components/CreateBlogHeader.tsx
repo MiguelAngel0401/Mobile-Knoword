@@ -1,5 +1,10 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import { Eye, EyeOff } from "lucide-react-native";
 
 interface CreateBlogHeaderProps {
@@ -18,52 +23,106 @@ export default function CreateBlogHeader({
   isPreviewMode,
 }: CreateBlogHeaderProps) {
   return (
-    <View className="flex-row items-center justify-between mb-4">
-      <Text className="text-2xl font-bold text-white">Crear nuevo blog</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Crear nuevo blog</Text>
 
-      <View className="flex-row items-center gap-3">
-        {/* Cancelar */}
+      <View style={styles.actions}>
         <TouchableOpacity onPress={onCancel} activeOpacity={0.7}>
-          <Text className="text-gray-400 font-medium">Cancelar</Text>
+          <Text style={styles.cancelText}>Cancelar</Text>
         </TouchableOpacity>
 
-        {/* Vista previa / Editar */}
         <TouchableOpacity
           onPress={onTogglePreview}
           activeOpacity={0.7}
-          className="flex-row items-center gap-2 px-4 py-2 border border-gray-600 rounded-md"
+          style={styles.previewButton}
         >
           {isPreviewMode ? (
             <>
               <EyeOff size={18} color="white" />
-              <Text className="text-white font-semibold">Editar</Text>
+              <Text style={styles.previewText}>Editar</Text>
             </>
           ) : (
             <>
               <Eye size={18} color="white" />
-              <Text className="text-white font-semibold">Vista previa</Text>
+              <Text style={styles.previewText}>Vista previa</Text>
             </>
           )}
         </TouchableOpacity>
 
-        {/* Guardar borrador */}
         <TouchableOpacity
           onPress={onSave}
           activeOpacity={0.7}
-          className="px-4 py-2 border border-blue-500 rounded-md"
+          style={styles.saveButton}
         >
-          <Text className="text-white font-semibold">Guardar borrador</Text>
+          <Text style={styles.saveText}>Guardar borrador</Text>
         </TouchableOpacity>
 
-        {/* Publicar */}
         <TouchableOpacity
           onPress={onSubmit}
           activeOpacity={0.7}
-          className="px-4 py-2 bg-blue-600 rounded-md"
+          style={styles.publishButton}
         >
-          <Text className="text-white font-semibold">Publicar</Text>
+          <Text style={styles.publishText}>Publicar</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  actions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  cancelText: {
+    color: "#9CA3AF",
+    fontWeight: "500",
+  },
+  previewButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: "#4B5563",
+    borderRadius: 8,
+  },
+  previewText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+  saveButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: "#3B82F6",
+    borderRadius: 8,
+  },
+  saveText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+  publishButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: "#2563EB",
+    borderRadius: 8,
+  },
+  publishText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+});

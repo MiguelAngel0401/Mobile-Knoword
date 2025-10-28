@@ -1,4 +1,4 @@
-import { View, TextInput } from "react-native";
+import { View, TextInput, StyleSheet } from "react-native";
 
 type RichTextEditorProps = {
   content: string;
@@ -7,15 +7,26 @@ type RichTextEditorProps = {
 
 export default function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   return (
-    <View className="p-4 bg-gray-800 rounded">
+    <View style={styles.container}>
       <TextInput
         multiline
         value={content}
         onChangeText={onChange}
         placeholder="Escribe aquí..."
         placeholderTextColor="#9CA3AF"
-        className="text-white"
+        style={styles.input}
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    backgroundColor: "#1f2937",
+    borderRadius: 12,
+  },
+  input: {
+    color: "#ffffff",
+  },
+});

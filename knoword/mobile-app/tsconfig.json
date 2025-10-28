@@ -3,7 +3,9 @@
   "compilerOptions": {
     "strict": true,
     "baseUrl": ".",
-    "types": ["react-native"],
+    "types": [
+      "react-native"
+    ],
     "paths": {
       "@/*": [
         "app/*"
@@ -15,8 +17,6 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "**/*.tsx"
   ]
 }

@@ -22,6 +22,7 @@ import { useAuthStore } from "@shared/store/authStore";
 import { login } from "../../../../shared-core/src/services/auth/login.native";
 import { saveTokens, getTokens } from "@shared/utils/storageToken";
 import { router } from "expo-router";
+import { Eye, EyeOff } from "lucide-react-native"; // 👁️ Importa íconos
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
@@ -32,6 +33,7 @@ export default function LoginScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [backendError, setBackendError] = useState<string | null>(null);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false); // 👁️ Estado para mostrar/ocultar
 
   const {
     handleSubmit,
@@ -100,14 +102,26 @@ export default function LoginScreen() {
             {errors.email && <Text style={styles.error}>{errors.email.message}</Text>}
 
             <Text style={[styles.label, { marginTop: 16 }]}>Contraseña</Text>
-            <TextInput
-              style={[styles.input, errors.password && styles.inputError]}
-              placeholder="••••••••"
-              placeholderTextColor="#9CA3AF"
-              secureTextEntry
-              autoCapitalize="none"
-              onChangeText={(text) => setValue("password", text)}
-            />
+            <View style={[styles.inputWrapper, errors.password && styles.inputError]}>
+              <TextInput
+                style={styles.inputPassword}
+                placeholder="••••••••"
+                placeholderTextColor="#9CA3AF"
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                onChangeText={(text) => setValue("password", text)}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.icon}
+              >
+                {showPassword ? (
+                  <EyeOff size={20} color="white" />
+                ) : (
+                  <Eye size={20} color="white" />
+                )}
+              </TouchableOpacity>
+            </View>
             {errors.password && <Text style={styles.error}>{errors.password.message}</Text>}
 
             {backendError && <Text style={styles.backendError}>{backendError}</Text>}
@@ -188,6 +202,24 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#4b5563",
+  },
+  inputPassword: {
+    flex: 1,
+    color: "#fff",
+    fontSize: 16,
+    paddingVertical: 12,
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#374151",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#4b5563",
+    paddingHorizontal: 12,
+  },
+  icon: {
+    paddingLeft: 8,
   },
   inputError: {
     borderColor: "#ef4444",

@@ -29,6 +29,7 @@ export function Banner() {
       try {
         setLoading(true);
         const data = await getMe(privateApiClient);
+        console.log("Perfil cargado:", data.user); // debug
         setUserData(data.user);
         setError(null);
       } catch (err) {
@@ -65,6 +66,9 @@ export function Banner() {
     return [styles.tabText, styles.tabTextInactive];
   };
 
+  const formatName = (name: string) =>
+    name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+
   return (
     <ScrollView style={styles.scroll}>
       {/* Sección superior */}
@@ -72,7 +76,7 @@ export function Banner() {
         <View style={styles.headerContent}>
           {/* Avatar + seguidores */}
           <View style={styles.avatarSection}>
-            <Avatar src={userData.avatar || ""} size="lg" />
+            <Avatar src={userData.avatar || ""} size="lg" editable={true} />
 
             <View style={styles.followSection}>
               <View style={styles.followItem}>
@@ -88,11 +92,22 @@ export function Banner() {
 
           {/* Información del usuario */}
           <View style={styles.userInfo}>
-           <Text style={styles.username}>{userData.username}</Text>
-<Text style={styles.realName}>{userData.realName}</Text>
-<View style={styles.bioWrapper}>
-  <Text style={styles.bio}>{userData.bio}</Text>
-</View>
+            {/* Nombre real principal */}
+            <Text style={styles.realName}>
+              {userData.realName
+                ? formatName(userData.realName)
+                : formatName(userData.username)}
+            </Text>
+
+            {/* Username con @ (forzado a mostrarse completo) */}
+            <Text style={styles.username}>
+              @{String(userData.username).trim()}
+            </Text>
+
+            {/* Bio */}
+            <View style={styles.bioWrapper}>
+              <Text style={styles.bio}>{userData.bio}</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -148,23 +163,33 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     gap: 32,
+    marginTop: 8,
   },
-  followItem: { alignItems: "center" },
+  followItem: {
+    alignItems: "center",
+    minWidth: 90, // 👈 asegura espacio suficiente
+  },
   followNumber: { fontSize: 20, fontWeight: "600", color: "white" },
-  followLabel: { fontSize: 14, color: "#9ca3af" },
+  followLabel: {
+    fontSize: 14,
+    color: "#9ca3af",
+    flexShrink: 1,
+    flexWrap: "wrap",
+    textAlign: "center",
+  },
   userInfo: { marginTop: 24, alignItems: "center" },
-  username: {
-    fontSize: 24,
+  realName: {
+    fontSize: 20,
     fontWeight: "700",
     color: "white",
     textAlign: "center",
-    flexShrink: 1,
+    marginBottom: 4,
   },
-  realName: {
-    fontSize: 16,
-    color: "#d1d5db",
+  username: {
+    fontSize: 14,
+    color: "#9ca3af",
     textAlign: "center",
-    flexShrink: 1,
+    marginBottom: 8,
   },
   bioWrapper: {
     width: "100%",

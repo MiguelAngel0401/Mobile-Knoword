@@ -45,7 +45,9 @@ export default function LateralMenu() {
                   >
                     <View style={styles.menuButtonContent}>
                       <Icon size={20} color="white" />
-                      <Text style={styles.menuText}>{item.name}</Text>
+                      <Text style={styles.menuText} numberOfLines={1}>
+                        {item.name}
+                      </Text>
                     </View>
                     <ChevronRight
                       size={16}
@@ -75,7 +77,9 @@ export default function LateralMenu() {
                 >
                   <View style={styles.menuButtonContent}>
                     <Icon size={20} color="white" />
-                    <Text style={styles.menuText}>{item.name}</Text>
+                    <Text style={styles.menuText} numberOfLines={1}>
+                      {item.name}
+                    </Text>
                   </View>
                 </TouchableOpacity>
               )}
@@ -99,6 +103,7 @@ const styles = StyleSheet.create({
   },
   menuButton: {
     width: "100%",
+    minWidth: 220,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -110,10 +115,16 @@ const styles = StyleSheet.create({
   menuButtonContent: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
   },
   menuText: {
     color: "white",
     marginLeft: 8,
+    fontSize: 14,
+    flexShrink: 1,
+    flexGrow: 1,
+    minWidth: 100,
+    maxWidth: 200,
   },
   rotateIcon: {
     transform: [{ rotate: "90deg" }],

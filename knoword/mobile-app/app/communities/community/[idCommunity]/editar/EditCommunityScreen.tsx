@@ -7,6 +7,7 @@ import {
     ScrollView,
     ActivityIndicator,
     Image,
+    StyleSheet,
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +22,7 @@ import {
     updateCommunity,
     getTagRecommendations,
 } from "@shared/services/community/communityServices";
-import { uploadToCloudinary } from "@shared/services/cloudinary/cloudinaryService";
+import { uploadToCloudinary } from "../../../../../../shared-core/src/services/cloudinary/upload";
 import { Community, Tag, CommunityUpdateData, } from "../../../../../../shared-core/src/types/community";
 import ErrorMessageScreen from "../../../../../components/shared/ErrorMessageScreen";
 import CommunitySuccessModal from "../../../components/modals/CommunitySuccessModal";
@@ -61,11 +62,10 @@ export default function EditCommunityScreen() {
         mode: "onBlur",
     });
 
-    // ✅ Cargar comunidad
     useEffect(() => {
         const fetchCommunity = async () => {
             try {
-                const data = await getCommunityById(idCommunity); // idCommunity es string
+                const data = await getCommunityById(idCommunity);
                 setCommunity(data);
                 setValue("name", data.name);
                 setValue("description", data.description);
@@ -88,7 +88,6 @@ export default function EditCommunityScreen() {
         if (idCommunity) fetchCommunity();
     }, [idCommunity]);
 
-    // ✅ Tags
     const handleAddTag = (tag: string) => {
         const newTag = tag.trim().toLowerCase();
         if (!newTag) return;
@@ -140,7 +139,6 @@ export default function EditCommunityScreen() {
         };
     }, [inputValue]);
 
-    // ✅ Upload imágenes
     const handleImageUpload = async (type: "banner" | "avatar") => {
         try {
             if (type === "banner") setIsUploadingBanner(true);
@@ -153,8 +151,8 @@ export default function EditCommunityScreen() {
             });
 
             if (!result.canceled) {
-                const uri = result.assets[0].uri;
-                const uploadedUrl = await uploadToCloudinary(uri);
+                const result = await uploadToCloudinary();
+                const uploadedUrl = result.secure_url;
 
                 if (type === "banner") {
                     setBannerPreview(uploadedUrl);
@@ -171,7 +169,7 @@ export default function EditCommunityScreen() {
             if (type === "avatar") setIsUploadingAvatar(false);
         }
     };
-    // ✅ Submit
+
     const onSubmit = async (values: FormData) => {
         try {
             setSubmitting(true);
@@ -185,9 +183,8 @@ export default function EditCommunityScreen() {
 
             const payload: CommunityUpdateData = {
                 ...values,
-                tags: selectedTags, // ✅ ya es string[]
+                tags: selectedTags,
             };
-
 
             await updateCommunity(id, payload);
             setIsSubmitCorrect(true);
@@ -199,14 +196,12 @@ export default function EditCommunityScreen() {
         }
     };
 
-    // ✅ Handlers para modales
     const handleCloseSuccessModal = () => setIsSubmitCorrect(false);
     const handleCloseErrorModal = () => setSubmissionError(null);
 
-    // ✅ Render
     if (loading) {
         return (
-            <View className="flex-1 justify-center items-center bg-black">
+            <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#3B82F6" />
             </View>
         );
@@ -217,16 +212,15 @@ export default function EditCommunityScreen() {
     }
 
     return (
-        <ScrollView className="flex-1 bg-black px-4 pt-6">
-            <Text className="text-white text-2xl font-bold mb-6">Editar Comunidad</Text>
+        <ScrollView style={styles.container}>
+            <Text style={styles.title}>Editar Comunidad</Text>
 
-            {/* Nombre */}
             <Controller
                 control={control}
                 name="name"
                 render={({ field: { onChange, onBlur, value } }) => (
                     <TextInput
-                        className="bg-gray-800 text-white px-4 py-2 rounded-lg mb-4"
+                        style={styles.input}
                         placeholder="Título de la comunidad"
                         placeholderTextColor="#888"
                         onBlur={onBlur}
@@ -235,15 +229,14 @@ export default function EditCommunityScreen() {
                     />
                 )}
             />
-            {errors.name && <Text className="text-red-500 text-sm mb-2">{errors.name.message}</Text>}
+            {errors.name && <Text style={styles.errorText}>{errors.name.message}</Text>}
 
-            {/* Descripción */}
             <Controller
                 control={control}
                 name="description"
                 render={({ field: { onChange, onBlur, value } }) => (
                     <TextInput
-                        className="bg-gray-800 text-white px-4 py-2 rounded-lg mb-4"
+                        style={styles.input}
                         placeholder="Descripción"
                         placeholderTextColor="#888"
                         onBlur={onBlur}
@@ -252,16 +245,15 @@ export default function EditCommunityScreen() {
                     />
                 )}
             />
-            {errors.description && <Text className="text-red-500 text-sm mb-2">{errors.description.message}</Text>}
+            {errors.description && <Text style={styles.errorText}>{errors.description.message}</Text>}
 
-            {/* Etiquetas */}
-            <Text className="text-white font-semibold mb-2">Etiquetas</Text>
-            <View className="flex-row flex-wrap gap-2 mb-4">
+            <Text style={styles.sectionTitle}>Etiquetas</Text>
+            <View style={styles.tagsContainer}>
                 {selectedTags.map((tag) => (
-                    <View key={tag} className="bg-blue-700 px-3 py-1 rounded-full flex-row items-center">
-                        <Text className="text-white text-sm">{tag}</Text>
+                    <View key={tag} style={styles.tag}>
+                        <Text style={styles.tagText}>{tag}</Text>
                         <TouchableOpacity onPress={() => handleRemoveTag(tag)}>
-                            <Text className="text-red-300 ml-2 text-lg font-bold">×</Text>
+                            <Text style={styles.tagRemove}>×</Text>
                         </TouchableOpacity>
                     </View>
                 ))}
@@ -270,23 +262,23 @@ export default function EditCommunityScreen() {
             {selectedTags.length < maxTags && (
                 <>
                     <TextInput
-                        className="bg-gray-800 text-white px-4 py-2 rounded-lg mb-2"
+                        style={styles.input}
                         placeholder="Nueva etiqueta"
                         placeholderTextColor="#888"
                         value={inputValue}
                         onChangeText={setInputValue}
                         onSubmitEditing={() => handleAddTag(inputValue)}
                     />
-                    {isSearching && <Text className="text-gray-400 italic">🔍 Buscando...</Text>}
+                    {isSearching && <Text style={styles.searchingText}>🔍 Buscando...</Text>}
                     {suggestions.length > 0 && !isSearching && (
-                        <View className="flex-row flex-wrap gap-2 mt-2">
+                        <View style={styles.suggestionsContainer}>
                             {suggestions.slice(0, 5).map((suggestion) => (
                                 <TouchableOpacity
                                     key={suggestion}
                                     onPress={() => handleAddTag(suggestion)}
-                                    className="bg-gray-700 px-3 py-1 rounded-full"
+                                    style={styles.suggestion}
                                 >
-                                    <Text className="text-white text-sm">+ {suggestion}</Text>
+                                    <Text style={styles.suggestionText}>+ {suggestion}</Text>
                                 </TouchableOpacity>
                             ))}
                         </View>
@@ -294,13 +286,11 @@ export default function EditCommunityScreen() {
                 </>
             )}
 
-            {tagError && <Text className="text-red-500 text-sm mt-2">{tagError}</Text>}
+            {tagError && <Text style={styles.tagErrorText}>{tagError}</Text>}
 
-            {/* Imágenes */}
-            <View className="mt-6 space-y-6">
-                {/* Banner */}
+            <View style={styles.imagesSection}>
                 <TouchableOpacity
-                    className="border border-dashed border-zinc-600 rounded-lg p-6 items-center justify-center"
+                    style={styles.bannerUpload}
                     onPress={() => handleImageUpload("banner")}
                     disabled={isUploadingBanner}
                 >
@@ -309,70 +299,69 @@ export default function EditCommunityScreen() {
                     ) : bannerPreview ? (
                         <Image
                             source={{ uri: bannerPreview }}
-                            className="w-full h-32 rounded-md"
+                            style={styles.bannerImage}
                             resizeMode="cover"
                         />
                     ) : (
                         <>
-                            <Text className="text-white font-bold mb-1">Sube la cabecera</Text>
-                            <Text className="text-sm text-zinc-400 text-center">
+                            <Text style={styles.uploadTitle}>Sube la cabecera</Text>
+                            <Text style={styles.uploadDescription}>
                                 Pulsa aquí para elegir una imagen. Tamaño recomendado: 1840 x 560 px.
                             </Text>
                         </>
                     )}
                 </TouchableOpacity>
 
-                {/* Avatar */}
                 <TouchableOpacity
-                    className="flex-row items-center gap-4"
+                    style={styles.avatarUpload}
                     onPress={() => handleImageUpload("avatar")}
                     disabled={isUploadingAvatar}
                 >
-                    <View className="w-20 h-20 border border-dashed border-zinc-600 rounded-lg bg-gray-800 items-center justify-center">
+                    <View style={styles.avatarBox}>
                         {isUploadingAvatar ? (
                             <ActivityIndicator size="small" color="#fff" />
                         ) : avatarPreview ? (
                             <Image
                                 source={{ uri: avatarPreview }}
-                                className="w-full h-full rounded-md"
+                                style={styles.avatarImage}
                                 resizeMode="cover"
                             />
                         ) : (
-                            <Text className="text-zinc-400 text-sm">📷</Text>
+                            <Text style={styles.avatarPlaceholder}>📷</Text>
                         )}
                     </View>
 
-                    <View className="flex-1">
-                        <Text className="text-white font-semibold mb-1">Sube un avatar</Text>
-                        <Text className="text-sm text-zinc-400">
+                    <View style={styles.avatarInfo}>
+                        <Text style={styles.avatarTitle}>Sube un avatar</Text>
+                        <Text style={styles.avatarDescription}>
                             Formato cuadrado, tamaño recomendado: 512 px.
                         </Text>
                     </View>
                 </TouchableOpacity>
             </View>
 
-            {/* Acciones */}
-            <View className="flex-row justify-center gap-4 mt-8 mb-12">
+            <View style={styles.actionsContainer}>
                 <TouchableOpacity
                     onPress={() => router.back()}
-                    className="px-6 py-2 bg-gray-600 rounded-lg"
+                    style={styles.cancelButton}
                 >
-                    <Text className="text-white font-semibold">Cancelar</Text>
+                    <Text style={styles.buttonText}>Cancelar</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     onPress={handleSubmit(onSubmit)}
                     disabled={!isValid || submitting}
-                    className={`px-6 py-2 rounded-lg ${submitting || !isValid ? "bg-blue-500 opacity-50" : "bg-blue-500"
-                        }`}
+                    style={[
+                        styles.submitButton,
+                        (!isValid || submitting) && styles.submitButtonDisabled
+                    ]}
                 >
-                    <Text className="text-white font-semibold">
+                    <Text style={styles.buttonText}>
                         {submitting ? "Guardando..." : "Guardar cambios"}
                     </Text>
                 </TouchableOpacity>
             </View>
 
-            {/* Modales */}
             <CommunitySuccessModal
                 isOpen={isSubmitCorrect}
                 onClose={handleCloseSuccessModal}
@@ -388,3 +377,185 @@ export default function EditCommunityScreen() {
         </ScrollView>
     );
 }
+
+const styles = StyleSheet.create({
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#000000',
+    },
+    container: {
+        flex: 1,
+        backgroundColor: '#000000',
+        paddingHorizontal: 16,
+        paddingTop: 24,
+    },
+    title: {
+        color: '#ffffff',
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 24,
+    },
+    input: {
+        backgroundColor: '#1f2937',
+        color: '#ffffff',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 8,
+        marginBottom: 16,
+    },
+    errorText: {
+        color: '#ef4444',
+        fontSize: 14,
+        marginBottom: 8,
+    },
+    sectionTitle: {
+        color: '#ffffff',
+        fontWeight: '600',
+        marginBottom: 8,
+    },
+    tagsContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginBottom: 16,
+    },
+    tag: {
+        backgroundColor: '#1d4ed8',
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 8,
+        marginBottom: 8,
+    },
+    tagText: {
+        color: '#ffffff',
+        fontSize: 14,
+    },
+    tagRemove: {
+        color: '#fca5a5',
+        marginLeft: 8,
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    searchingText: {
+        color: '#9ca3af',
+        fontStyle: 'italic',
+    },
+    suggestionsContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginTop: 8,
+    },
+    suggestion: {
+        backgroundColor: '#374151',
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: 16,
+        marginRight: 8,
+        marginBottom: 8,
+    },
+    suggestionText: {
+        color: '#ffffff',
+        fontSize: 14,
+    },
+    tagErrorText: {
+        color: '#ef4444',
+        fontSize: 14,
+        marginTop: 8,
+    },
+    imagesSection: {
+        marginTop: 24,
+    },
+    bannerUpload: {
+        borderWidth: 1,
+        borderStyle: 'dashed',
+        borderColor: '#52525b',
+        borderRadius: 8,
+        padding: 24,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 24,
+    },
+    bannerImage: {
+        width: '100%',
+        height: 128,
+        borderRadius: 6,
+    },
+    uploadTitle: {
+        color: '#ffffff',
+        fontWeight: 'bold',
+        marginBottom: 4,
+    },
+    uploadDescription: {
+        fontSize: 14,
+        color: '#a1a1aa',
+        textAlign: 'center',
+    },
+    avatarUpload: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 24,
+    },
+    avatarBox: {
+        width: 80,
+        height: 80,
+        borderWidth: 1,
+        borderStyle: 'dashed',
+        borderColor: '#52525b',
+        borderRadius: 8,
+        backgroundColor: '#1f2937',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 16,
+    },
+    avatarImage: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 6,
+    },
+    avatarPlaceholder: {
+        color: '#a1a1aa',
+        fontSize: 14,
+    },
+    avatarInfo: {
+        flex: 1,
+    },
+    avatarTitle: {
+        color: '#ffffff',
+        fontWeight: '600',
+        marginBottom: 4,
+    },
+    avatarDescription: {
+        fontSize: 14,
+        color: '#a1a1aa',
+    },
+    actionsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 32,
+        marginBottom: 48,
+    },
+    cancelButton: {
+        paddingHorizontal: 24,
+        paddingVertical: 8,
+        backgroundColor: '#4b5563',
+        borderRadius: 8,
+        marginRight: 16,
+    },
+    submitButton: {
+        paddingHorizontal: 24,
+        paddingVertical: 8,
+        backgroundColor: '#3b82f6',
+        borderRadius: 8,
+    },
+    submitButtonDisabled: {
+        opacity: 0.5,
+    },
+    buttonText: {
+        color: '#ffffff',
+        fontWeight: '600',
+    },
+});

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
+  StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { z } from "zod";
@@ -15,14 +16,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import debounce from "lodash/debounce";
 import { Image as ImageIcon } from "lucide-react-native";
 
-// Importa tus propios módulos compartidos en el monorepo
 import { createCommunitySchema } from "../../../../shared-core/src/validators/community/createCommunity";
 import {
   createCommunity,
   getTagRecommendations,
 } from "@shared/services/community/communityServices";
-import { uploadToCloudinary } from "@shared/services/cloudinary/cloudinaryService";
-
+import { uploadToCloudinary } from "@shared/services/cloudinary/upload";
 
 import CommunitySuccessModal from "../components/modals/CommunitySuccessModal";
 import CommunityErrorModal from "../components/modals/CommuntyErrorModal";
@@ -69,7 +68,6 @@ export default function CreateCommunityScreen() {
     },
   });
 
-  // Vincula inputs controlados de RN con react-hook-form
   useEffect(() => {
     register("name");
     register("description");
@@ -84,7 +82,6 @@ export default function CreateCommunityScreen() {
     name: string;
   }
 
-  // Sugerencias de tags con debounce
   const fetchTagSuggestions = useCallback(
     debounce(async (query: string) => {
       setTagError(null);
@@ -116,7 +113,6 @@ export default function CreateCommunityScreen() {
     };
   }, [inputValue, fetchTagSuggestions]);
 
-  // Manejo de tags
   const handleAddTag = (tag: string) => {
     const newTag = tag.trim().toLowerCase();
     if (newTag && !selectedTags.includes(newTag) && selectedTags.length < maxTags) {
@@ -132,7 +128,6 @@ export default function CreateCommunityScreen() {
     setSelectedTags((prev) => prev.filter((t) => t !== tagToRemove));
   };
 
-  // Subida de imágenes (banner y avatar)
   const handleImageUpload = async (uri: string, type: "banner" | "avatar") => {
     const setPreview = type === "banner" ? setBannerPreview : setAvatarPreview;
     const setIsLoading = type === "banner" ? setIsUploadingBanner : setIsUploadingAvatar;
@@ -142,9 +137,11 @@ export default function CreateCommunityScreen() {
       setIsLoading(true);
       setSubmissionError(null);
 
-      // Subir URI (base64 o multipart) a tu servicio de Cloudinary
-      const cloudinaryUrl = await uploadToCloudinary(uri);
+      const cloudinaryResult = await uploadToCloudinary();
+      const cloudinaryUrl = cloudinaryResult.secure_url;
+
       setValue(type, cloudinaryUrl, { shouldValidate: true });
+
     } catch (error) {
       console.error(`Error al subir la imagen de ${type}:`, error);
       setSubmissionError(`No se pudo subir la imagen de ${type}. Inténtalo de nuevo.`);
@@ -155,20 +152,12 @@ export default function CreateCommunityScreen() {
     }
   };
 
-  // Helpers para seleccionar imagen desde el dispositivo
   const openSystemImagePicker = async (type: "banner" | "avatar") => {
-    // Si ya tienes integrado expo-image-picker, llama aquí y obtén la URI.
-    // Para mantenerlo agnóstico, asumimos que recibes una URI lista:
-    // const result = await pickImage();
-    // if (!result.canceled) handleImageUpload(result.uri, type);
-
-    // Placeholder: simula selección con una URI existente (reemplaza con tu picker real)
     const sampleUri =
       "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&q=80";
     await handleImageUpload(sampleUri, type);
   };
 
-  // Submit
   const handleCloseSuccessModal = () => setIsSubmitCorrect(false);
   const handleCloseErrorModal = () => {
     setSubmissionError(null);
@@ -192,67 +181,57 @@ export default function CreateCommunityScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-black px-6 py-6">
-      <Text className="text-2xl font-bold mb-6 text-white">Crear Comunidad</Text>
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Crear Comunidad</Text>
 
-      {/* Información de la comunidad */}
-      <View className="bg-gray-900 rounded-lg shadow-md p-6 w-full mb-6">
-        <Text className="text-lg font-semibold text-white mb-1">Información de la comunidad</Text>
-        <Text className="text-sm text-gray-400 mb-6">
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Información de la comunidad</Text>
+        <Text style={styles.sectionDescription}>
           Estamos emocionados de ver tu comunidad cobrar vida. Cuéntanos un poco de lo que tienes en mente.
         </Text>
 
-        {/* Título */}
-        <View className="mb-6">
-          <Text className="text-sm font-medium mb-1 text-white">Título de la comunidad</Text>
+        <View style={styles.fieldContainer}>
+          <Text style={styles.label}>Título de la comunidad</Text>
           <TextInput
             placeholder="Ej. Matemáticas y física"
             placeholderTextColor="#9CA3AF"
             onChangeText={(v) => setValue("name", v, { shouldValidate: true })}
-            className={`w-full px-4 py-2 rounded-lg bg-gray-800 text-white border ${errors.name ? "border-red-500" : "border-gray-600"
-              }`}
+            style={[styles.input, errors.name && styles.inputError]}
           />
-          {errors.name && <Text className="text-red-400 text-sm mt-1">{errors.name.message}</Text>}
+          {errors.name && <Text style={styles.errorText}>{errors.name.message}</Text>}
         </View>
 
-        {/* Descripción */}
-        <View className="mb-6">
-          <Text className="text-sm font-medium mb-1 text-white">Descripción de la comunidad</Text>
+        <View style={styles.fieldContainer}>
+          <Text style={styles.label}>Descripción de la comunidad</Text>
           <TextInput
             placeholder="Ej. Un lugar para discutir y aprender sobre matemáticas y física."
             placeholderTextColor="#9CA3AF"
             multiline
             onChangeText={(v) => setValue("description", v, { shouldValidate: true })}
-            className={`w-full px-4 py-2 rounded-lg bg-gray-800 text-white border ${errors.description ? "border-red-500" : "border-gray-600"
-              }`}
+            style={[styles.input, styles.textArea, errors.description && styles.inputError]}
           />
           {errors.description && (
-            <Text className="text-red-400 text-sm mt-1">{errors.description.message}</Text>
+            <Text style={styles.errorText}>{errors.description.message}</Text>
           )}
         </View>
 
-        {/* Privacidad */}
-        <View className="mb-2">
-          <Text className="text-sm font-medium mb-1 text-white">Privacidad de la comunidad.</Text>
+        <View style={styles.privacyContainer}>
+          <Text style={styles.label}>Privacidad de la comunidad.</Text>
           <TouchableOpacity
             onPress={() => setIsPrivate((v) => !v)}
-            className={`inline-flex h-6 w-11 mt-2 items-center rounded-full ${isPrivate ? "bg-purple-600" : "bg-gray-700"
-              }`}
+            style={[styles.toggle, isPrivate ? styles.toggleActive : styles.toggleInactive]}
             activeOpacity={0.8}
           >
-            <View
-              className={`size-4 rounded-full bg-white ${isPrivate ? "translate-x-6" : "translate-x-1"
-                }`}
-            />
+            <View style={[styles.toggleThumb, isPrivate && styles.toggleThumbActive]} />
           </TouchableOpacity>
 
-          <View className="mt-2">
+          <View style={styles.privacyInfo}>
             {isPrivate ? (
-              <Text className="text-sm text-red-400">
+              <Text style={styles.privacyTextPrivate}>
                 La comunidad será privada, solo podrás invitar a miembros mediante un enlace de confirmación
               </Text>
             ) : (
-              <Text className="text-sm text-gray-400">
+              <Text style={styles.privacyTextPublic}>
                 La comunidad será pública; cualquiera puede unirse y ver su contenido.
               </Text>
             )}
@@ -260,29 +239,23 @@ export default function CreateCommunityScreen() {
         </View>
       </View>
 
-      {/* Etiquetas */}
-      <View className="bg-gray-900 rounded-lg shadow-md p-6 w-full mb-6">
-        <Text className="text-lg font-semibold text-white mb-1">Temas de la comunidad</Text>
-        <Text className="text-sm text-gray-400 mb-4">
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Temas de la comunidad</Text>
+        <Text style={styles.sectionDescription}>
           Añade al menos 3 etiquetas para que los demás puedan encontrar tu comunidad fácilmente.
         </Text>
 
-        {/* Tags seleccionados */}
-        <View className="flex-row flex-wrap gap-2 mb-4">
+        <View style={styles.tagsContainer}>
           {selectedTags.map((tag) => (
-            <View
-              key={tag}
-              className="bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-md flex-row items-center"
-            >
-              <Text className="text-white text-sm font-semibold">{tag}</Text>
-              <TouchableOpacity onPress={() => handleTagRemove(tag)} className="ml-3">
-                <Text className="text-red-200 text-lg font-bold">×</Text>
+            <View key={tag} style={styles.tag}>
+              <Text style={styles.tagText}>{tag}</Text>
+              <TouchableOpacity onPress={() => handleTagRemove(tag)} style={styles.tagRemove}>
+                <Text style={styles.tagRemoveText}>×</Text>
               </TouchableOpacity>
             </View>
           ))}
         </View>
 
-        {/* Input y sugerencias */}
         {selectedTags.length < maxTags ? (
           <View>
             <TextInput
@@ -290,52 +263,50 @@ export default function CreateCommunityScreen() {
               placeholderTextColor="#9CA3AF"
               value={inputValue}
               onChangeText={setInputValue}
-              className="w-full border border-gray-600 rounded px-3 py-2 text-sm bg-gray-800 text-white"
+              style={styles.tagInput}
             />
 
             {isSearching && (
-              <Text className="text-sm text-gray-400 italic mt-2">🔍 Buscando...</Text>
+              <Text style={styles.searchingText}>🔍 Buscando...</Text>
             )}
 
             {suggestions.length > 0 && !isSearching && (
-              <View className="mt-4 flex-row flex-wrap gap-2">
+              <View style={styles.suggestionsContainer}>
                 {suggestions.slice(0, 5).map((suggestion) => (
                   <TouchableOpacity
                     key={suggestion}
                     onPress={() => handleAddTag(suggestion)}
-                    className="px-4 py-2 bg-gray-700 rounded-full"
+                    style={styles.suggestion}
                   >
-                    <Text className="text-gray-100 text-sm font-medium">+ {suggestion}</Text>
+                    <Text style={styles.suggestionText}>+ {suggestion}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             )}
           </View>
         ) : (
-          <Text className="text-sm text-gray-400 mt-2">
+          <Text style={styles.maxTagsText}>
             Has agregado el máximo de {maxTags} etiquetas.
           </Text>
         )}
 
-        {tagError && <Text className="text-red-400 text-sm mt-2">{tagError}</Text>}
+        {tagError && <Text style={styles.tagErrorText}>{tagError}</Text>}
       </View>
 
-      {/* Imágenes */}
-      <View className="bg-gray-900 rounded-lg shadow-md p-6 w-full mb-6">
-        <Text className="text-lg font-semibold text-white mb-1">Imágenes de la comunidad</Text>
-        <Text className="text-sm text-gray-400 mb-6">
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Imágenes de la comunidad</Text>
+        <Text style={styles.sectionDescription}>
           Añade un banner y un avatar representativo para que tu comunidad se vea única.
         </Text>
 
-        <View className="space-y-6">
-          {/* Banner */}
+        <View style={styles.imagesSection}>
           <TouchableOpacity
             onPress={() => openSystemImagePicker("banner")}
             activeOpacity={0.8}
-            className="border border-dashed border-zinc-600 rounded-lg p-6 items-center justify-center"
+            style={styles.bannerUpload}
           >
             {isUploadingBanner && (
-              <View className="absolute inset-0 bg-black/50 items-center justify-center rounded-md">
+              <View style={styles.uploadingOverlay}>
                 <ActivityIndicator color="#fff" />
               </View>
             )}
@@ -343,14 +314,14 @@ export default function CreateCommunityScreen() {
             {bannerPreview ? (
               <Image
                 source={{ uri: bannerPreview }}
-                className="w-full h-48 rounded-md"
+                style={styles.bannerImage}
                 resizeMode="cover"
               />
             ) : (
               !isUploadingBanner && (
-                <View className="items-center">
-                  <Text className="text-white mb-1 font-semibold">Sube la cabecera</Text>
-                  <Text className="text-sm text-zinc-400 text-center">
+                <View style={styles.uploadPlaceholder}>
+                  <Text style={styles.uploadTitle}>Sube la cabecera</Text>
+                  <Text style={styles.uploadDescription}>
                     Pulsa aquí para elegir una imagen. Ideal: 1840 x 560 píxeles.
                   </Text>
                 </View>
@@ -358,15 +329,14 @@ export default function CreateCommunityScreen() {
             )}
           </TouchableOpacity>
 
-          {/* Avatar */}
           <TouchableOpacity
             onPress={() => openSystemImagePicker("avatar")}
             activeOpacity={0.8}
-            className="flex-row items-center gap-4"
+            style={styles.avatarUpload}
           >
-            <View className="w-20 h-20 border border-dashed border-zinc-600 rounded-lg items-center justify-center bg-gray-800 relative">
+            <View style={styles.avatarBox}>
               {isUploadingAvatar && (
-                <View className="absolute inset-0 bg-black/50 items-center justify-center rounded-md">
+                <View style={styles.uploadingOverlay}>
                   <ActivityIndicator color="#fff" />
                 </View>
               )}
@@ -374,7 +344,7 @@ export default function CreateCommunityScreen() {
               {avatarPreview && !isUploadingAvatar ? (
                 <Image
                   source={{ uri: avatarPreview }}
-                  className="w-20 h-20 rounded-md"
+                  style={styles.avatarImage}
                   resizeMode="cover"
                 />
               ) : (
@@ -382,9 +352,9 @@ export default function CreateCommunityScreen() {
               )}
             </View>
 
-            <View className="flex-col">
-              <Text className="text-sm text-white mb-1 font-semibold">Sube un avatar</Text>
-              <Text className="text-sm text-zinc-400">
+            <View style={styles.avatarInfo}>
+              <Text style={styles.avatarTitle}>Sube un avatar</Text>
+              <Text style={styles.avatarDescription}>
                 Formato ideal cuadrado de 512 píxeles.
               </Text>
             </View>
@@ -392,32 +362,31 @@ export default function CreateCommunityScreen() {
         </View>
       </View>
 
-      {/* Botones de acción */}
-      <View className="flex-row mt-2 justify-center gap-4">
+      <View style={styles.actionsContainer}>
         <TouchableOpacity
           disabled={
             isUploadingBanner || isUploadingAvatar || !isValid || selectedTags.length < 3
           }
           onPress={handleSubmit(submitCreateCommunityForm)}
-          className={`px-4 py-2 rounded ${isUploadingBanner || isUploadingAvatar || !isValid || selectedTags.length < 3
-              ? "bg-blue-900 opacity-50"
-              : "bg-blue-600"
-            }`}
+          style={[
+            styles.createButton,
+            (isUploadingBanner || isUploadingAvatar || !isValid || selectedTags.length < 3) &&
+            styles.createButtonDisabled
+          ]}
         >
-          <Text className="text-white font-bold">
+          <Text style={styles.buttonText}>
             {isSubmitting ? "Creando..." : "Crear Comunidad"}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => router.push("/communities" as any)}
-          className="px-4 py-2 bg-gray-600 rounded"
+          style={styles.cancelButton}
         >
-          <Text className="text-white font-medium">Ir a comunidades</Text>
+          <Text style={styles.buttonText}>Ir a comunidades</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Modales de éxito y error */}
       <CommunitySuccessModal
         isOpen={isSubmitCorrect}
         onClose={handleCloseSuccessModal}
@@ -432,3 +401,286 @@ export default function CreateCommunityScreen() {
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000000',
+    paddingHorizontal: 24,
+    paddingVertical: 24,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 24,
+    color: '#ffffff',
+  },
+  section: {
+    backgroundColor: '#111827',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    padding: 24,
+    width: '100%',
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  sectionDescription: {
+    fontSize: 14,
+    color: '#9ca3af',
+    marginBottom: 24,
+  },
+  fieldContainer: {
+    marginBottom: 24,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 4,
+    color: '#ffffff',
+  },
+  input: {
+    width: '100%',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#1f2937',
+    color: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#4b5563',
+  },
+  textArea: {
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  inputError: {
+    borderColor: '#ef4444',
+  },
+  errorText: {
+    color: '#f87171',
+    fontSize: 14,
+    marginTop: 4,
+  },
+  privacyContainer: {
+    marginBottom: 8,
+  },
+  toggle: {
+    height: 24,
+    width: 44,
+    marginTop: 8,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  toggleActive: {
+    backgroundColor: '#7c3aed',
+  },
+  toggleInactive: {
+    backgroundColor: '#374151',
+  },
+  toggleThumb: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#ffffff',
+    marginLeft: 4,
+  },
+  toggleThumbActive: {
+    marginLeft: 24,
+  },
+  privacyInfo: {
+    marginTop: 8,
+  },
+  privacyTextPrivate: {
+    fontSize: 14,
+    color: '#fca5a5',
+  },
+  privacyTextPublic: {
+    fontSize: 14,
+    color: '#9ca3af',
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 16,
+  },
+  tag: {
+    backgroundColor: '#7c3aed',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  tagText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  tagRemove: {
+    marginLeft: 12,
+  },
+  tagRemoveText: {
+    color: '#fecaca',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  tagInput: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#4b5563',
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 14,
+    backgroundColor: '#1f2937',
+    color: '#ffffff',
+  },
+  searchingText: {
+    fontSize: 14,
+    color: '#9ca3af',
+    fontStyle: 'italic',
+    marginTop: 8,
+  },
+  suggestionsContainer: {
+    marginTop: 16,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  suggestion: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#374151',
+    borderRadius: 16,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  suggestionText: {
+    color: '#f3f4f6',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  maxTagsText: {
+    fontSize: 14,
+    color: '#9ca3af',
+    marginTop: 8,
+  },
+  tagErrorText: {
+    color: '#f87171',
+    fontSize: 14,
+    marginTop: 8,
+  },
+  imagesSection: {
+    marginTop: 0,
+  },
+  bannerUpload: {
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: '#52525b',
+    borderRadius: 8,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  uploadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 6,
+  },
+  bannerImage: {
+    width: '100%',
+    height: 192,
+    borderRadius: 6,
+  },
+  uploadPlaceholder: {
+    alignItems: 'center',
+  },
+  uploadTitle: {
+    color: '#ffffff',
+    marginBottom: 4,
+    fontWeight: '600',
+  },
+  uploadDescription: {
+    fontSize: 14,
+    color: '#a1a1aa',
+    textAlign: 'center',
+  },
+  avatarUpload: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  avatarBox: {
+    width: 80,
+    height: 80,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: '#52525b',
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1f2937',
+    marginRight: 16,
+    position: 'relative',
+  },
+  avatarImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 6,
+  },
+  avatarInfo: {
+    flex: 1,
+  },
+  avatarTitle: {
+    fontSize: 14,
+    color: '#ffffff',
+    marginBottom: 4,
+    fontWeight: '600',
+  },
+  avatarDescription: {
+    fontSize: 14,
+    color: '#a1a1aa',
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    marginTop: 8,
+    justifyContent: 'center',
+  },
+  createButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+    backgroundColor: '#2563eb',
+    marginRight: 16,
+  },
+  createButtonDisabled: {
+    backgroundColor: '#1e3a8a',
+    opacity: 0.5,
+  },
+  cancelButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#4b5563',
+    borderRadius: 6,
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+  },
+});

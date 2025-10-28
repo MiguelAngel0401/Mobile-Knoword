@@ -1,7 +1,6 @@
-import React, { useRef } from "react";
-import { View, Text } from "react-native";
+import React, { useRef, useState } from "react";
+import { View, Text, StyleSheet } from "react-native";
 import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor";
-import { useState } from "react";
 
 interface RichTextProps {
   content: string;
@@ -13,8 +12,8 @@ export default function RichTextEditor({ content, onChange }: RichTextProps) {
   const [editorContent, setEditorContent] = useState(content);
 
   return (
-    <View className="flex-1 bg-black p-4">
-      <Text className="text-white text-lg font-bold mb-2">Editor</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Editor</Text>
 
       <RichEditor
         ref={editorRef}
@@ -24,7 +23,7 @@ export default function RichTextEditor({ content, onChange }: RichTextProps) {
           onChange(html);
         }}
         editorStyle={{
-          backgroundColor: "#1f2937", // bg-gray-800
+          backgroundColor: "#1f2937",
           color: "white",
           placeholderColor: "#9CA3AF",
           contentCSSText: "font-size: 16px; min-height: 300px;",
@@ -46,8 +45,27 @@ export default function RichTextEditor({ content, onChange }: RichTextProps) {
         ]}
         iconTint="white"
         selectedIconTint="#3B82F6"
-        style={{ backgroundColor: "#111827", marginTop: 10, borderRadius: 8 }}
+        style={styles.toolbar}
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+    padding: 16,
+  },
+  title: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  toolbar: {
+    backgroundColor: "#111827",
+    marginTop: 10,
+    borderRadius: 8,
+  },
+});

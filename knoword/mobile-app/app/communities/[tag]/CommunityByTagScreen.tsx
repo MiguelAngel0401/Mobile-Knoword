@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+} from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
@@ -49,8 +56,8 @@ export default function CommunityByTagScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-black">
-        <View className="w-12 h-12 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin" />
+      <View style={styles.loadingContainer}>
+        <View style={styles.spinner} />
       </View>
     );
   }
@@ -60,10 +67,8 @@ export default function CommunityByTagScreen() {
   }
 
   return (
-    <View className="flex-1 bg-black px-4 pt-6">
-      <Text className="text-white text-2xl font-bold mb-6 capitalize">
-        Comunidades de {tag}
-      </Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Comunidades de {tag}</Text>
 
       <FlatList
         data={communities}
@@ -71,30 +76,30 @@ export default function CommunityByTagScreen() {
         contentContainerStyle={{ paddingBottom: 32 }}
         renderItem={({ item }) => (
           <TouchableOpacity
-            className="bg-[#1f1f1f] rounded-xl mb-6 overflow-hidden"
+            style={styles.card}
             onPress={() =>
               navigation.navigate("CommunityScreen", { idCommunity: item.id })
             }
           >
             {/* Banner */}
-            <View className="h-24 relative">
+            <View style={styles.banner}>
               {item.banner ? (
-                <Image source={{ uri: item.banner }} className="w-full h-full" resizeMode="cover" />
+                <Image source={{ uri: item.banner }} style={styles.bannerImage} resizeMode="cover" />
               ) : (
-                <View className="w-full h-full bg-gradient-to-r from-blue-600 to-purple-600" />
+                <View style={styles.bannerFallback} />
               )}
 
               {/* Avatar */}
-              <View className="absolute -bottom-6 left-4">
+              <View style={styles.avatarContainer}>
                 {item.avatar ? (
                   <Image
                     source={{ uri: item.avatar }}
-                    className="w-12 h-12 rounded-full border-2 border-[#121212]"
+                    style={styles.avatarImage}
                     resizeMode="cover"
                   />
                 ) : (
-                  <View className="w-12 h-12 rounded-full border-2 border-[#121212] bg-gray-700 flex items-center justify-center">
-                    <Text className="text-white font-bold text-lg">
+                  <View style={styles.avatarFallback}>
+                    <Text style={styles.avatarFallbackText}>
                       {item.name.charAt(0).toUpperCase()}
                     </Text>
                   </View>
@@ -103,32 +108,29 @@ export default function CommunityByTagScreen() {
 
               {/* Privacidad */}
               {item.isPrivate && (
-                <View className="absolute top-2 right-2 bg-yellow-500 px-2 py-1 rounded-full">
-                  <Text className="text-yellow-900 text-xs font-medium">Privada</Text>
+                <View style={styles.privacyBadge}>
+                  <Text style={styles.privacyText}>Privada</Text>
                 </View>
               )}
             </View>
 
             {/* Contenido */}
-            <View className="pt-8 pb-4 px-4">
-              <Text className="text-white text-lg font-bold mb-1 truncate">
-                {item.name}
-              </Text>
-
-              <Text className="text-gray-400 text-sm mb-3" numberOfLines={2}>
+            <View style={styles.content}>
+              <Text style={styles.communityName}>{item.name}</Text>
+              <Text style={styles.description} numberOfLines={2}>
                 {item.description}
               </Text>
 
               {/* Tags */}
-              <View className="flex-row flex-wrap gap-1 mb-3">
+              <View style={styles.tagsContainer}>
                 {item.tags.slice(0, 2).map((tag) => (
-                  <View key={tag.id} className="px-2 py-1 rounded-full bg-blue-900">
-                    <Text className="text-blue-200 text-xs font-medium">{tag.name}</Text>
+                  <View key={tag.id} style={styles.tag}>
+                    <Text style={styles.tagText}>{tag.name}</Text>
                   </View>
                 ))}
                 {item.tags.length > 2 && (
-                  <View className="px-2 py-1 rounded-full bg-gray-700">
-                    <Text className="text-gray-300 text-xs font-medium">
+                  <View style={styles.tagOverflow}>
+                    <Text style={styles.tagOverflowText}>
                       +{item.tags.length - 2}
                     </Text>
                   </View>
@@ -136,9 +138,9 @@ export default function CommunityByTagScreen() {
               </View>
 
               {/* Footer */}
-              <View className="flex-row justify-between items-center text-xs text-gray-500">
-                <Text className="text-xs text-gray-400">Creada: {formatDate(item.createdAt)}</Text>
-                <Text className="text-xs text-gray-400">👥 {item.memberCount}</Text>
+              <View style={styles.footer}>
+                <Text style={styles.footerText}>Creada: {formatDate(item.createdAt)}</Text>
+                <Text style={styles.footerText}>👥 {item.memberCount}</Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -147,3 +149,146 @@ export default function CommunityByTagScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+    paddingHorizontal: 16,
+    paddingTop: 24,
+  },
+  title: {
+    color: "#fff",
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 24,
+    textTransform: "capitalize",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000",
+  },
+  spinner: {
+    width: 48,
+    height: 48,
+    borderTopWidth: 2,
+    borderBottomWidth: 2,
+    borderColor: "#3b82f6",
+    borderRadius: 24,
+  },
+  card: {
+    backgroundColor: "#1f1f1f",
+    borderRadius: 16,
+    marginBottom: 24,
+    overflow: "hidden",
+  },
+  banner: {
+    height: 96,
+    position: "relative",
+  },
+  bannerImage: {
+    width: "100%",
+    height: "100%",
+  },
+  bannerFallback: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#3b82f6",
+  },
+  avatarContainer: {
+    position: "absolute",
+    bottom: -24,
+    left: 16,
+  },
+  avatarImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: "#121212",
+  },
+  avatarFallback: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: "#121212",
+    backgroundColor: "#4b5563",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarFallbackText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 18,
+  },
+  privacyBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "#facc15",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  privacyText: {
+    color: "#78350f",
+    fontSize: 10,
+    fontWeight: "500",
+  },
+  content: {
+    paddingTop: 32,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+  },
+  communityName: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  description: {
+    color: "#9ca3af",
+    fontSize: 14,
+    marginBottom: 12,
+  },
+  tagsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 4,
+    marginBottom: 12,
+  },
+  tag: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: "#1e3a8a",
+  },
+  tagText: {
+    color: "#bfdbfe",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  tagOverflow: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: "#374151",
+  },
+  tagOverflowText: {
+    color: "#d1d5db",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  footerText: {
+    color: "#9ca3af",
+    fontSize: 12,
+  },
+});
