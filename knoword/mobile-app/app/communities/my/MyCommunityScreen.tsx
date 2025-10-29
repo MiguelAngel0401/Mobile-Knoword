@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Image,
+  StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
 
@@ -48,7 +49,7 @@ export default function MyCommunitiesScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-black">
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#3B82F6" />
       </View>
     );
@@ -59,55 +60,52 @@ export default function MyCommunitiesScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-black px-6 py-6">
-      <Text className="text-3xl font-bold mb-8 text-white">
+    <ScrollView style={styles.screen}>
+      <Text style={styles.title}>
         Mis Comunidades ({communities.length})
       </Text>
 
       {communities.length === 0 ? (
-        <View className="items-center py-12">
-          <View className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16 mb-4" />
-          <Text className="text-lg font-medium text-white mb-1">
+        <View style={styles.emptyContainer}>
+          <View style={styles.emptyIcon} />
+          <Text style={styles.emptyTitle}>
             Aún no has creado comunidades
           </Text>
-          <Text className="text-gray-400">
+          <Text style={styles.emptySubtitle}>
             Crea tu primera comunidad para empezar a colaborar
           </Text>
         </View>
       ) : (
-        <View className="flex flex-wrap flex-row justify-between">
+        <View style={styles.list}>
           {communities.map((community) => (
             <TouchableOpacity
               key={community.id}
               onPress={() =>
                 router.push(`/communities/community/${community.id}` as any)
               }
-              className="bg-gray-900 rounded-xl shadow-md overflow-hidden mb-6 w-full"
+              style={styles.card}
               activeOpacity={0.8}
             >
-              {/* Banner */}
-              <View className="h-32 bg-gray-800">
+              <View style={styles.banner}>
                 {community.banner ? (
                   <Image
                     source={{ uri: community.banner.trim() }}
-                    className="w-full h-full"
+                    style={styles.bannerImage}
                     resizeMode="cover"
                   />
                 ) : (
-                  <View className="w-full h-full bg-gradient-to-r from-blue-400 to-purple-500" />
+                  <View style={styles.bannerFallback} />
                 )}
-
-                {/* Avatar */}
-                <View className="absolute -bottom-8 left-4">
+                <View style={styles.avatarContainer}>
                   {community.avatar ? (
                     <Image
                       source={{ uri: community.avatar.trim() }}
-                      className="w-16 h-16 rounded-full border-4 border-white"
+                      style={styles.avatar}
                       resizeMode="cover"
                     />
                   ) : (
-                    <View className="w-16 h-16 rounded-full border-4 border-white bg-gray-200 items-center justify-center">
-                      <Text className="text-2xl font-bold text-gray-600">
+                    <View style={styles.avatarFallback}>
+                      <Text style={styles.avatarFallbackText}>
                         {community.name.charAt(0).toUpperCase()}
                       </Text>
                     </View>
@@ -115,45 +113,38 @@ export default function MyCommunitiesScreen() {
                 </View>
               </View>
 
-              {/* Contenido */}
-              <View className="pt-10 pb-6 px-4">
-                <View className="flex-row justify-between items-start mb-2">
-                  <Text className="text-xl font-bold text-white flex-1 mr-2">
+              <View style={styles.content}>
+                <View style={styles.header}>
+                  <Text style={styles.communityName}>
                     {community.name}
                   </Text>
                   {community.isPrivate && (
-                    <Text className="px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                      Privada
-                    </Text>
+                    <Text style={styles.privateBadge}>Privada</Text>
                   )}
                 </View>
 
-                <Text className="text-gray-300 text-sm mb-4" numberOfLines={2}>
+                <Text style={styles.description} numberOfLines={2}>
                   {community.description}
                 </Text>
 
-                {/* Etiquetas */}
-                <View className="flex-row flex-wrap gap-1 mb-4">
+                <View style={styles.tagsContainer}>
                   {community.tags.slice(0, 3).map((tag) => (
-                    <Text
-                      key={tag.id}
-                      className="px-2 py-1 rounded-full text-xs font-medium bg-blue-900 text-blue-100 mr-1"
-                    >
+                    <Text key={tag.id} style={styles.tag}>
                       {tag.name}
                     </Text>
                   ))}
                   {community.tags.length > 3 && (
-                    <Text className="px-2 py-1 rounded-full text-xs font-medium bg-gray-700 text-gray-300">
+                    <Text style={styles.moreTags}>
                       +{community.tags.length - 3}
                     </Text>
                   )}
                 </View>
 
-                <View className="flex-row justify-between items-center text-xs">
-                  <Text className="text-gray-400">
+                <View style={styles.footer}>
+                  <Text style={styles.footerText}>
                     Creada: {formatDate(community.createdAt)}
                   </Text>
-                  <Text className="text-gray-400">
+                  <Text style={styles.footerText}>
                     👥 {community.memberCount} miembro
                     {community.memberCount !== 1 ? "s" : ""}
                   </Text>
@@ -166,3 +157,168 @@ export default function MyCommunitiesScreen() {
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000",
+  },
+  screen: {
+    flex: 1,
+    backgroundColor: "#000",
+    paddingHorizontal: 24,
+    paddingVertical: 24,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 32,
+    color: "#fff",
+  },
+  emptyContainer: {
+    alignItems: "center",
+    paddingVertical: 48,
+  },
+  emptyIcon: {
+    backgroundColor: "#E5E7EB",
+    borderWidth: 2,
+    borderStyle: "dashed",
+    borderRadius: 12,
+    width: 64,
+    height: 64,
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: "500",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  emptySubtitle: {
+    color: "#9CA3AF",
+  },
+  list: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  card: {
+    backgroundColor: "#111827",
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+    overflow: "hidden",
+    marginBottom: 24,
+    width: "100%",
+  },
+  banner: {
+    height: 128,
+    backgroundColor: "#1F2937",
+  },
+  bannerImage: {
+    width: "100%",
+    height: "100%",
+  },
+  bannerFallback: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#3B82F6",
+  },
+  avatarContainer: {
+    position: "absolute",
+    bottom: -32,
+    left: 16,
+  },
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 4,
+    borderColor: "#fff",
+  },
+  avatarFallback: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 4,
+    borderColor: "#fff",
+    backgroundColor: "#E5E7EB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarFallbackText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#4B5563",
+  },
+  content: {
+    paddingTop: 40,
+    paddingBottom: 24,
+    paddingHorizontal: 16,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 8,
+  },
+  communityName: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#fff",
+    flex: 1,
+    marginRight: 8,
+  },
+  privateBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+    fontSize: 12,
+    fontWeight: "500",
+    backgroundColor: "#FEF3C7",
+    color: "#92400E",
+  },
+  description: {
+    color: "#D1D5DB",
+    fontSize: 14,
+    marginBottom: 16,
+  },
+  tagsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 16,
+  },
+  tag: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    fontSize: 12,
+    fontWeight: "500",
+    backgroundColor: "#1E3A8A",
+    color: "#DBEAFE",
+    marginRight: 4,
+    marginBottom: 4,
+  },
+  moreTags: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    fontSize: 12,
+    fontWeight: "500",
+    backgroundColor: "#374151",
+    color: "#D1D5DB",
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  footerText: {
+    color: "#9CA3AF",
+    fontSize: 12,
+  },
+});

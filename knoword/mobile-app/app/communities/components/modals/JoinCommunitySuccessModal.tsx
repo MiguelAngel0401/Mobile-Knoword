@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Modal, View, Text } from "react-native";
+import { Modal, View, Text, StyleSheet } from "react-native";
 
 interface JoinSuccessModalProps {
   isOpen: boolean;
@@ -16,7 +16,7 @@ export default function JoinSuccessModal({
     if (isOpen) {
       const timer = setTimeout(() => {
         onClose();
-      }, 3000); // Cierra automáticamente después de 3 segundos
+      }, 3000);
 
       return () => clearTimeout(timer);
     }
@@ -29,27 +29,71 @@ export default function JoinSuccessModal({
       animationType="fade"
       onRequestClose={onClose}
     >
-      {/* Fondo oscuro */}
-      <View className="flex-1 bg-black/50 justify-center items-center px-4">
-        {/* Contenedor del modal */}
-        <View className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-sm p-6 items-center">
-          {/* Icono de éxito */}
-          <View className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-4">
-            <Text className="text-green-600 dark:text-green-300 text-3xl">✓</Text>
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          <View style={styles.iconContainer}>
+            <Text style={styles.icon}>✓</Text>
           </View>
 
-          {/* Título */}
-          <Text className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+          <Text style={styles.title}>
             ¡Éxito!
           </Text>
 
-          {/* Mensaje */}
-          <Text className="text-gray-600 dark:text-gray-300 text-center">
+          <Text style={styles.message}>
             Ahora eres miembro de{" "}
-            <Text className="font-semibold">{communityName}</Text>.
+            <Text style={styles.communityName}>{communityName}</Text>.
           </Text>
         </View>
       </View>
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  container: {
+    backgroundColor: '#1f2937',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 10,
+    width: '100%',
+    maxWidth: 384,
+    padding: 24,
+    alignItems: 'center',
+  },
+  iconContainer: {
+    width: 64,
+    height: 64,
+    backgroundColor: '#064e3b',
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  icon: {
+    color: '#6ee7b7',
+    fontSize: 30,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 8,
+  },
+  message: {
+    color: '#d1d5db',
+    textAlign: 'center',
+  },
+  communityName: {
+    fontWeight: '600',
+  },
+});

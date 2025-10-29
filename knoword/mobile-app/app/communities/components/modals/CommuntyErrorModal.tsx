@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   Pressable,
+  StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
 
@@ -22,7 +23,6 @@ export default function CommunityErrorModal({
   const router = useRouter();
 
   const handleGoToCommunities = () => {
-    // ✅ Navegación segura con string literal
     router.push("/communities/explore" as any);
     onClose();
   };
@@ -35,31 +35,31 @@ export default function CommunityErrorModal({
       onRequestClose={onClose}
     >
       <Pressable
-        className="flex-1 bg-black/60 justify-center items-center"
+        style={styles.overlay}
         onPress={onClose}
       >
-        <View className="bg-gray-800 rounded-lg shadow-xl p-6 w-80">
-          <Text className="text-2xl font-bold text-red-500 mb-4 text-center">
+        <View style={styles.container}>
+          <Text style={styles.title}>
             Ha ocurrido un error
           </Text>
 
-          <Text className="text-md text-gray-200 mb-6 text-center">
+          <Text style={styles.message}>
             {message || "Algo salió mal. Por favor, inténtalo de nuevo."}
           </Text>
 
-          <View className="flex-row justify-center gap-4">
+          <View style={styles.buttonsContainer}>
             <TouchableOpacity
               onPress={onClose}
-              className="px-4 py-2 bg-blue-600 rounded-lg"
+              style={styles.retryButton}
             >
-              <Text className="text-white font-semibold">Reintentar</Text>
+              <Text style={styles.buttonText}>Reintentar</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={handleGoToCommunities}
-              className="px-4 py-2 bg-purple-600 rounded-lg"
+              style={styles.exploreButton}
             >
-              <Text className="text-white font-semibold">
+              <Text style={styles.buttonText}>
                 Explorar comunidades
               </Text>
             </TouchableOpacity>
@@ -69,3 +69,57 @@ export default function CommunityErrorModal({
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  container: {
+    backgroundColor: '#1f2937',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 10,
+    padding: 24,
+    width: 320,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ef4444',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  message: {
+    fontSize: 16,
+    color: '#e5e7eb',
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  buttonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  retryButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#2563eb',
+    borderRadius: 8,
+    marginRight: 16,
+  },
+  exploreButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#7c3aed',
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontWeight: '600',
+  },
+});

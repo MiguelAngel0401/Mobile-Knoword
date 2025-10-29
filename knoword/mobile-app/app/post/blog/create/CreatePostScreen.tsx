@@ -1,11 +1,18 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, TextInput, Alert, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Alert,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 
 import CreateBlogHeader from "../components/CreateBlogHeader";
 import BlogPreview from "../components/BlogPreview";
-import RichTextEditor from "../components/RichTextEditor"; // wrapper que hicimos con pell
+import RichTextEditor from "../components/RichTextEditor";
 import { useDebounce } from "../../../../../mobile-app/src/hooks/useDebounce";
 
 interface BlogDraft {
@@ -24,7 +31,6 @@ export default function CreateBlogPost() {
 
   const router = useRouter();
 
-  // Cargar borrador desde AsyncStorage
   useEffect(() => {
     const loadDraft = async () => {
       try {
@@ -41,7 +47,6 @@ export default function CreateBlogPost() {
     loadDraft();
   }, []);
 
-  // Guardar borrador
   const saveDraft = useCallback(async () => {
     setSavingStatus("saving");
     const draft: BlogDraft = {
@@ -95,7 +100,7 @@ export default function CreateBlogPost() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-black px-4 py-6">
+    <ScrollView style={styles.screen}>
       <CreateBlogHeader
         onSubmit={handleSubmit}
         onSave={handleSave}
@@ -104,14 +109,11 @@ export default function CreateBlogPost() {
         isPreviewMode={isPreviewMode}
       />
 
-      {/* Título */}
-      <View className="flex flex-col gap-2 mb-4">
-        <View className="flex-row justify-between items-center">
-          <Text className="text-sm font-medium text-gray-300">
-            Título del blog
-          </Text>
+      <View style={styles.titleContainer}>
+        <View style={styles.titleHeader}>
+          <Text style={styles.titleLabel}>Título del blog</Text>
           {savingStatus !== "idle" && (
-            <Text className="text-xs text-gray-500">
+            <Text style={styles.savingStatus}>
               {savingStatusText[savingStatus]}
             </Text>
           )}
@@ -121,11 +123,10 @@ export default function CreateBlogPost() {
           onChangeText={setTitle}
           placeholder="Escribe el título de tu blog..."
           placeholderTextColor="#9CA3AF"
-          className="px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-white"
+          style={styles.input}
         />
       </View>
 
-      {/* Editor o Preview */}
       {isPreviewMode ? (
         <BlogPreview title={title} content={content} />
       ) : (
@@ -134,3 +135,40 @@ export default function CreateBlogPost() {
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: "#000",
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+  },
+  titleContainer: {
+    flexDirection: "column",
+    gap: 8,
+    marginBottom: 16,
+  },
+  titleHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  titleLabel: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#D1D5DB",
+  },
+  savingStatus: {
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  input: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "#1F2937",
+    borderWidth: 1,
+    borderColor: "#374151",
+    borderRadius: 8,
+    color: "#fff",
+  },
+});

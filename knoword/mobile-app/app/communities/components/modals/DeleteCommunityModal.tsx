@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Pressable,
   ActivityIndicator,
+  StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { deleteCommunity } from "@shared/services/community/communityServices";
@@ -48,7 +49,7 @@ export default function DeleteCommunityModal({
 
       setTimeout(() => {
         onClose();
-        router.push("/communities/my" as any); // ✅ navegación corregida
+        router.push("/communities/my" as any);
       }, 2000);
     } catch (err) {
       console.error("Error al eliminar la comunidad:", err);
@@ -73,94 +74,89 @@ export default function DeleteCommunityModal({
       onRequestClose={handleCancel}
     >
       <Pressable
-        className="flex-1 bg-black/70 justify-center items-center"
+        style={styles.overlay}
         onPress={handleCancel}
       >
-        <View className="bg-gray-900 rounded-xl border border-gray-700 shadow-2xl w-80 overflow-hidden">
-          <View className="px-6 pt-6 pb-4">
+        <View style={styles.container}>
+          <View style={styles.header}>
             {!isDeleted ? (
               <>
-                <Text className="text-xl font-bold text-red-400 text-center">
+                <Text style={styles.warningText}>
                   ⚠️ ¡Advertencia!
                 </Text>
-                <Text className="text-2xl font-bold text-white text-center mt-1">
+                <Text style={styles.title}>
                   ¿Eliminar Comunidad?
                 </Text>
               </>
             ) : (
-              <Text className="text-2xl font-bold text-green-400 text-center">
+              <Text style={styles.successTitle}>
                 ✅ Eliminada con éxito
               </Text>
             )}
           </View>
 
-          <View className="px-6 pb-6">
+          <View style={styles.content}>
             {!isDeleted ? (
               <>
-                <Text className="text-gray-300 text-sm text-center mb-5">
+                <Text style={styles.description}>
                   Estás a punto de eliminar permanentemente la comunidad{" "}
-                  <Text className="font-semibold text-white">{communityName}</Text>.{" "}
+                  <Text style={styles.communityName}>{communityName}</Text>.{" "}
                   Esta acción no se puede deshacer. Para confirmar, escribe el nombre:
                 </Text>
 
-                <View className="relative">
+                <View style={styles.inputContainer}>
                   <TextInput
                     placeholder={`Escribe "${communityName}"`}
                     placeholderTextColor="#888"
                     value={communityNameInput}
                     onChangeText={validateCommunityName}
                     editable={!isDeleting}
-                    className={`w-full px-4 py-3 rounded-lg border text-white ${
-                      isConfirmed
-                        ? "bg-green-900/30 border-green-600"
-                        : communityNameInput && !isConfirmed
-                        ? "bg-red-900/20 border-red-600"
-                        : "bg-gray-800 border-gray-600"
-                    }`}
+                    style={[
+                      styles.input,
+                      isConfirmed && styles.inputSuccess,
+                      communityNameInput && !isConfirmed && styles.inputError,
+                    ]}
                   />
                   {isConfirmed && (
-                    <Text className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 text-lg">
-                      ✅
-                    </Text>
+                    <Text style={styles.checkmark}>✅</Text>
                   )}
                 </View>
 
                 {communityNameInput && !isConfirmed && (
-                  <Text className="text-red-400 text-xs mt-2 text-center">
+                  <Text style={styles.validationError}>
                     El nombre no coincide. Revisa mayúsculas y espacios.
                   </Text>
                 )}
               </>
             ) : (
-              <Text className="text-gray-200 text-center text-sm">
-                La comunidad <Text className="font-semibold">{communityName}</Text> se eliminó correctamente.
+              <Text style={styles.deletedMessage}>
+                La comunidad <Text style={styles.communityNameBold}>{communityName}</Text> se eliminó correctamente.
               </Text>
             )}
 
-            {error && <Text className="text-red-400 text-md mt-2">{error}</Text>}
+            {error && <Text style={styles.errorText}>{error}</Text>}
           </View>
 
-          <View className="flex-col gap-3 px-6 pb-6 pt-4 bg-gray-800/50 border-t border-gray-700">
+          <View style={styles.footer}>
             {!isDeleted ? (
               <>
                 <TouchableOpacity
                   onPress={handleCancel}
                   disabled={isDeleting}
-                  className="px-4 py-2.5 bg-gray-700 rounded-lg disabled:opacity-50"
+                  style={[styles.cancelButton, isDeleting && styles.buttonDisabled]}
                 >
-                  <Text className="text-white text-center font-medium">Cancelar</Text>
+                  <Text style={styles.buttonText}>Cancelar</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   onPress={handleDelete}
                   disabled={!isConfirmed || isDeleting}
-                  className={`px-4 py-2.5 rounded-lg ${
-                    isConfirmed && !isDeleting
-                      ? "bg-red-600"
-                      : "bg-red-900 opacity-60"
-                  }`}
+                  style={[
+                    styles.deleteButton,
+                    (!isConfirmed || isDeleting) && styles.deleteButtonDisabled
+                  ]}
                 >
-                  <Text className="text-white text-center font-medium">
+                  <Text style={styles.buttonText}>
                     {isDeleting ? "Eliminando..." : "Eliminar Comunidad"}
                   </Text>
                 </TouchableOpacity>
@@ -168,9 +164,9 @@ export default function DeleteCommunityModal({
             ) : (
               <TouchableOpacity
                 onPress={handleCancel}
-                className="w-full px-4 py-2.5 bg-blue-600 rounded-lg"
+                style={styles.acceptButton}
               >
-                <Text className="text-white text-center font-medium">Aceptar</Text>
+                <Text style={styles.buttonText}>Aceptar</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -179,3 +175,151 @@ export default function DeleteCommunityModal({
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  container: {
+    backgroundColor: '#111827',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#374151',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 20,
+    width: 320,
+    overflow: 'hidden',
+  },
+  header: {
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 16,
+  },
+  warningText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#f87171',
+    textAlign: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  successTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#4ade80',
+    textAlign: 'center',
+  },
+  content: {
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+  },
+  description: {
+    color: '#d1d5db',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  communityName: {
+    fontWeight: '600',
+    color: '#ffffff',
+  },
+  inputContainer: {
+    position: 'relative',
+  },
+  input: {
+    width: '100%',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    color: '#ffffff',
+    backgroundColor: '#1f2937',
+    borderColor: '#4b5563',
+  },
+  inputSuccess: {
+    backgroundColor: 'rgba(6, 78, 59, 0.3)',
+    borderColor: '#16a34a',
+  },
+  inputError: {
+    backgroundColor: 'rgba(127, 29, 29, 0.2)',
+    borderColor: '#dc2626',
+  },
+  checkmark: {
+    position: 'absolute',
+    right: 12,
+    top: '50%',
+    marginTop: -10,
+    color: '#22c55e',
+    fontSize: 18,
+  },
+  validationError: {
+    color: '#f87171',
+    fontSize: 12,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  deletedMessage: {
+    color: '#e5e7eb',
+    textAlign: 'center',
+    fontSize: 14,
+  },
+  communityNameBold: {
+    fontWeight: '600',
+  },
+  errorText: {
+    color: '#f87171',
+    fontSize: 16,
+    marginTop: 8,
+  },
+  footer: {
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+    paddingTop: 16,
+    backgroundColor: 'rgba(31, 41, 55, 0.5)',
+    borderTopWidth: 1,
+    borderTopColor: '#374151',
+  },
+  cancelButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#374151',
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  deleteButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#dc2626',
+  },
+  deleteButtonDisabled: {
+    backgroundColor: '#7f1d1d',
+    opacity: 0.6,
+  },
+  acceptButton: {
+    width: '100%',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#2563eb',
+    borderRadius: 8,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
+  },
+  buttonText: {
+    color: '#ffffff',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+});

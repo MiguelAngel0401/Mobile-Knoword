@@ -1,5 +1,5 @@
 import React from "react";
-import { View } from "react-native";
+import { View, StyleSheet } from "react-native";
 import PostActionComponent from "./PostActionComponent";
 import {
   Image as ImageIcon,
@@ -23,7 +23,7 @@ const postActions = [
 
 export default function PostsBarComponent() {
   return (
-    <View className="border border-gray-700 rounded-xl shadow-lg w-full flex-row flex-wrap gap-4 px-4 py-2 mt-4 items-center justify-between">
+    <View style={styles.container}>
       {postActions.map((action) => (
         <PostActionComponent
           key={action.key}
@@ -34,3 +34,24 @@ export default function PostsBarComponent() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    borderWidth: 1,
+    borderColor: "#374151",
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    width: "100%",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginTop: 16,
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+});

@@ -1,5 +1,5 @@
 import React from "react";
-import { View } from "react-native";
+import { View, StyleSheet } from "react-native";
 import YoutubePlayer from "react-native-youtube-iframe";
 
 interface YoutubeEmbedProps {
@@ -19,7 +19,7 @@ export default function YoutubeEmbed({ url, start = 0 }: YoutubeEmbedProps) {
   if (!videoId) return null;
 
   return (
-    <View className="w-full aspect-video rounded-lg overflow-hidden mb-4">
+    <View style={styles.container}>
       <YoutubePlayer
         height={220}
         play={false}
@@ -29,3 +29,13 @@ export default function YoutubeEmbed({ url, start = 0 }: YoutubeEmbedProps) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+    aspectRatio: 16 / 9,
+    borderRadius: 8,
+    overflow: "hidden",
+    marginBottom: 16,
+  },
+});
