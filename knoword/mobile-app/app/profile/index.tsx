@@ -12,35 +12,45 @@ export default function ProfileIndex() {
   const [showMenu, setShowMenu] = useState(false);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => setShowMenu(!showMenu)} style={styles.menuIcon}>
-          <Menu size={24} color="white" />
-        </TouchableOpacity>
+    <View style={styles.screen}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.topBar}>
+          <TouchableOpacity
+            onPress={() => setShowMenu(!showMenu)}
+            style={styles.menuIcon}
+          >
+            <Menu size={24} color="white" />
+          </TouchableOpacity>
 
-        <View style={styles.profileWrapper}>
-          <ProfileMenu />
+          <View style={styles.profileWrapper}>
+            <ProfileMenu />
+          </View>
         </View>
-      </View>
 
-      {showMenu && (
-        <View style={styles.lateralMenuWrapper}>
-          <LateralMenu />
+        {showMenu && (
+          <View style={styles.lateralMenuWrapper}>
+            <LateralMenu />
+          </View>
+        )}
+
+        <View style={styles.card}>
+          <Banner />
+          <Posts />
+          <Followers />
+          <Communities />
         </View>
-      )}
-
-      <Banner />
-      <Posts />
-      <Followers />
-      <Communities />
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
   container: {
     padding: 16,
-    backgroundColor: "black",
   },
   topBar: {
     flexDirection: "row",
@@ -56,5 +66,14 @@ const styles = StyleSheet.create({
   },
   lateralMenuWrapper: {
     marginBottom: 16,
+  },
+  card: {
+    backgroundColor: "#111827",
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
 });

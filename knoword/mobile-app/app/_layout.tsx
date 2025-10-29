@@ -10,36 +10,56 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        {/* ✅ Pantalla raíz */}
-        <Stack.Screen name="index" options={{ title: 'Inicio', headerShown: false }} />
+      <Stack
+        screenOptions={{
+          headerStyle: { backgroundColor: '#000' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: 'bold' },
+          headerTitleAlign: 'center',
+        }}
+      >
+        {/* Pantalla raíz */}
+        <Stack.Screen
+          name="index"
+          options={{ title: 'Inicio', headerShown: false }}
+        />
 
-        {/* Pantallas de autenticación */}
-        <Stack.Screen name="auth/login/LoginScreen" options={{ title: 'Login' }} />
-        <Stack.Screen name="auth/register/RegisterScreen" options={{ title: 'Registro' }} />
-        <Stack.Screen name="auth/forgot-password/ForgotPasswordScreen" options={{ title: 'Olvidé mi contraseña' }} />
-        <Stack.Screen name="auth/reset-password/ResetPasswordScreen" options={{ title: 'Restablecer contraseña' }} />
-        <Stack.Screen name="auth/verify-account/VerifyAccountScreen" options={{ title: 'Verificar cuenta' }} />
-        <Stack.Screen name="auth/confirm-account/ConfirmAccountScreen" options={{ title: 'Confirmar cuenta' }} />
+        {/* Autenticación */}
+<Stack.Screen name="auth/login/LoginScreen" options={{ title: 'Login' }} />
+<Stack.Screen name="auth/register/RegisterScreen" options={{ title: 'Registro' }} />
+<Stack.Screen name="auth/forgot-password/ForgotPasswordScreen" options={{ title: 'Olvidé mi contraseña' }} />
+<Stack.Screen name="auth/reset-password/ResetPasswordScreen" options={{ title: 'Restablecer contraseña' }} />
+<Stack.Screen name="auth/verify-account/VerifyAccountScreen" options={{ title: 'Verificar cuenta' }} />
+<Stack.Screen name="auth/confirm-account/ConfirmAccountScreen" options={{ title: 'Confirmar cuenta' }} />
 
-        {/* Pantallas de comunidad */}
-        <Stack.Screen name="create/CreateCommunityScreen" options={{ title: 'Crear comunidad' }} />
-        <Stack.Screen name="explore/ExploreCommunityScreen" options={{ title: 'Explorar comunidades' }} />
-        <Stack.Screen name="communities/member/MemberCommunityScreen" options={{ title: 'Miembros' }} />
-        <Stack.Screen name="communities/my/MyCommunityScreen" options={{ title: 'Mis comunidades' }} />
-        <Stack.Screen name="communities/community/[idCommunity]/CommunityDetailScreen" options={{ title: 'Detalle comunidad' }} />
-        <Stack.Screen name="communities/community/[idCommunity]/editar/EditCommunityScreen" options={{ title: 'Editar comunidad' }} />
-        <Stack.Screen name="communities/[tag]/CommunityByTagScreen" options={{ title: 'Por etiqueta' }} />
+        {/* Comunidad */}
+        <Stack.Screen name="create/index" options={{ title: 'Crear comunidad' }} />
+        <Stack.Screen name="explore/index" options={{ title: 'Explorar comunidades' }} />
+        <Stack.Screen name="communities/member/index" options={{ title: 'Miembros' }} />
+        <Stack.Screen name="communities/my/index" options={{ title: 'Mis comunidades' }} />
+        <Stack.Screen name="communities/community/[idCommunity]/index" options={{ title: 'Detalle comunidad' }} />
+        <Stack.Screen name="communities/community/[idCommunity]/editar/index" options={{ title: 'Editar comunidad' }} />
+        <Stack.Screen name="communities/[tag]/index" options={{ title: 'Por etiqueta' }} />
 
-        {/* Pantallas de perfil */}
-        <Stack.Screen name="profile/[username]/ProfileScreen" options={{ title: 'Perfil público' }} />
-        <Stack.Screen name="profile/me/Profile" options={{ title: 'Mi perfil' }} />
-        <Stack.Screen name="profile/me/edit/ProfileEditorScreen" options={{ title: 'Editar perfil' }} />
+       {/* Perfil */}
+<Stack.Screen
+  name="profile/[username]/ProfileScreen"
+  options={{ title: 'Perfil público' }}
+/>
+<Stack.Screen
+  name="profile/me/Profile"
+  options={{ title: 'Mi perfil' }}
+/>
+<Stack.Screen
+  name="profile/me/edit/ProfileEditorScreen"
+  options={{ title: 'Editar perfil' }}
+/>
 
-        {/* Modales */}
+
+        {/* Modal */}
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
     </ThemeProvider>
   );
 }
