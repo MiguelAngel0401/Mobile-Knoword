@@ -3,22 +3,22 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { User } from "lucide-react-native";
 import { logout } from "../../../../shared-core/src/services/auth/logout";
 import privateApiClient from "../../../../shared-core/src/services/client/privateApiClient";
+import { useRouter } from "expo-router";
 
 export function ProfileMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
   const logoutFromBackend = async () => {
-    try {
-      await logout(privateApiClient);
-      console.log("Sesión cerrada");
-    } catch (error) {
-      console.error("Error al cerrar sesión:", error);
-    }
+    setIsOpen(false);
+    
+    await logout(privateApiClient);
+    
+    router.replace("/auth/login/LoginScreen");
   };
 
   return (
     <View style={{ position: "relative" }}>
-      {/* Botón de usuario */}
       <TouchableOpacity
         onPress={() => setIsOpen(!isOpen)}
         style={styles.userButton}
@@ -26,13 +26,12 @@ export function ProfileMenu() {
         <User size={24} color="white" />
       </TouchableOpacity>
 
-      {/* Menú desplegable */}
       {isOpen && (
         <View style={styles.menuContainer}>
           <TouchableOpacity
             onPress={() => {
-              console.log("Ir a /profile/me");
               setIsOpen(false);
+              router.push("/profile/me/Profile");
             }}
             style={styles.menuItem}
           >
@@ -41,8 +40,8 @@ export function ProfileMenu() {
 
           <TouchableOpacity
             onPress={() => {
-              console.log("Ir a /profile/me/edit");
               setIsOpen(false);
+              router.push("/profile/me/edit/ProfileEditorScreen");
             }}
             style={styles.menuItem}
           >
@@ -50,10 +49,7 @@ export function ProfileMenu() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => {
-              logoutFromBackend();
-              setIsOpen(false);
-            }}
+            onPress={logoutFromBackend}
             style={[styles.menuItem, styles.logoutButton]}
           >
             <Text style={styles.logoutText}>Cerrar Sesión</Text>
@@ -73,7 +69,7 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     position: "absolute",
-    top: 40, // justo debajo del ícono
+    top: 40,
     right: 0,
     width: 200,
     backgroundColor: "#111827",

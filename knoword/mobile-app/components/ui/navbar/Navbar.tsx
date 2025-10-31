@@ -5,7 +5,7 @@ import { NotificationsMenu } from "./NotificationsMenu";
 import { ProfileMenu } from "./ProfileMenu";
 
 export default function Navbar() {
-  const pathname = "/communities"; // Simulado, reemplaza con tu lógica real
+  const pathname = "/communities";
 
   return (
     <View style={styles.container}>
