@@ -4,8 +4,6 @@ import {
   Home,
   Compass,
   Users,
-  Bookmark,
-  Settings,
   ChevronRight,
 } from "lucide-react-native";
 
@@ -19,6 +17,7 @@ const communitySubmenu = [
   { name: "Explorar Comunidades" },
   { name: "Comunidades a las que pertenezco" },
   { name: "Mis Comunidades" },
+  { name: "Crear Comunidad" },
 ];
 
 export default function LateralMenu() {
