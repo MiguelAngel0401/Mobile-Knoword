@@ -12,12 +12,12 @@ export default function Followers() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",   // items-center
-    justifyContent: "center", // justify-center
+    alignItems: "center",
+    justifyContent: "center",
   },
   text: {
-    color: "white",        // text-white
-    fontSize: 18,          // text-lg
-    fontWeight: "600",     // font-semibold
+    color: "white",    
+    fontSize: 18,      
+    fontWeight: "600",     
   },
 });

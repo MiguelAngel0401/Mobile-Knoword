@@ -13,8 +13,6 @@ const navigation = [
   { name: "Inicio", icon: Home },
   { name: "Explorar", icon: Compass },
   { name: "Comunidades", icon: Users, submenu: true },
-  { name: "Cursos", icon: Bookmark },
-  { name: "Configuración", icon: Settings },
 ];
 
 const communitySubmenu = [

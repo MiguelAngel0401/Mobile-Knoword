@@ -31,16 +31,16 @@ const styles = StyleSheet.create({
   },
   inputWrapper: {
     width: "100%",
-    maxWidth: 480, // max-w-xl
+    maxWidth: 480,
     position: "relative",
     justifyContent: "center",
   },
   input: {
     width: "100%",
-    paddingLeft: 48, // pl-12
-    paddingRight: 16, // pr-4
-    paddingVertical: 8, // py-2
-    borderRadius: 9999, // rounded-full
+    paddingLeft: 48,
+    paddingRight: 16,
+    paddingVertical: 8,
+    borderRadius: 9999,
     backgroundColor: "#1f1e28",
     color: "white",
   },
@@ -48,6 +48,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 12, // left-3
     top: "50%",
-    transform: [{ translateY: -10 }], // -translate-y-1/2 (ajustado al tamaño del icono)
+    transform: [{ translateY: -10 }],
   },
 });

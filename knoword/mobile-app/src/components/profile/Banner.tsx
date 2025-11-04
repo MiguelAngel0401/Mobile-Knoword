@@ -29,7 +29,7 @@ export function Banner() {
       try {
         setLoading(true);
         const data = await getMe(privateApiClient);
-        console.log("Perfil cargado:", data.user); // debug
+        console.log("Perfil cargado:", data.user);
         setUserData(data.user);
         setError(null);
       } catch (err) {
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   },
   followItem: {
     alignItems: "center",
-    minWidth: 90, // 👈 asegura espacio suficiente
+    minWidth: 90,
   },
   followNumber: { fontSize: 20, fontWeight: "600", color: "white" },
   followLabel: {

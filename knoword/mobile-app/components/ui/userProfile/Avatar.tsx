@@ -55,7 +55,7 @@ export function Avatar({ src, size = "md", editable = false }: AvatarProps) {
           resizeMode="cover"
         />
       </TouchableOpacity>
-      {editable && <Text style={styles.editText}>Editar</Text>}
+      {/*editable && <Text style={styles.editText}>Editar</Text>*/}
     </View>
   );
 }

@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: "white",
-    fontSize: 18, // text-lg
-    fontWeight: "600", // font-semibold
+    fontSize: 18,
+    fontWeight: "600",
   },
 });
