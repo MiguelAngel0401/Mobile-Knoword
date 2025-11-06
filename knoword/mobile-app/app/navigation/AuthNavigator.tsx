@@ -4,7 +4,7 @@ import LoginScreen from "../auth/login/LoginScreen";
 import RegisterScreen from "../auth/register/RegisterScreen";
 import ForgotPasswordScreen from "../auth/forgot-password/ForgotPasswordScreen";
 import ConfirmAccountScreen from "../auth/confirm-account/ConfirmAccountScreen";
-import { AuthStackParamList } from "@shared/types/navigation"; // desde shared-core
+import { AuthStackParamList } from "@shared/types/navigation";
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 

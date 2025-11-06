@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
-  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { z } from "zod";
@@ -17,14 +18,13 @@ import debounce from "lodash/debounce";
 import { Image as ImageIcon } from "lucide-react-native";
 
 import { createCommunitySchema } from "../../../../shared-core/src/validators/community/createCommunity";
-import {
-  createCommunity,
-  getTagRecommendations,
-} from "@shared/services/community/communityServices";
+import { createCommunity, getTagRecommendations } from "@shared/services/community/communityServices";
 import { uploadToCloudinary } from "@shared/services/cloudinary/upload";
 
 import CommunitySuccessModal from "../components/modals/CommunitySuccessModal";
 import CommunityErrorModal from "../components/modals/CommuntyErrorModal";
+import { styles } from './styles';
+
 
 type CreateCommunityPageData = z.infer<typeof createCommunitySchema>;
 
@@ -32,9 +32,6 @@ export default function CreateCommunityScreen() {
   const router = useRouter();
 
   const [communityId, setCommunityId] = useState<string>("");
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [isPrivate, setIsPrivate] = useState(false);
-
   const [inputValue, setInputValue] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -56,15 +53,17 @@ export default function CreateCommunityScreen() {
     handleSubmit,
     setValue,
     watch,
-    formState: { errors, isValid },
+    formState: { errors },
   } = useForm<CreateCommunityPageData>({
     resolver: zodResolver(createCommunitySchema),
-    mode: "onTouched",
+    mode: "onChange",
     defaultValues: {
       name: "",
       description: "",
       banner: undefined,
       avatar: undefined,
+      isPrivate: false,
+      tags: [],
     },
   });
 
@@ -73,27 +72,34 @@ export default function CreateCommunityScreen() {
     register("description");
     register("banner");
     register("avatar");
+    register("isPrivate");
+    register("tags");
   }, [register]);
 
-  watch("name");
-  watch("description");
+  const name = watch("name");
+  const description = watch("description");
+  const isPrivate = watch("isPrivate");
+  const tags = watch("tags");
 
-  interface TagSuggestion {
-    name: string;
-  }
+  const isFormValid =
+    name.trim().length >= 3 &&
+    description.trim().length >= 10 &&
+    tags.length >= 3 &&
+    !isUploadingBanner &&
+    !isUploadingAvatar;
 
   const fetchTagSuggestions = useCallback(
     debounce(async (query: string) => {
-      setTagError(null);
-      if (query.length < 2) {
+      if (query.length < 3) {
         setSuggestions([]);
+        setIsSearching(false);
         return;
       }
       setIsSearching(true);
       try {
-        const response = await getTagRecommendations(query) as TagSuggestion[];
+        const response = await getTagRecommendations(query);
         const newSuggestions = response
-          .filter((s) => !selectedTags.includes(s.name.toLowerCase()))
+          .filter((s) => !tags.includes(s.name.toLowerCase()))
           .map((s) => s.name);
         setSuggestions(newSuggestions);
       } catch (error) {
@@ -102,12 +108,17 @@ export default function CreateCommunityScreen() {
       } finally {
         setIsSearching(false);
       }
-    }, 1000),
-    [selectedTags],
+    }, 800),
+    [tags]
   );
 
   useEffect(() => {
-    fetchTagSuggestions(inputValue);
+    if (inputValue.trim().length >= 3) {
+      fetchTagSuggestions(inputValue);
+    } else {
+      setSuggestions([]);
+      setIsSearching(false);
+    }
     return () => {
       fetchTagSuggestions.cancel();
     };
@@ -115,34 +126,56 @@ export default function CreateCommunityScreen() {
 
   const handleAddTag = (tag: string) => {
     const newTag = tag.trim().toLowerCase();
-    if (newTag && !selectedTags.includes(newTag) && selectedTags.length < maxTags) {
-      setSelectedTags((prev) => [...prev, newTag]);
-      setInputValue("");
-      setSuggestions([]);
-    } else if (selectedTags.includes(newTag)) {
-      setTagError("Esta etiqueta ya ha sido agregada.");
+
+    if (!newTag) return;
+
+    if (newTag.length < 3) {
+      setTagError("Cada etiqueta debe tener al menos 3 caracteres.");
+      setTimeout(() => setTagError(null), 3000);
+      return;
     }
+
+    if (tags.length >= maxTags) {
+      setTagError(`Máximo ${maxTags} etiquetas permitidas.`);
+      setTimeout(() => setTagError(null), 3000);
+      return;
+    }
+
+    if (tags.includes(newTag)) {
+      setTagError("Esta etiqueta ya ha sido agregada.");
+      setTimeout(() => setTagError(null), 3000);
+      return;
+    }
+
+    setValue("tags", [...tags, newTag], { shouldValidate: true });
+    setInputValue("");
+    setSuggestions([]);
+    setTagError(null);
   };
 
   const handleTagRemove = (tagToRemove: string) => {
-    setSelectedTags((prev) => prev.filter((t) => t !== tagToRemove));
+    setValue("tags", tags.filter((t) => t !== tagToRemove), { shouldValidate: true });
   };
 
-  const handleImageUpload = async (uri: string, type: "banner" | "avatar") => {
+  const openSystemImagePicker = async (type: "banner" | "avatar") => {
     const setPreview = type === "banner" ? setBannerPreview : setAvatarPreview;
     const setIsLoading = type === "banner" ? setIsUploadingBanner : setIsUploadingAvatar;
 
     try {
-      setPreview(uri);
       setIsLoading(true);
       setSubmissionError(null);
 
       const cloudinaryResult = await uploadToCloudinary();
       const cloudinaryUrl = cloudinaryResult.secure_url;
 
+      setPreview(cloudinaryUrl);
       setValue(type, cloudinaryUrl, { shouldValidate: true });
+    } catch (error: any) {
+      if (error.message === 'USER_CANCELED') {
+        console.log('Usuario canceló la selección de imagen');
+        return;
+      }
 
-    } catch (error) {
       console.error(`Error al subir la imagen de ${type}:`, error);
       setSubmissionError(`No se pudo subir la imagen de ${type}. Inténtalo de nuevo.`);
       setPreview(null);
@@ -152,13 +185,18 @@ export default function CreateCommunityScreen() {
     }
   };
 
-  const openSystemImagePicker = async (type: "banner" | "avatar") => {
-    const sampleUri =
-      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&q=80";
-    await handleImageUpload(sampleUri, type);
+  const handleCloseSuccessModal = () => {
+    setIsSubmitCorrect(false);
+    setValue("name", "");
+    setValue("description", "");
+    setValue("banner", undefined);
+    setValue("avatar", undefined);
+    setValue("isPrivate", false);
+    setValue("tags", []);
+    setBannerPreview(null);
+    setAvatarPreview(null);
   };
 
-  const handleCloseSuccessModal = () => setIsSubmitCorrect(false);
   const handleCloseErrorModal = () => {
     setSubmissionError(null);
     setIsSubmitting(false);
@@ -167,139 +205,195 @@ export default function CreateCommunityScreen() {
   async function submitCreateCommunityForm(data: CreateCommunityPageData) {
     setIsSubmitting(true);
     setSubmissionError(null);
-    const communityData = { ...data, isPrivate, tags: selectedTags };
+
     try {
-      const response = await createCommunity(communityData);
+      const response = await createCommunity(data);
       setIsSubmitCorrect(true);
       setCommunityId(String(response.id));
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al crear la comunidad:", error);
-      setSubmissionError("Error al crear la comunidad. Por favor, inténtalo de nuevo.");
+      setSubmissionError(
+        error.response?.data?.message ||
+        "Error al crear la comunidad. Por favor, inténtalo de nuevo."
+      );
     } finally {
       setIsSubmitting(false);
     }
   }
 
+  useEffect(() => {
+    if (isSubmitCorrect && communityId) {
+      setTimeout(() => {
+        //Opción 1: Ir a "Mis comunidades"
+        router.replace('/communities/my-communities');
+
+        //Opción 2: Ir al detalle (si ya creaste la página)
+        // router.replace(`/communities/${communityId}`);
+
+        //Opción 3: Volver atrás
+        // router.back();
+      }, 5000);
+    }
+  }, [isSubmitCorrect, communityId]);
+
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Crear Comunidad</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.title}>Crear Comunidad</Text>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Información de la comunidad</Text>
-        <Text style={styles.sectionDescription}>
-          Estamos emocionados de ver tu comunidad cobrar vida. Cuéntanos un poco de lo que tienes en mente.
-        </Text>
+        {/* Información básica */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Información de la comunidad</Text>
+          <Text style={styles.sectionDescription}>
+            Cuéntanos un poco sobre tu comunidad.
+          </Text>
 
-        <View style={styles.fieldContainer}>
-          <Text style={styles.label}>Título de la comunidad</Text>
-          <TextInput
-            placeholder="Ej. Matemáticas y física"
-            placeholderTextColor="#9CA3AF"
-            onChangeText={(v) => setValue("name", v, { shouldValidate: true })}
-            style={[styles.input, errors.name && styles.inputError]}
-          />
-          {errors.name && <Text style={styles.errorText}>{errors.name.message}</Text>}
+          <View style={styles.fieldContainer}>
+            <Text style={styles.label}>Título de la comunidad</Text>
+            <TextInput
+              placeholder="Ej. Matemáticas y física"
+              placeholderTextColor="#9CA3AF"
+              value={name}
+              onChangeText={(v) => {
+                setValue("name", v, { shouldValidate: true });
+              }}
+              style={[styles.input, errors.name && styles.inputError]}
+            />
+            {errors.name && <Text style={styles.errorText}>{errors.name.message}</Text>}
+          </View>
+
+          <View style={styles.fieldContainer}>
+            <Text style={styles.label}>Descripción de la comunidad</Text>
+            <TextInput
+              placeholder="Ej. Un lugar para discutir y aprender sobre matemáticas y física."
+              placeholderTextColor="#9CA3AF"
+              value={description}
+              multiline
+              numberOfLines={4}
+              onChangeText={(v) => {
+                setValue("description", v, { shouldValidate: true });
+              }}
+              style={[styles.input, styles.textArea, errors.description && styles.inputError]}
+            />
+            {errors.description && (
+              <Text style={styles.errorText}>{errors.description.message}</Text>
+            )}
+          </View>
+
+          <View style={styles.privacyContainer}>
+            <View style={styles.privacyHeader}>
+              <Text style={styles.label}>Privacidad de la comunidad</Text>
+              <TouchableOpacity
+                onPress={() => setValue("isPrivate", !isPrivate, { shouldValidate: true })}
+                style={[styles.toggle, isPrivate ? styles.toggleActive : styles.toggleInactive]}
+                activeOpacity={0.8}
+              >
+                <View style={[styles.toggleThumb, isPrivate && styles.toggleThumbActive]} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.privacyInfo}>
+              {isPrivate ? (
+                <Text style={styles.privacyTextPrivate}>
+                  Privada: Solo invitados pueden unirse
+                </Text>
+              ) : (
+                <Text style={styles.privacyTextPublic}>
+                  Pública: Cualquiera puede unirse
+                </Text>
+              )}
+            </View>
+          </View>
         </View>
 
-        <View style={styles.fieldContainer}>
-          <Text style={styles.label}>Descripción de la comunidad</Text>
-          <TextInput
-            placeholder="Ej. Un lugar para discutir y aprender sobre matemáticas y física."
-            placeholderTextColor="#9CA3AF"
-            multiline
-            onChangeText={(v) => setValue("description", v, { shouldValidate: true })}
-            style={[styles.input, styles.textArea, errors.description && styles.inputError]}
-          />
-          {errors.description && (
-            <Text style={styles.errorText}>{errors.description.message}</Text>
-          )}
-        </View>
+        {/* Etiquetas */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Etiquetas</Text>
+          <Text style={styles.sectionDescription}>
+            Agrega al menos 3 etiquetas para ayudar a otros a encontrar tu comunidad.
+          </Text>
 
-        <View style={styles.privacyContainer}>
-          <Text style={styles.label}>Privacidad de la comunidad.</Text>
-          <TouchableOpacity
-            onPress={() => setIsPrivate((v) => !v)}
-            style={[styles.toggle, isPrivate ? styles.toggleActive : styles.toggleInactive]}
-            activeOpacity={0.8}
-          >
-            <View style={[styles.toggleThumb, isPrivate && styles.toggleThumbActive]} />
-          </TouchableOpacity>
+          <View style={styles.tagsInputWrapper}>
+            <TextInput
+              placeholder="Escribe una etiqueta"
+              placeholderTextColor="#9CA3AF"
+              value={inputValue}
+              onChangeText={(text) => {
+                setInputValue(text);
+                setTagError(null);
+              }}
+              onSubmitEditing={() => {
+                const trimmed = inputValue.trim();
+                if (trimmed) {
+                  handleAddTag(trimmed);
+                }
+              }}
+              returnKeyType="done"
+              blurOnSubmit={false}
+              style={styles.input}
+            />
+            {tagError && <Text style={styles.errorText}>{tagError}</Text>}
+            {errors.tags && <Text style={styles.errorText}>{errors.tags.message}</Text>}
 
-          <View style={styles.privacyInfo}>
-            {isPrivate ? (
-              <Text style={styles.privacyTextPrivate}>
-                La comunidad será privada, solo podrás invitar a miembros mediante un enlace de confirmación
-              </Text>
-            ) : (
-              <Text style={styles.privacyTextPublic}>
-                La comunidad será pública; cualquiera puede unirse y ver su contenido.
+            {tags.length > 0 && (
+              <Text style={styles.tagCount}>
+                {tags.length} de {maxTags} etiquetas
               </Text>
             )}
           </View>
-        </View>
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Temas de la comunidad</Text>
-        <Text style={styles.sectionDescription}>
-          Añade al menos 3 etiquetas para que los demás puedan encontrar tu comunidad fácilmente.
-        </Text>
-
-        <View style={styles.tagsContainer}>
-          {selectedTags.map((tag) => (
-            <View key={tag} style={styles.tag}>
-              <Text style={styles.tagText}>{tag}</Text>
-              <TouchableOpacity onPress={() => handleTagRemove(tag)} style={styles.tagRemove}>
-                <Text style={styles.tagRemoveText}>×</Text>
-              </TouchableOpacity>
+          {isSearching && (
+            <View style={styles.searchingContainer}>
+              <ActivityIndicator color="#7c3aed" size="small" />
+              <Text style={styles.searchingText}>Buscando...</Text>
             </View>
-          ))}
-        </View>
+          )}
 
-        {selectedTags.length < maxTags ? (
-          <View>
-            <TextInput
-              placeholder="Ej. programación"
-              placeholderTextColor="#9CA3AF"
-              value={inputValue}
-              onChangeText={setInputValue}
-              style={styles.tagInput}
-            />
-
-            {isSearching && (
-              <Text style={styles.searchingText}>🔍 Buscando...</Text>
-            )}
-
-            {suggestions.length > 0 && !isSearching && (
-              <View style={styles.suggestionsContainer}>
-                {suggestions.slice(0, 5).map((suggestion) => (
+          {!isSearching && suggestions.length > 0 && (
+            <View style={styles.suggestionsContainer}>
+              <Text style={styles.suggestionsTitle}>Sugerencias:</Text>
+              <View style={styles.suggestionsWrapper}>
+                {suggestions.slice(0, 8).map((tag) => (
                   <TouchableOpacity
-                    key={suggestion}
-                    onPress={() => handleAddTag(suggestion)}
+                    key={tag}
+                    onPress={() => handleAddTag(tag)}
                     style={styles.suggestion}
                   >
-                    <Text style={styles.suggestionText}>+ {suggestion}</Text>
+                    <Text style={styles.suggestionText}>{tag}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
-            )}
-          </View>
-        ) : (
-          <Text style={styles.maxTagsText}>
-            Has agregado el máximo de {maxTags} etiquetas.
+            </View>
+          )}
+
+          {tags.length > 0 && (
+            <View style={styles.selectedTagsContainer}>
+              {tags.map((tag) => (
+                <View key={tag} style={styles.selectedTag}>
+                  <Text style={styles.selectedTagText}>{tag}</Text>
+                  <TouchableOpacity onPress={() => handleTagRemove(tag)}>
+                    <Text style={styles.removeTag}>✕</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+
+        {/* Imágenes */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Imagen de cabecera</Text>
+          <Text style={styles.sectionDescription}>
+            Recomendado: 1200 x 400 px (opcional)
           </Text>
-        )}
 
-        {tagError && <Text style={styles.tagErrorText}>{tagError}</Text>}
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Imágenes de la comunidad</Text>
-        <Text style={styles.sectionDescription}>
-          Añade un banner y un avatar representativo para que tu comunidad se vea única.
-        </Text>
-
-        <View style={styles.imagesSection}>
           <TouchableOpacity
             onPress={() => openSystemImagePicker("banner")}
             activeOpacity={0.8}
@@ -307,7 +401,8 @@ export default function CreateCommunityScreen() {
           >
             {isUploadingBanner && (
               <View style={styles.uploadingOverlay}>
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color="#fff" size="large" />
+                <Text style={styles.uploadingText}>Subiendo...</Text>
               </View>
             )}
 
@@ -320,19 +415,24 @@ export default function CreateCommunityScreen() {
             ) : (
               !isUploadingBanner && (
                 <View style={styles.uploadPlaceholder}>
-                  <Text style={styles.uploadTitle}>Sube la cabecera</Text>
-                  <Text style={styles.uploadDescription}>
-                    Pulsa aquí para elegir una imagen. Ideal: 1840 x 560 píxeles.
-                  </Text>
+                  <ImageIcon size={40} color="#52525b" />
+                  <Text style={styles.uploadPlaceholderText}>Toca para subir</Text>
                 </View>
               )
             )}
           </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Avatar de la comunidad</Text>
+          <Text style={styles.sectionDescription}>
+            Recomendado: 512 x 512 px (opcional)
+          </Text>
 
           <TouchableOpacity
             onPress={() => openSystemImagePicker("avatar")}
             activeOpacity={0.8}
-            style={styles.avatarUpload}
+            style={styles.avatarUploadContainer}
           >
             <View style={styles.avatarBox}>
               {isUploadingAvatar && (
@@ -348,339 +448,64 @@ export default function CreateCommunityScreen() {
                   resizeMode="cover"
                 />
               ) : (
-                !isUploadingAvatar && <ImageIcon size={24} color="#A1A1AA" />
+                !isUploadingAvatar && (
+                  <View style={styles.avatarPlaceholder}>
+                    <ImageIcon size={32} color="#52525b" />
+                  </View>
+                )
               )}
             </View>
-
-            <View style={styles.avatarInfo}>
-              <Text style={styles.avatarTitle}>Sube un avatar</Text>
-              <Text style={styles.avatarDescription}>
-                Formato ideal cuadrado de 512 píxeles.
-              </Text>
-            </View>
+            <Text style={styles.avatarUploadText}>Toca para subir avatar</Text>
           </TouchableOpacity>
         </View>
-      </View>
 
-      <View style={styles.actionsContainer}>
+        {/* Botón de crear */}
         <TouchableOpacity
-          disabled={
-            isUploadingBanner || isUploadingAvatar || !isValid || selectedTags.length < 3
-          }
-          onPress={handleSubmit(submitCreateCommunityForm)}
           style={[
-            styles.createButton,
-            (isUploadingBanner || isUploadingAvatar || !isValid || selectedTags.length < 3) &&
-            styles.createButtonDisabled
+            styles.submitButton,
+            !isFormValid && styles.submitButtonDisabled,
           ]}
+          disabled={!isFormValid || isSubmitting}
+          onPress={handleSubmit(submitCreateCommunityForm)}
         >
-          <Text style={styles.buttonText}>
-            {isSubmitting ? "Creando..." : "Crear Comunidad"}
-          </Text>
+          {isSubmitting ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.submitButtonText}>Crear comunidad</Text>
+          )}
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => router.push("/communities" as any)}
-          style={styles.cancelButton}
-        >
-          <Text style={styles.buttonText}>Ir a comunidades</Text>
-        </TouchableOpacity>
-      </View>
+        {/* Info de validación */}
+        {!isFormValid && (
+          <View style={styles.validationInfo}>
+            {name.trim().length < 3 && (
+              <Text style={styles.validationText}>• Falta el título de la comunidad</Text>
+            )}
+            {description.trim().length < 10 && (
+              <Text style={styles.validationText}>• Falta la descripción</Text>
+            )}
+            {tags.length < 3 && (
+              <Text style={styles.validationText}>
+                • Faltan {3 - tags.length} etiqueta(s)
+              </Text>
+            )}
+          </View>
+        )}
 
-      <CommunitySuccessModal
-        isOpen={isSubmitCorrect}
-        onClose={handleCloseSuccessModal}
-        message="Tu comunidad se ha creado con éxito. Comparte tu conocimiento con el mundo."
-        communityId={communityId}
-      />
-      <CommunityErrorModal
-        isOpen={!!submissionError}
-        onClose={handleCloseErrorModal}
-        message={submissionError || undefined}
-      />
-    </ScrollView>
+        {/* Modales */}
+        <CommunitySuccessModal
+          isOpen={isSubmitCorrect}
+          onClose={handleCloseSuccessModal}
+          message="Tu comunidad se ha creado con éxito."
+          communityId={communityId}
+        />
+
+        <CommunityErrorModal
+          isOpen={!!submissionError}
+          onClose={handleCloseErrorModal}
+          message={submissionError || ""}
+        />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000000',
-    paddingHorizontal: 24,
-    paddingVertical: 24,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 24,
-    color: '#ffffff',
-  },
-  section: {
-    backgroundColor: '#111827',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    padding: 24,
-    width: '100%',
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#ffffff',
-    marginBottom: 4,
-  },
-  sectionDescription: {
-    fontSize: 14,
-    color: '#9ca3af',
-    marginBottom: 24,
-  },
-  fieldContainer: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 4,
-    color: '#ffffff',
-  },
-  input: {
-    width: '100%',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: '#1f2937',
-    color: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#4b5563',
-  },
-  textArea: {
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  inputError: {
-    borderColor: '#ef4444',
-  },
-  errorText: {
-    color: '#f87171',
-    fontSize: 14,
-    marginTop: 4,
-  },
-  privacyContainer: {
-    marginBottom: 8,
-  },
-  toggle: {
-    height: 24,
-    width: 44,
-    marginTop: 8,
-    borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  toggleActive: {
-    backgroundColor: '#7c3aed',
-  },
-  toggleInactive: {
-    backgroundColor: '#374151',
-  },
-  toggleThumb: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: '#ffffff',
-    marginLeft: 4,
-  },
-  toggleThumbActive: {
-    marginLeft: 24,
-  },
-  privacyInfo: {
-    marginTop: 8,
-  },
-  privacyTextPrivate: {
-    fontSize: 14,
-    color: '#fca5a5',
-  },
-  privacyTextPublic: {
-    fontSize: 14,
-    color: '#9ca3af',
-  },
-  tagsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 16,
-  },
-  tag: {
-    backgroundColor: '#7c3aed',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 6,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  tagText: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  tagRemove: {
-    marginLeft: 12,
-  },
-  tagRemoveText: {
-    color: '#fecaca',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  tagInput: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#4b5563',
-    borderRadius: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 14,
-    backgroundColor: '#1f2937',
-    color: '#ffffff',
-  },
-  searchingText: {
-    fontSize: 14,
-    color: '#9ca3af',
-    fontStyle: 'italic',
-    marginTop: 8,
-  },
-  suggestionsContainer: {
-    marginTop: 16,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  suggestion: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#374151',
-    borderRadius: 16,
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  suggestionText: {
-    color: '#f3f4f6',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  maxTagsText: {
-    fontSize: 14,
-    color: '#9ca3af',
-    marginTop: 8,
-  },
-  tagErrorText: {
-    color: '#f87171',
-    fontSize: 14,
-    marginTop: 8,
-  },
-  imagesSection: {
-    marginTop: 0,
-  },
-  bannerUpload: {
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: '#52525b',
-    borderRadius: 8,
-    padding: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-  },
-  uploadingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 6,
-  },
-  bannerImage: {
-    width: '100%',
-    height: 192,
-    borderRadius: 6,
-  },
-  uploadPlaceholder: {
-    alignItems: 'center',
-  },
-  uploadTitle: {
-    color: '#ffffff',
-    marginBottom: 4,
-    fontWeight: '600',
-  },
-  uploadDescription: {
-    fontSize: 14,
-    color: '#a1a1aa',
-    textAlign: 'center',
-  },
-  avatarUpload: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  avatarBox: {
-    width: 80,
-    height: 80,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: '#52525b',
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#1f2937',
-    marginRight: 16,
-    position: 'relative',
-  },
-  avatarImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 6,
-  },
-  avatarInfo: {
-    flex: 1,
-  },
-  avatarTitle: {
-    fontSize: 14,
-    color: '#ffffff',
-    marginBottom: 4,
-    fontWeight: '600',
-  },
-  avatarDescription: {
-    fontSize: 14,
-    color: '#a1a1aa',
-  },
-  actionsContainer: {
-    flexDirection: 'row',
-    marginTop: 8,
-    justifyContent: 'center',
-  },
-  createButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 6,
-    backgroundColor: '#2563eb',
-    marginRight: 16,
-  },
-  createButtonDisabled: {
-    backgroundColor: '#1e3a8a',
-    opacity: 0.5,
-  },
-  cancelButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#4b5563',
-    borderRadius: 6,
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontWeight: 'bold',
-  },
-});
+};

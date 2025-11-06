@@ -12,6 +12,13 @@ export type AuthStackParamList = {
 export type AppStackParamList = {
   Profile: undefined;
   ProfileEditor: undefined;
+
+  // Comunidades
+  ExploreCommunities: undefined;
+  MemberCommunities: undefined;
+  MyCommunities: undefined;
+  CreateCommunity: undefined;
+
 };
 
 // Rutas principales (comunidades, home, etc.)

@@ -15,14 +15,14 @@ export const uploadToCloudinary = async (): Promise<{ secure_url: string }> => {
   }
 
   const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    mediaTypes: ['images'],
     allowsEditing: true,
     aspect: [1, 1],
     quality: 0.8,
   });
 
   if (result.canceled) {
-    throw new Error("Selección cancelada");
+    throw new Error("USER_CANCELED");
   }
 
   const uri = result.assets[0].uri;
@@ -47,5 +47,5 @@ export const uploadToCloudinary = async (): Promise<{ secure_url: string }> => {
     throw new Error(errorData.error?.message || "Error al subir a Cloudinary");
   }
 
-  return response.json(); // devuelve { secure_url, ... }
+  return response.json();
 };

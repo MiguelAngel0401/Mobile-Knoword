@@ -17,6 +17,15 @@ export interface Community {
   isMember?: boolean;
 }
 
+export interface CommunityCreateData {
+  name: string;
+  description: string;
+  avatar?: string | null;
+  banner?: string | null;
+  isPrivate: boolean;
+  tags: string[];
+}
+
 export interface CommunityUpdateData {
   name?: string;
   description?: string;

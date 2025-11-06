@@ -11,9 +11,7 @@ export function ProfileMenu() {
 
   const logoutFromBackend = async () => {
     setIsOpen(false);
-    
     await logout(privateApiClient);
-    
     router.replace("/auth/login/LoginScreen");
   };
 
@@ -48,11 +46,52 @@ export function ProfileMenu() {
             <Text style={styles.menuText}>Editar perfil</Text>
           </TouchableOpacity>
 
+          {/* Rutas corregidas de comunidades */}
+          <TouchableOpacity
+            onPress={() => {
+              setIsOpen(false);
+              router.push("/communities/explore");
+            }}
+            style={styles.menuItem}
+          >
+            <Text style={styles.menuText}>Explorar comunidades</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              setIsOpen(false);
+              router.push("/communities/member");
+            }}
+            style={styles.menuItem}
+          >
+            <Text style={styles.menuText}>Comunidades que sigo</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              setIsOpen(false);
+              router.push("/communities/my");
+            }}
+            style={styles.menuItem}
+          >
+            <Text style={styles.menuText}>Mis comunidades</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              setIsOpen(false);
+              router.push("/communities/create");
+            }}
+            style={styles.menuItem}
+          >
+            <Text style={styles.menuText}>Crear comunidad</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             onPress={logoutFromBackend}
             style={[styles.menuItem, styles.logoutButton]}
           >
-            <Text style={styles.logoutText}>Cerrar Sesión</Text>
+            <Text style={styles.logoutText}>Cerrar sesión</Text>
           </TouchableOpacity>
         </View>
       )}

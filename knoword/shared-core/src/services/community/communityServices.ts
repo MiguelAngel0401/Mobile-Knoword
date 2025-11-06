@@ -5,12 +5,14 @@ import {
   CommunityCreateData,
   CommunityUpdateData,
 } from "../../types/community";
-import { Tag } from "../../types/community/communityTag";
+import { Tag, TagSuggestion } from "../../types/community/communityTag";
 
-export const getTagRecommendations = async (query: string) => {
+export const getTagRecommendations = async (
+  query: string
+): Promise<TagSuggestion[]> => {
   try {
     const response = await privateApiClient.get(
-      `/communities/tags/recommendations?tag=${query}`,
+      `/communities/tags/recommendations?tag=${query}`
     );
     return response.data;
   } catch (error) {
@@ -23,7 +25,7 @@ export const createCommunity = async (communityData: CommunityCreateData) => {
   try {
     const response = await privateApiClient.post(
       "/communities/create",
-      communityData,
+      communityData
     );
     console.log(response);
     return response.data;
@@ -46,7 +48,7 @@ export const exploreCommunities = async () => {
 export const getCommunityById = async (communityId: string) => {
   try {
     const response = await privateApiClient.get(
-      `/communities/community/${communityId}`,
+      `/communities/community/${communityId}`
     );
     return response.data;
   } catch (error) {
@@ -56,7 +58,7 @@ export const getCommunityById = async (communityId: string) => {
 };
 
 export const getCommunitiesByTag = async (
-  tag: string,
+  tag: string
 ): Promise<Community[]> => {
   try {
     const response = await publicApiClient.get(`/communities/by-tag/${tag}`);
@@ -80,7 +82,7 @@ export const getMyCommunities = async () => {
 export const joinCommunity = async (communityId: number) => {
   try {
     const response = await privateApiClient.post(
-      `/communities/join/${communityId}`,
+      `/communities/join/${communityId}`
     );
     return response.data;
   } catch (error) {
@@ -92,7 +94,7 @@ export const joinCommunity = async (communityId: number) => {
 export const leaveCommunity = async (communityId: number) => {
   try {
     const response = await privateApiClient.delete(
-      `/communities/leave/${communityId}`,
+      `/communities/leave/${communityId}`
     );
     return response.data;
   } catch (error) {
@@ -104,7 +106,7 @@ export const leaveCommunity = async (communityId: number) => {
 export const getUserCommunities = async () => {
   try {
     const response = await privateApiClient.get(
-      "/communities/user-communities",
+      "/communities/user-communities"
     );
     return response.data;
   } catch (error) {
@@ -115,12 +117,12 @@ export const getUserCommunities = async () => {
 
 export const updateCommunity = async (
   communityId: number,
-  communityData: CommunityUpdateData,
+  communityData: CommunityUpdateData
 ): Promise<any> => {
   try {
     const response = await privateApiClient.patch(
       `/communities/community/${communityId}`,
-      communityData,
+      communityData
     );
     return response.data;
   } catch (error) {

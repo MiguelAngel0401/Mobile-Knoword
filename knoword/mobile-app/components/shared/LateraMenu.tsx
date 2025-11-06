@@ -1,11 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import {
-  Home,
-  Compass,
-  Users,
-  ChevronRight,
-} from "lucide-react-native";
+import { Home, Compass, Users, ChevronRight } from "lucide-react-native";
+import { useRouter } from "expo-router";
 
 const navigation = [
   { name: "Inicio", icon: Home },
@@ -14,14 +10,15 @@ const navigation = [
 ];
 
 const communitySubmenu = [
-  { name: "Explorar Comunidades" },
-  { name: "Comunidades a las que pertenezco" },
-  { name: "Mis Comunidades" },
-  { name: "Crear Comunidad" },
+  { name: "Explorar Comunidades", route: "/communities/explore" },
+  { name: "Comunidades a las que pertenezco", route: "/communities/user-communities" },
+  { name: "Mis Comunidades", route: "/communities/my-communities" },
+  { name: "Crear Comunidad", route: "/communities/create" },
 ];
 
 export default function LateralMenu() {
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+  const router = useRouter();
 
   const toggleSubmenu = (itemName: string) => {
     setOpenSubmenu(openSubmenu === itemName ? null : itemName);
@@ -59,7 +56,7 @@ export default function LateralMenu() {
                         <TouchableOpacity
                           key={subItem.name}
                           style={styles.submenuButton}
-                          onPress={() => console.log("Navigate to", subItem.name)}
+                          onPress={() => router.push(subItem.route)}
                         >
                           <Text style={styles.submenuText}>{subItem.name}</Text>
                         </TouchableOpacity>

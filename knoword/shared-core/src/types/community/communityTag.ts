@@ -3,3 +3,7 @@ export interface Tag {
   name: string;
   createdAt: string;
 }
+
+export interface TagSuggestion {
+  name: string;
+}
