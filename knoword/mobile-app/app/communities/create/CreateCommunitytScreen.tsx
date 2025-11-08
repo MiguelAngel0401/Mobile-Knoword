@@ -23,8 +23,7 @@ import { uploadToCloudinary } from "@shared/services/cloudinary/upload";
 
 import CommunitySuccessModal from "../components/modals/CommunitySuccessModal";
 import CommunityErrorModal from "../components/modals/CommuntyErrorModal";
-import { styles } from './styles';
-
+import { styles } from "./styles";
 
 type CreateCommunityPageData = z.infer<typeof createCommunitySchema>;
 
@@ -82,7 +81,7 @@ export default function CreateCommunityScreen() {
   const tags = watch("tags");
 
   const isFormValid =
-    name.trim().length >= 3 &&
+    name.trim().length >= 4 &&
     description.trim().length >= 10 &&
     tags.length >= 3 &&
     !isUploadingBanner &&
@@ -171,8 +170,8 @@ export default function CreateCommunityScreen() {
       setPreview(cloudinaryUrl);
       setValue(type, cloudinaryUrl, { shouldValidate: true });
     } catch (error: any) {
-      if (error.message === 'USER_CANCELED') {
-        console.log('Usuario canceló la selección de imagen');
+      if (error.message === "USER_CANCELED") {
+        console.log("Usuario canceló la selección de imagen");
         return;
       }
 
@@ -214,27 +213,13 @@ export default function CreateCommunityScreen() {
       console.error("Error al crear la comunidad:", error);
       setSubmissionError(
         error.response?.data?.message ||
-        "Error al crear la comunidad. Por favor, inténtalo de nuevo."
+        error.message ||
+          "Error al crear la comunidad. Por favor, inténtalo de nuevo."
       );
     } finally {
       setIsSubmitting(false);
     }
   }
-
-  useEffect(() => {
-    if (isSubmitCorrect && communityId) {
-      setTimeout(() => {
-        //Opción 1: Ir a "Mis comunidades"
-        router.replace('/communities/my-communities');
-
-        //Opción 2: Ir al detalle (si ya creaste la página)
-        // router.replace(`/communities/${communityId}`);
-
-        //Opción 3: Volver atrás
-        // router.back();
-      }, 5000);
-    }
-  }, [isSubmitCorrect, communityId]);
 
   return (
     <KeyboardAvoidingView
@@ -461,10 +446,7 @@ export default function CreateCommunityScreen() {
 
         {/* Botón de crear */}
         <TouchableOpacity
-          style={[
-            styles.submitButton,
-            !isFormValid && styles.submitButtonDisabled,
-          ]}
+          style={[styles.submitButton, !isFormValid && styles.submitButtonDisabled]}
           disabled={!isFormValid || isSubmitting}
           onPress={handleSubmit(submitCreateCommunityForm)}
         >
@@ -478,8 +460,8 @@ export default function CreateCommunityScreen() {
         {/* Info de validación */}
         {!isFormValid && (
           <View style={styles.validationInfo}>
-            {name.trim().length < 3 && (
-              <Text style={styles.validationText}>• Falta el título de la comunidad</Text>
+            {name.trim().length < 4 && (
+              <Text style={styles.validationText}>• Falta el título de la comunidad (mínimo 4 caracteres)</Text>
             )}
             {description.trim().length < 10 && (
               <Text style={styles.validationText}>• Falta la descripción</Text>
@@ -508,4 +490,4 @@ export default function CreateCommunityScreen() {
       </ScrollView>
     </KeyboardAvoidingView>
   );
-};
+}

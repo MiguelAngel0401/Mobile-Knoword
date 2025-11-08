@@ -25,10 +25,15 @@ export default function CommunitySuccessModal({
   const router = useRouter();
 
   const handleGoToCommunity = () => {
-    if (communityId) {
-      router.push(`/communities/community/${communityId}` as any);
+    console.log("🚀 Navegando a comunidad ID:", communityId);
+    
+    if (!communityId) {
+      console.warn("⚠️ No hay communityId");
+      return;
     }
+
     onClose();
+   router.push(`/communities/community/${communityId}`);
   };
 
   return (
@@ -39,30 +44,30 @@ export default function CommunitySuccessModal({
       onRequestClose={onClose}
     >
       <Pressable style={styles.overlay} onPress={onClose}>
-        <View style={styles.modalContainer}>
-          {/* Header */}
+        <Pressable style={styles.modalContainer} onPress={(e) => e.stopPropagation()}>
           <View style={styles.header}>
             <Text style={styles.headerText}>✅ Comunidad Creada</Text>
           </View>
 
-          {/* Body */}
           <View style={styles.body}>
             <Text style={styles.bodyText}>
               {message || "Tu comunidad ha sido creada exitosamente."}
             </Text>
           </View>
 
-          {/* Footer */}
           <View style={styles.footer}>
             <TouchableOpacity onPress={onClose} style={styles.buttonBlue}>
               <Text style={styles.buttonText}>OK, lo he entendido</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={handleGoToCommunity} style={styles.buttonPurple}>
+            <TouchableOpacity
+              onPress={handleGoToCommunity}
+              style={styles.buttonPurple}
+            >
               <Text style={styles.buttonText}>Muéstrame mi comunidad</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </Pressable>
       </Pressable>
     </Modal>
   );
