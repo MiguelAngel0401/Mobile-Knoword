@@ -1,2 +1,3 @@
-import ExploreCommunityScreen from "../../communities/explore/ExploreCommuntyScreen";
-export default ExploreCommunityScreen;
+// app/communities/explore/index.tsx
+import ExploreCommunitiesScreen from "./ExploreCommuntyScreen";
+export default ExploreCommunitiesScreen;

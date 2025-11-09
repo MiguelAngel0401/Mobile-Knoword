@@ -10,10 +10,10 @@ const navigation = [
 ];
 
 const communitySubmenu = [
-  { name: "Explorar Comunidades", route: "/communities/explore" },
-  { name: "Comunidades a las que pertenezco", route: "/communities/user-communities" },
-  { name: "Mis Comunidades", route: "/communities/my-communities" },
-  { name: "Crear Comunidad", route: "/communities/create" },
+  { name: "Explorar comunidades", route: "/communities/explore" },
+  { name: "Comunidades que sigo", route: "/communities/member" },
+  { name: "Mis comunidades", route: "/communities/my" },
+  { name: "Crear comunidad", route: "/communities/create" },
 ];
 
 export default function LateralMenu() {
@@ -56,7 +56,10 @@ export default function LateralMenu() {
                         <TouchableOpacity
                           key={subItem.name}
                           style={styles.submenuButton}
-                          onPress={() => router.push(subItem.route)}
+                          onPress={() => {
+                            setOpenSubmenu(null);
+                            router.push(subItem.route);
+                          }}
                         >
                           <Text style={styles.submenuText}>{subItem.name}</Text>
                         </TouchableOpacity>

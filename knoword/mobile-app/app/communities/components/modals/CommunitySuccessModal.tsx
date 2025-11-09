@@ -25,15 +25,12 @@ export default function CommunitySuccessModal({
   const router = useRouter();
 
   const handleGoToCommunity = () => {
-    console.log("🚀 Navegando a comunidad ID:", communityId);
-    
     if (!communityId) {
-      console.warn("⚠️ No hay communityId");
       return;
     }
 
     onClose();
-   router.push(`/communities/community/${communityId}`);
+    router.push(`/communities/community/${communityId}`);
   };
 
   return (
