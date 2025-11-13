@@ -7,19 +7,18 @@ import {
     TouchableOpacity,
     ActivityIndicator,
 } from "react-native";
-import { Calendar, Users, Tag, Lock, Globe } from "lucide-react-native";
+import { Calendar, Users, Tag, Lock, Globe, Pencil, Trash2, Share2 } from "lucide-react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import DeleteCommunityModal from "../../components/modals/DeleteCommunityModal";
 import JoinCommunitySuccessModal from "../../components/modals/JoinCommunitySuccessModal";
 import LeaveCommunityModal from "../../components/modals/LeaveCommunityModal";
-import PostComponent from "../../components/ui/posts/PostActionComponent";
 import { getCommunityById, joinCommunity } from "../../../../../shared-core/src/services/community/communityServices";
 import type { Community } from "../../../../../shared-core/src/types/community";
 import { styles } from "./styles";
-import { useLocalSearchParams } from "expo-router";
 
 export default function CommunityDetailScreen() {
     const { idCommunity } = useLocalSearchParams<{ idCommunity: string }>();
-
+    const router = useRouter();
 
     const [community, setCommunity] = useState<Community | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -43,7 +42,6 @@ export default function CommunityDetailScreen() {
         };
         if (idCommunity) {
             fetchCommunity();
-        } else {
         }
     }, [idCommunity]);
 
@@ -62,6 +60,11 @@ export default function CommunityDetailScreen() {
         }
     };
 
+    const handleEdit = () => {
+        console.log("📝 Navegando a editar comunidad:", idCommunity);
+        router.push(`/communities/community/${idCommunity}/editar`);
+    };
+
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleDateString("es-ES", {
@@ -74,7 +77,8 @@ export default function CommunityDetailScreen() {
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#3B82F6" />
+                <ActivityIndicator size="large" color="#7c3aed" />
+                <Text style={styles.loadingText}>Cargando comunidad...</Text>
             </View>
         );
     }
@@ -89,7 +93,6 @@ export default function CommunityDetailScreen() {
             </View>
         );
     }
-
 
     return (
         <ScrollView style={styles.container}>
@@ -144,7 +147,9 @@ export default function CommunityDetailScreen() {
                 </View>
 
                 {community.isOwner && (
-                    <Text style={styles.ownerText}>¡Eres dueño de esta comunidad!</Text>
+                    <View style={styles.ownerBadge}>
+                        <Text style={styles.ownerText}>👑 Eres el creador de esta comunidad</Text>
+                    </View>
                 )}
 
                 {/* Botones de acción */}
@@ -155,6 +160,7 @@ export default function CommunityDetailScreen() {
                             onPress={handleJoin}
                             disabled={isJoining}
                         >
+                            <Users size={18} color="#fff" />
                             <Text style={styles.buttonText}>
                                 {isJoining ? "Uniendo..." : "Unirse"}
                             </Text>
@@ -166,28 +172,34 @@ export default function CommunityDetailScreen() {
                             style={styles.leaveButton}
                             onPress={() => setIsLeaving(true)}
                         >
-                            <Text style={styles.buttonText}>Salir</Text>
+                            <Text style={styles.buttonText}>Salir de la comunidad</Text>
                         </TouchableOpacity>
                     )}
 
                     {community.isOwner && (
-                        <>
-                            <TouchableOpacity style={styles.editButton}>
+                        <View style={styles.ownerActionsContainer}>
+                            <TouchableOpacity 
+                                style={styles.editButton}
+                                onPress={handleEdit}
+                            >
+                                <Pencil size={18} color="#fff" />
                                 <Text style={styles.buttonText}>Editar</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles.deleteButton}
                                 onPress={() => setIsDeleting(true)}
                             >
+                                <Trash2 size={18} color="#fff" />
                                 <Text style={styles.buttonText}>Eliminar</Text>
                             </TouchableOpacity>
-                        </>
+                        </View>
                     )}
-
-                    <TouchableOpacity style={styles.shareButton}>
-                        <Text style={styles.shareButtonText}>Compartir</Text>
-                    </TouchableOpacity>
                 </View>
+
+                <TouchableOpacity style={styles.shareButton}>
+                    <Share2 size={18} color="#7c3aed" />
+                    <Text style={styles.shareButtonText}>Compartir comunidad</Text>
+                </TouchableOpacity>
 
                 {/* Info extra */}
                 <View style={styles.infoSection}>
@@ -200,7 +212,7 @@ export default function CommunityDetailScreen() {
                     <View style={styles.infoRow}>
                         <Users size={20} color="#6B7280" />
                         <Text style={styles.infoText}>
-                            Miembros: {community.memberCount}
+                            {community.memberCount} {community.memberCount === 1 ? 'miembro' : 'miembros'}
                         </Text>
                     </View>
                 </View>

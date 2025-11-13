@@ -1,2 +1,2 @@
-import MyCommunityScreen from "../../communities/my/MyCommunityScreen";
+import MyCommunityScreen from "./MyCommunityScreen";
 export default MyCommunityScreen;

@@ -1,2 +1,2 @@
-import MemberCommunityScreen from "../../communities/member/MemberCommunityScreen";
+import MemberCommunityScreen from "./MemberCommunityScreen";
 export default MemberCommunityScreen;

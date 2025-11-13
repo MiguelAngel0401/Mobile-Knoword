@@ -4,9 +4,9 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
-  ScrollView,
   StyleSheet,
 } from "react-native";
+import { FileText, Users, UserPlus } from "lucide-react-native";
 import { Avatar } from "../../../components/ui/userProfile/Avatar";
 import Posts from "./Posts";
 import Communities from "./Communities";
@@ -59,25 +59,22 @@ export function Banner() {
     return null;
   }
 
-  const getButtonStyle = (tab: ActiveTab) => {
-    if (activeTab === tab) {
-      return [styles.tabText, styles.tabTextActive];
-    }
-    return [styles.tabText, styles.tabTextInactive];
-  };
+  const isActive = (tab: ActiveTab) => activeTab === tab;
 
   const formatName = (name: string) =>
     name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
 
   return (
-    <ScrollView style={styles.scroll}>
+    <View style={styles.container}>
       {/* Sección superior */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          {/* Avatar + seguidores */}
+          {/* Avatar */}
           <View style={styles.avatarSection}>
-            <Avatar src={userData.avatar || ""} size="lg" editable={true} />
+            <Avatar src={userData.avatar || ""} size="xl" editable={true} />
 
+            {/* Sección de seguidores/siguiendo (comentada por ahora) */}
+            {/*
             <View style={styles.followSection}>
               <View style={styles.followItem}>
                 <Text style={styles.followNumber}>1</Text>
@@ -88,40 +85,87 @@ export function Banner() {
                 <Text style={styles.followLabel}>Siguiendo</Text>
               </View>
             </View>
+            */}
           </View>
 
           {/* Información del usuario */}
           <View style={styles.userInfo}>
-            {/* Nombre real principal */}
-            <Text style={styles.realName}>
+            <Text style={styles.realName} numberOfLines={2}>
               {userData.realName
                 ? formatName(userData.realName)
                 : formatName(userData.username)}
             </Text>
 
-            {/* Username con @ (forzado a mostrarse completo) */}
-            <Text style={styles.username}>
+            <Text style={styles.username} numberOfLines={1}>
               @{String(userData.username).trim()}
             </Text>
 
-            {/* Bio */}
-            <View style={styles.bioWrapper}>
-              <Text style={styles.bio}>{userData.bio}</Text>
-            </View>
+            {userData.bio && (
+              <View style={styles.bioWrapper}>
+                <Text style={styles.bio}>{userData.bio}</Text>
+              </View>
+            )}
           </View>
         </View>
       </View>
 
-      {/* Tabs */}
+      {/* Tabs con iconos */}
       <View style={styles.tabs}>
-        <TouchableOpacity onPress={() => setActiveTab("posts")}>
-          <Text style={getButtonStyle("posts")}>Publicaciones</Text>
+        <TouchableOpacity
+          onPress={() => setActiveTab("posts")}
+          style={[styles.tabButton, isActive("posts") && styles.tabButtonActive]}
+        >
+          <FileText
+            size={22}
+            color={isActive("posts") ? "#3B82F6" : "#9ca3af"}
+          />
+          <Text
+            style={[styles.tabText, isActive("posts") && styles.tabTextActive]}
+          >
+            Posts
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => setActiveTab("communities")}>
-          <Text style={getButtonStyle("communities")}>Comunidades</Text>
+
+        <TouchableOpacity
+          onPress={() => setActiveTab("communities")}
+          style={[
+            styles.tabButton,
+            isActive("communities") && styles.tabButtonActive,
+          ]}
+        >
+          <Users
+            size={22}
+            color={isActive("communities") ? "#3B82F6" : "#9ca3af"}
+          />
+          <Text
+            style={[
+              styles.tabText,
+              isActive("communities") && styles.tabTextActive,
+            ]}
+          >
+            Comunidades
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => setActiveTab("followers")}>
-          <Text style={getButtonStyle("followers")}>Seguidores</Text>
+
+        <TouchableOpacity
+          onPress={() => setActiveTab("followers")}
+          style={[
+            styles.tabButton,
+            isActive("followers") && styles.tabButtonActive,
+          ]}
+        >
+          <UserPlus
+            size={22}
+            color={isActive("followers") ? "#3B82F6" : "#9ca3af"}
+          />
+          <Text
+            style={[
+              styles.tabText,
+              isActive("followers") && styles.tabTextActive,
+            ]}
+          >
+            Seguidores
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -131,90 +175,130 @@ export function Banner() {
         {activeTab === "communities" && <Communities />}
         {activeTab === "followers" && <Followers />}
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1, width: "100%" },
-  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  container: {
+    flex: 1,
+    width: "100%",
+    backgroundColor: "#111827",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: 200,
+  },
   header: {
     width: "100%",
-    backgroundColor: "#1f1e28",
+    backgroundColor: "#1f2937",
     marginTop: 16,
-    paddingHorizontal: 24,
-    paddingVertical: 32,
-    borderRadius: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 28,
+    borderRadius: 12,
     shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 6,
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 8,
   },
   headerContent: {
     flexDirection: "column",
     alignItems: "center",
-    gap: 16,
+    gap: 20,
   },
   avatarSection: {
     alignItems: "center",
-    gap: 16,
+    gap: 20,
+    width: "100%",
   },
   followSection: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: 32,
-    marginTop: 8,
+    gap: 40,
+    marginTop: 12,
+    width: "100%",
   },
   followItem: {
     alignItems: "center",
-    minWidth: 90,
+    flex: 1,
+    maxWidth: 120,
   },
-  followNumber: { fontSize: 20, fontWeight: "600", color: "white" },
+  followNumber: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#3B82F6",
+  },
   followLabel: {
     fontSize: 14,
     color: "#9ca3af",
-    flexShrink: 1,
-    flexWrap: "wrap",
     textAlign: "center",
+    marginTop: 4,
   },
-  userInfo: { marginTop: 24, alignItems: "center" },
+  userInfo: {
+    marginTop: 24,
+    alignItems: "center",
+    width: "100%",
+    paddingHorizontal: 8,
+  },
   realName: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "700",
     color: "white",
     textAlign: "center",
-    marginBottom: 4,
+    marginBottom: 6,
+    width: "100%",
   },
   username: {
     fontSize: 14,
     color: "#9ca3af",
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: 10,
+    width: "100%",
   },
   bioWrapper: {
     width: "100%",
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
+    marginTop: 10,
   },
   bio: {
     fontSize: 14,
-    color: "#9ca3af",
+    color: "#d1d5db",
     textAlign: "center",
-    flexWrap: "wrap",
+    lineHeight: 20,
   },
   tabs: {
     flexDirection: "row",
-    justifyContent: "space-evenly",
+    justifyContent: "space-around",
+    alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#1f2937",
-    marginTop: 24,
+    borderBottomColor: "#374151",
+    marginTop: 28,
+    width: "100%",
   },
-  tabText: { paddingVertical: 8, paddingHorizontal: 16 },
-  tabTextActive: {
-    borderBottomWidth: 2,
+  tabButton: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 14,
+    gap: 6,
+  },
+  tabButtonActive: {
+    borderBottomWidth: 3,
     borderBottomColor: "#3B82F6",
-    color: "white",
+  },
+  tabText: {
+    fontSize: 13,
+    color: "#9ca3af",
+    textAlign: "center",
+  },
+  tabTextActive: {
+    color: "#3B82F6",
     fontWeight: "600",
   },
-  tabTextInactive: { color: "#9ca3af" },
-  content: { marginTop: 24, paddingHorizontal: 16 },
+  content: {
+    marginTop: 28,
+    width: "100%",
+    paddingHorizontal: 16,
+  },
 });

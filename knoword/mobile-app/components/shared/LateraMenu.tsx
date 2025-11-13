@@ -11,7 +11,7 @@ const navigation = [
 
 const communitySubmenu = [
   { name: "Explorar comunidades", route: "/communities/explore" },
-  { name: "Comunidades que sigo", route: "/communities/member" },
+  { name: "Comunidades a las que pertenezco", route: "/communities/member" },
   { name: "Mis comunidades", route: "/communities/my" },
   { name: "Crear comunidad", route: "/communities/create" },
 ];
@@ -22,6 +22,16 @@ export default function LateralMenu() {
 
   const toggleSubmenu = (itemName: string) => {
     setOpenSubmenu(openSubmenu === itemName ? null : itemName);
+  };
+
+  const handleNavigation = (route: string) => {
+    console.log("🚀 Navegando a:", route);
+    setOpenSubmenu(null);
+    try {
+      router.push(route as any);
+    } catch (error) {
+      console.error("❌ Error al navegar:", error);
+    }
   };
 
   return (
@@ -56,10 +66,7 @@ export default function LateralMenu() {
                         <TouchableOpacity
                           key={subItem.name}
                           style={styles.submenuButton}
-                          onPress={() => {
-                            setOpenSubmenu(null);
-                            router.push(subItem.route);
-                          }}
+                          onPress={() => handleNavigation(subItem.route)}
                         >
                           <Text style={styles.submenuText}>{subItem.name}</Text>
                         </TouchableOpacity>

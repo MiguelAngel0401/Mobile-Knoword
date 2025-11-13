@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Menu } from "lucide-react-native";
+import { useFocusEffect } from "expo-router";
 import { ProfileMenu } from "../../components/ui/navbar/ProfileMenu";
 import { Banner } from "../../../mobile-app/src/components/profile/Banner";
 import Posts from "../../../mobile-app/src/components/profile/Posts";
@@ -10,11 +11,22 @@ import LateralMenu from "../../../mobile-app/components/shared/LateraMenu";
 
 export default function ProfileIndex() {
   const [showMenu, setShowMenu] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      setRefreshKey(prev => prev + 1);
+    }, [])
+  );
 
   return (
     <View style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.topBar}>
+      <ScrollView 
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header con padding */}
+        <View style={styles.header}>
           <TouchableOpacity
             onPress={() => setShowMenu(!showMenu)}
             style={styles.menuIcon}
@@ -33,8 +45,9 @@ export default function ProfileIndex() {
           </View>
         )}
 
+        {/* Card SIN padding horizontal en el container */}
         <View style={styles.card}>
-          <Banner />
+          <Banner key={refreshKey} />
           <Posts />
           <Followers />
           <Communities />
@@ -50,13 +63,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#000",
   },
   container: {
-    padding: 16,
+    paddingBottom: 16,
   },
-  topBar: {
+  header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 8,
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
   menuIcon: {
     padding: 8,
@@ -66,10 +81,11 @@ const styles = StyleSheet.create({
   },
   lateralMenuWrapper: {
     marginBottom: 16,
+    paddingHorizontal: 16,
   },
   card: {
     backgroundColor: "#111827",
-    borderRadius: 12,
+    borderRadius: 0,
     padding: 16,
     shadowColor: "#000",
     shadowOpacity: 0.3,
