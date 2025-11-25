@@ -21,6 +21,7 @@ import { User } from "../../../../../shared-core/src/types/users/user";
 import { uploadToCloudinary } from "../../../../../shared-core/src/services/cloudinary/upload";
 import client from "../../../lib/axios";
 import ErrorMessageScreen from "../../../../components/shared/ErrorMessageScreen";
+import BottomTabs from "../../../../src/components/profile/BottomTabs"; 
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
@@ -81,16 +82,11 @@ export default function ProfileScreen() {
     setSubmissionError(null);
 
     try {
-      console.log("Iniciando subida de imagen...");
       const cloudinaryResult = await uploadToCloudinary();
-      console.log("Imagen subida:", cloudinaryResult.secure_url);
-      
       const uploadedUrl = cloudinaryResult.secure_url;
 
       setAvatarPreview(uploadedUrl);
       setValue("avatar", uploadedUrl, { shouldDirty: true, shouldValidate: true });
-      
-      console.log("Avatar actualizado en preview:", uploadedUrl);
     } catch (error: any) {
       console.error("Error subiendo imagen:", error);
       if (error.message !== "Selección cancelada") {
@@ -113,11 +109,8 @@ export default function ProfileScreen() {
       avatar: avatarPreview || data.avatar || user?.avatar || ""
     };
     
-    console.log("Datos a enviar:", updatedData);
-    
     try {
       const updated = await updateUserData(client, updatedData);
-      console.log("Respuesta del servidor:", updated);
       
       setUser(updated.user);
       setAvatarPreview(updated.user.avatar || null);
@@ -275,6 +268,11 @@ export default function ProfileScreen() {
         </View>
       </ScrollView>
 
+      {/* BottomTabs flotante */}
+      <View style={styles.tabsWrapper}>
+        <BottomTabs />
+      </View>
+
       <Modal visible={isOpen} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -302,7 +300,7 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 24,
-    paddingBottom: 100,
+    paddingBottom: 120,
     flexGrow: 1,
   },
   centered: {
@@ -430,6 +428,12 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
     fontSize: 16,
+  },
+  tabsWrapper: {
+    position: "absolute",
+    bottom: 20, 
+    left: 0,
+    right: 0,
   },
   modalOverlay: {
     flex: 1,

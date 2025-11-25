@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from "react-native";
 export default function Posts() {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Posts</Text>
+      {/*<Text style={styles.text}>Posts</Text>*/}
     </View>
   );
 }
