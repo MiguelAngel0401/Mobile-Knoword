@@ -21,7 +21,7 @@ export default function ProfileIndex() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: 'Bienvenido a tu perfil',
+      title: 'Bienvenid@',
       headerLeft: () => (
         <TouchableOpacity
           onPress={() => setShowLogoutModal(true)}

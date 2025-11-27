@@ -1,28 +1,31 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter, usePathname } from "expo-router";
-import { Home, Users, User } from "lucide-react-native";
+import { Home, Users, FileText } from "lucide-react-native";
 
 export default function BottomTabs() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const isActive = (path: string) => pathname?.includes(path);
-
   return (
     <View style={styles.container}>
       <TouchableOpacity
         style={styles.tab}
-        onPress={() => router.push("/(tabs)/")}
+        onPress={() => router.push("/profile/index")}
       >
-        <Home 
-          size={28} 
-          color={isActive("/") && !isActive("/communities") && !isActive("/profile") ? "#3B82F6" : "#9CA3AF"} 
+        <Home
+          size={28}
+          color={
+            pathname?.includes("/profile/index") || pathname === "/profile"
+              ? "#3B82F6"
+              : "#9CA3AF"
+          }
         />
-        <Text 
+        <Text
           style={[
             styles.label,
-            isActive("/") && !isActive("/communities") && !isActive("/profile") && styles.labelActive
+            (pathname?.includes("/profile/index") || pathname === "/profile") &&
+              styles.labelActive,
           ]}
         >
           Inicio
@@ -31,16 +34,22 @@ export default function BottomTabs() {
 
       <TouchableOpacity
         style={styles.tab}
-        onPress={() => router.push("/(tabs)/communities")}
+        onPress={() => router.push("/communities/my/index")}
       >
-        <Users 
-          size={28} 
-          color={isActive("/communities") ? "#3B82F6" : "#9CA3AF"} 
+        <Users
+          size={28}
+          color={
+            pathname?.includes("/communities") || pathname?.includes("/explore")
+              ? "#3B82F6"
+              : "#9CA3AF"
+          }
         />
-        <Text 
+        <Text
           style={[
             styles.label,
-            isActive("/communities") && styles.labelActive
+            (pathname?.includes("/communities") ||
+              pathname?.includes("/explore")) &&
+              styles.labelActive,
           ]}
         >
           Comunidades
@@ -49,19 +58,19 @@ export default function BottomTabs() {
 
       <TouchableOpacity
         style={styles.tab}
-        onPress={() => router.push("/(tabs)/profile")}
+        onPress={() => router.push("/post/blog")}
       >
-        <User 
-          size={28} 
-          color={isActive("/profile") ? "#3B82F6" : "#9CA3AF"} 
+        <FileText
+          size={28}
+          color={pathname?.includes("/post/blog") ? "#3B82F6" : "#9CA3AF"}
         />
-        <Text 
+        <Text
           style={[
             styles.label,
-            isActive("/profile") && styles.labelActive
+            pathname?.includes("/post/blog") && styles.labelActive,
           ]}
         >
-          Perfil
+          Blog
         </Text>
       </TouchableOpacity>
     </View>

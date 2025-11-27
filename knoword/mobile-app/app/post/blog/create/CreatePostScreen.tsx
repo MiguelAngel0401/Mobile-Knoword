@@ -12,8 +12,9 @@ import { useRouter } from "expo-router";
 
 import CreateBlogHeader from "../components/CreateBlogHeader";
 import BlogPreview from "../components/BlogPreview";
-import RichTextEditor from "../components/RichTextEditor";
+import RichHtmlBlogEditor from "../components/RichHTMLBlogEditor";
 import { useDebounce } from "../../../../../mobile-app/src/hooks/useDebounce";
+import { createBlogPost } from "../../../../../shared-core/src/blog/api";
 
 interface BlogDraft {
   title: string;
@@ -23,7 +24,7 @@ interface BlogDraft {
 
 type SavingStatus = "idle" | "saving" | "saved";
 
-export default function CreateBlogPost() {
+export default function CreatePostScreen() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isPreviewMode, setIsPreviewMode] = useState(false);
@@ -81,12 +82,25 @@ export default function CreateBlogPost() {
   };
 
   const handleCancel = () => {
-    router.push("/posts/blog" as any);
+    router.push("/post/blog");
   };
 
   const handleSubmit = async () => {
-    await AsyncStorage.removeItem("blogDraft");
-    Alert.alert("Contenido publicado");
+    try {
+      if (!title || !content) {
+        Alert.alert("Error", "Título y contenido son obligatorios");
+        return;
+      }
+
+      await createBlogPost({ title, content });
+
+      await AsyncStorage.removeItem("blogDraft");
+      Alert.alert("Publicado con éxito");
+      router.push("/post/blog");
+    } catch (error) {
+      console.error("Error al publicar:", error);
+      Alert.alert("Error", "No se pudo publicar el contenido");
+    }
   };
 
   const handleTogglePreview = () => {
@@ -130,7 +144,7 @@ export default function CreateBlogPost() {
       {isPreviewMode ? (
         <BlogPreview title={title} content={content} />
       ) : (
-        <RichTextEditor content={content} onChange={handleContentChange} />
+        <RichHtmlBlogEditor content={content} onChange={handleContentChange} />
       )}
     </ScrollView>
   );

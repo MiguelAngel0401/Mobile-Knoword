@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import {
   AlignCenter,
@@ -12,17 +12,22 @@ import {
   List,
   ListOrdered,
   Strikethrough,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  Youtube,
 } from "lucide-react-native";
 
+import LinkModal from "./LinkModal";
 import ImageUpload from "./ImageUpload";
 import YoutubeUpload from "./YoutubeUpload";
-import LinkModal from "./LinkModal";
 
 interface MenuBarProps {
   editor: any;
 }
 
 export default function MenuBar({ editor }: MenuBarProps) {
+  const [showLinkModal, setShowLinkModal] = useState(false);
+
   if (!editor) return null;
 
   const options = [
@@ -98,9 +103,22 @@ export default function MenuBar({ editor }: MenuBarProps) {
         </TouchableOpacity>
       ))}
 
-      <LinkModal editor={editor} />
-      <ImageUpload editor={editor} />
-      <YoutubeUpload editor={editor} />
+      {/* Link button */}
+      <TouchableOpacity
+        onPress={() => setShowLinkModal(true)}
+        style={styles.button}
+      >
+        <LinkIcon size={18} color="white" />
+      </TouchableOpacity>
+
+      {/* Image button */}
+<ImageUpload editor={editor} />
+
+{/* YouTube button */}
+<YoutubeUpload editor={editor} />
+
+      {/* Link modal */}
+      <LinkModal editor={editor} isOpen={showLinkModal} setIsOpen={setShowLinkModal} />
     </View>
   );
 }

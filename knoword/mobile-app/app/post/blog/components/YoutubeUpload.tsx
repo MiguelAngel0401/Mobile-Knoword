@@ -88,6 +88,7 @@ const styles = StyleSheet.create({
   trigger: {
     padding: 8,
     borderRadius: 8,
+    margin: 4,
   },
   overlay: {
     flex: 1,

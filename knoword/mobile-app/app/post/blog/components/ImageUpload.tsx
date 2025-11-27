@@ -41,7 +41,7 @@ export default function ImageUpload({ editor }: ImageUploadProps) {
 
       setIsUploading(true);
 
-      const imageUrl = await uploadToCloudinary();
+      const imageUrl = await uploadToCloudinary(asset.uri);
 
       if (editor) {
         editor.chain().focus().setImage({ src: imageUrl }).run();
@@ -55,27 +55,25 @@ export default function ImageUpload({ editor }: ImageUploadProps) {
   };
 
   return (
-    <View>
-      <TouchableOpacity
-        onPress={handleImagePick}
-        disabled={isUploading}
-        activeOpacity={0.7}
-        style={[
-          styles.button,
-          isUploading ? styles.buttonUploading : styles.buttonIdle,
-        ]}
-      >
-        {isUploading ? (
-          <View style={styles.uploadingContent}>
-            <Upload size={18} color="#9CA3AF" style={styles.iconMarginRight} />
-            <ActivityIndicator size="small" color="#9CA3AF" />
-            <Text style={styles.uploadingText}>Subiendo...</Text>
-          </View>
-        ) : (
-          <ImageIcon size={20} color="#9CA3AF" />
-        )}
-      </TouchableOpacity>
-    </View>
+    <TouchableOpacity
+      onPress={handleImagePick}
+      disabled={isUploading}
+      activeOpacity={0.7}
+      style={[
+        styles.button,
+        isUploading ? styles.buttonUploading : styles.buttonIdle,
+      ]}
+    >
+      {isUploading ? (
+        <View style={styles.uploadingContent}>
+          <Upload size={18} color="#9CA3AF" style={styles.iconMarginRight} />
+          <ActivityIndicator size="small" color="#9CA3AF" />
+          <Text style={styles.uploadingText}>Subiendo...</Text>
+        </View>
+      ) : (
+        <ImageIcon size={20} color="#9CA3AF" />
+      )}
+    </TouchableOpacity>
   );
 }
 
@@ -86,6 +84,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    margin: 4,
   },
   buttonIdle: {
     backgroundColor: "transparent",

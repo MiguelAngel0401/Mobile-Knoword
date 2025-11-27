@@ -44,7 +44,7 @@ export default function RootLayout() {
         {/* Perfil */}
         <Stack.Screen
           name="profile/index"
-          options={{ 
+          options={{
             title: 'Perfil',
             headerShown: true,
             headerLeft: () => null,
@@ -63,9 +63,20 @@ export default function RootLayout() {
           options={{ title: 'Editar perfil' }}
         />
 
+        <Stack.Screen
+          name="post/blog/index"
+          options={{ title: 'Blog' }}
+        />
+
+        <Stack.Screen
+  name="post/blog/create/CreatePostScreen"
+  options={{ title: 'Crear Post' }}
+/>
+
         {/* Modal */}
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
+
       <StatusBar style="light" />
     </ThemeProvider>
   );

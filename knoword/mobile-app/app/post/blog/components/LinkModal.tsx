@@ -8,14 +8,14 @@ import {
   Pressable,
   StyleSheet,
 } from "react-native";
-import { Link as LinkIcon } from "lucide-react-native";
 
 interface LinkModalProps {
   editor?: any;
+  isOpen: boolean;
+  setIsOpen: (value: boolean) => void;
 }
 
-export default function LinkModal({ editor }: LinkModalProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function LinkModal({ editor, isOpen, setIsOpen }: LinkModalProps) {
   const [url, setUrl] = useState("");
   const [text, setText] = useState("");
 
@@ -61,7 +61,7 @@ export default function LinkModal({ editor }: LinkModalProps) {
         .focus()
         .insertContent({
           type: "text",
-          text: text || url,
+          text: url,
           marks: [{ type: "link", attrs: { href: fullUrl } }],
         })
         .run();
@@ -75,6 +75,7 @@ export default function LinkModal({ editor }: LinkModalProps) {
   const handleUnlink = () => {
     if (!editor) return;
     editor.chain().focus().unsetLink().run();
+    setIsOpen(false);
   };
 
   const isLinkActive = () => {
@@ -83,82 +84,60 @@ export default function LinkModal({ editor }: LinkModalProps) {
   };
 
   return (
-    <View>
-      <TouchableOpacity
-        onPress={() => setIsOpen(true)}
-        style={[
-          styles.trigger,
-          isLinkActive() ? styles.triggerActive : styles.triggerIdle,
-        ]}
-      >
-        <LinkIcon size={18} color={isLinkActive() ? "white" : "#9CA3AF"} />
-      </TouchableOpacity>
+    <Modal visible={isOpen} transparent animationType="fade">
+      <Pressable style={styles.overlay} onPress={() => setIsOpen(false)}>
+        <View style={styles.modal}>
+          <Text style={styles.modalTitle}>
+            {isLinkActive() ? "Editar enlace" : "Insertar enlace"}
+          </Text>
 
-      <Modal visible={isOpen} transparent animationType="fade">
-        <Pressable style={styles.overlay} onPress={() => setIsOpen(false)}>
-          <View style={styles.modal}>
-            <Text style={styles.modalTitle}>
-              {isLinkActive() ? "Editar enlace" : "Insertar enlace"}
+          <View style={styles.field}>
+            <Text style={styles.label}>Texto a mostrar</Text>
+            <TextInput
+              value={text}
+              onChangeText={setText}
+              placeholder="Texto del enlace"
+              placeholderTextColor="#9CA3AF"
+              style={styles.input}
+            />
+            <Text style={styles.helper}>
+              Si no se especifica, se usará la URL como texto
             </Text>
-
-            <View style={styles.field}>
-              <Text style={styles.label}>Texto a mostrar</Text>
-              <TextInput
-                value={text}
-                onChangeText={setText}
-                placeholder="Texto del enlace"
-                placeholderTextColor="#9CA3AF"
-                style={styles.input}
-              />
-              <Text style={styles.helper}>
-                Si no se especifica, se usará la URL como texto
-              </Text>
-            </View>
-
-            <View style={styles.field}>
-              <Text style={styles.label}>URL</Text>
-              <TextInput
-                value={url}
-                onChangeText={setUrl}
-                placeholder="https://example.com"
-                placeholderTextColor="#9CA3AF"
-                style={styles.input}
-              />
-            </View>
-
-            <View style={styles.actions}>
-              {isLinkActive() && (
-                <TouchableOpacity onPress={handleUnlink} style={styles.unlink}>
-                  <Text style={styles.buttonText}>Eliminar</Text>
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity onPress={() => setIsOpen(false)} style={styles.cancel}>
-                <Text style={styles.cancelText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleSubmit} style={styles.submit}>
-                <Text style={styles.buttonText}>
-                  {isLinkActive() ? "Actualizar" : "Insertar"}
-                </Text>
-              </TouchableOpacity>
-            </View>
           </View>
-        </Pressable>
-      </Modal>
-    </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>URL</Text>
+            <TextInput
+              value={url}
+              onChangeText={setUrl}
+              placeholder="https://example.com"
+              placeholderTextColor="#9CA3AF"
+              style={styles.input}
+            />
+          </View>
+
+          <View style={styles.actions}>
+            {isLinkActive() && (
+              <TouchableOpacity onPress={handleUnlink} style={styles.unlink}>
+                <Text style={styles.buttonText}>Eliminar</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity onPress={() => setIsOpen(false)} style={styles.cancel}>
+              <Text style={styles.cancelText}>Cancelar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleSubmit} style={styles.submit}>
+              <Text style={styles.buttonText}>
+                {isLinkActive() ? "Actualizar" : "Insertar"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Pressable>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  trigger: {
-    padding: 8,
-    borderRadius: 8,
-  },
-  triggerIdle: {
-    backgroundColor: "transparent",
-  },
-  triggerActive: {
-    backgroundColor: "#374151",
-  },
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",

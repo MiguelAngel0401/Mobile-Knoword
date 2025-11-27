@@ -1,7 +1,9 @@
 import * as ImagePicker from "expo-image-picker";
 import Constants from "expo-constants";
 
-export const uploadToCloudinary = async (): Promise<{ secure_url: string }> => {
+export const uploadToCloudinary = async (
+  externalUri?: string
+): Promise<{ secure_url: string }> => {
   const cloudName = Constants.expoConfig?.extra?.CLOUDINARY_CLOUD_NAME;
   const uploadPreset = Constants.expoConfig?.extra?.CLOUDINARY_UPLOAD_PRESET;
 
@@ -9,23 +11,28 @@ export const uploadToCloudinary = async (): Promise<{ secure_url: string }> => {
     throw new Error("Cloudinary credentials are not set in app.config.js");
   }
 
-  const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (!permissionResult.granted) {
-    throw new Error("Permiso denegado para acceder a la galería");
+  let uri = externalUri;
+
+  if (!uri) {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      throw new Error("Permiso denegado para acceder a la galería");
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (result.canceled || !result.assets || result.assets.length === 0) {
+      throw new Error("USER_CANCELED");
+    }
+
+    uri = result.assets[0].uri;
   }
 
-  const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ['images'],
-    allowsEditing: true,
-    aspect: [1, 1],
-    quality: 0.8,
-  });
-
-  if (result.canceled) {
-    throw new Error("USER_CANCELED");
-  }
-
-  const uri = result.assets[0].uri;
   const formData = new FormData();
   formData.append("file", {
     uri,
