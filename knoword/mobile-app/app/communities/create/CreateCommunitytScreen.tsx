@@ -16,13 +16,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import debounce from "lodash/debounce";
 import { Image as ImageIcon } from "lucide-react-native";
-
 import { createCommunitySchema } from "../../../../shared-core/src/validators/community/createCommunity";
 import { createCommunity, getTagRecommendations } from "@shared/services/community/communityServices";
 import { uploadToCloudinary } from "@shared/services/cloudinary/upload";
-
 import CommunitySuccessModal from "../components/modals/CommunitySuccessModal";
 import CommunityErrorModal from "../components/modals/CommuntyErrorModal";
+import BottomTabs from "../../../src/components/profile/BottomTabs";
 import { styles } from "./styles";
 
 type CreateCommunityPageData = z.infer<typeof createCommunitySchema>;
@@ -222,272 +221,283 @@ export default function CreateCommunityScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+    <View style={containerStyles.container}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <Text style={styles.title}>Crear Comunidad</Text>
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text style={styles.title}>Crear Comunidad</Text>
 
-        {/* Información básica */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Información de la comunidad</Text>
-          <Text style={styles.sectionDescription}>
-            Cuéntanos un poco sobre tu comunidad.
-          </Text>
+          {/* Información básica */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Información de la comunidad</Text>
+            <Text style={styles.sectionDescription}>
+              Cuéntanos un poco sobre tu comunidad.
+            </Text>
 
-          <View style={styles.fieldContainer}>
-            <Text style={styles.label}>Título de la comunidad</Text>
-            <TextInput
-              placeholder="Ej. Matemáticas y física"
-              placeholderTextColor="#9CA3AF"
-              value={name}
-              onChangeText={(v) => {
-                setValue("name", v, { shouldValidate: true });
-              }}
-              style={[styles.input, errors.name && styles.inputError]}
-            />
-            {errors.name && <Text style={styles.errorText}>{errors.name.message}</Text>}
-          </View>
-
-          <View style={styles.fieldContainer}>
-            <Text style={styles.label}>Descripción de la comunidad</Text>
-            <TextInput
-              placeholder="Ej. Un lugar para discutir y aprender sobre matemáticas y física."
-              placeholderTextColor="#9CA3AF"
-              value={description}
-              multiline
-              numberOfLines={4}
-              onChangeText={(v) => {
-                setValue("description", v, { shouldValidate: true });
-              }}
-              style={[styles.input, styles.textArea, errors.description && styles.inputError]}
-            />
-            {errors.description && (
-              <Text style={styles.errorText}>{errors.description.message}</Text>
-            )}
-          </View>
-
-          <View style={styles.privacyContainer}>
-            <View style={styles.privacyHeader}>
-              <Text style={styles.label}>Privacidad de la comunidad</Text>
-              <TouchableOpacity
-                onPress={() => setValue("isPrivate", !isPrivate, { shouldValidate: true })}
-                style={[styles.toggle, isPrivate ? styles.toggleActive : styles.toggleInactive]}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.toggleThumb, isPrivate && styles.toggleThumbActive]} />
-              </TouchableOpacity>
+            <View style={styles.fieldContainer}>
+              <Text style={styles.label}>Título de la comunidad</Text>
+              <TextInput
+                placeholder="Ej. Matemáticas y física"
+                placeholderTextColor="#9CA3AF"
+                value={name}
+                onChangeText={(v) => {
+                  setValue("name", v, { shouldValidate: true });
+                }}
+                style={[styles.input, errors.name && styles.inputError]}
+              />
+              {errors.name && <Text style={styles.errorText}>{errors.name.message}</Text>}
             </View>
-            <View style={styles.privacyInfo}>
-              {isPrivate ? (
-                <Text style={styles.privacyTextPrivate}>
-                  Privada: Solo invitados pueden unirse
-                </Text>
-              ) : (
-                <Text style={styles.privacyTextPublic}>
-                  Pública: Cualquiera puede unirse
+
+            <View style={styles.fieldContainer}>
+              <Text style={styles.label}>Descripción de la comunidad</Text>
+              <TextInput
+                placeholder="Ej. Un lugar para discutir y aprender sobre matemáticas y física."
+                placeholderTextColor="#9CA3AF"
+                value={description}
+                multiline
+                numberOfLines={4}
+                onChangeText={(v) => {
+                  setValue("description", v, { shouldValidate: true });
+                }}
+                style={[styles.input, styles.textArea, errors.description && styles.inputError]}
+              />
+              {errors.description && (
+                <Text style={styles.errorText}>{errors.description.message}</Text>
+              )}
+            </View>
+
+            <View style={styles.privacyContainer}>
+              <View style={styles.privacyHeader}>
+                <Text style={styles.label}>Privacidad de la comunidad</Text>
+                <TouchableOpacity
+                  onPress={() => setValue("isPrivate", !isPrivate, { shouldValidate: true })}
+                  style={[styles.toggle, isPrivate ? styles.toggleActive : styles.toggleInactive]}
+                  activeOpacity={0.8}
+                >
+                  <View style={[styles.toggleThumb, isPrivate && styles.toggleThumbActive]} />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.privacyInfo}>
+                {isPrivate ? (
+                  <Text style={styles.privacyTextPrivate}>
+                    Privada: Solo invitados pueden unirse
+                  </Text>
+                ) : (
+                  <Text style={styles.privacyTextPublic}>
+                    Pública: Cualquiera puede unirse
+                  </Text>
+                )}
+              </View>
+            </View>
+          </View>
+
+          {/* Etiquetas */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Etiquetas</Text>
+            <Text style={styles.sectionDescription}>
+              Agrega al menos 3 etiquetas para ayudar a otros a encontrar tu comunidad.
+            </Text>
+
+            <View style={styles.tagsInputWrapper}>
+              <TextInput
+                placeholder="Escribe una etiqueta"
+                placeholderTextColor="#9CA3AF"
+                value={inputValue}
+                onChangeText={(text) => {
+                  setInputValue(text);
+                  setTagError(null);
+                }}
+                onSubmitEditing={() => {
+                  const trimmed = inputValue.trim();
+                  if (trimmed) {
+                    handleAddTag(trimmed);
+                  }
+                }}
+                returnKeyType="done"
+                blurOnSubmit={false}
+                style={styles.input}
+              />
+              {tagError && <Text style={styles.errorText}>{tagError}</Text>}
+              {errors.tags && <Text style={styles.errorText}>{errors.tags.message}</Text>}
+
+              {tags.length > 0 && (
+                <Text style={styles.tagCount}>
+                  {tags.length} de {maxTags} etiquetas
                 </Text>
               )}
             </View>
-          </View>
-        </View>
 
-        {/* Etiquetas */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Etiquetas</Text>
-          <Text style={styles.sectionDescription}>
-            Agrega al menos 3 etiquetas para ayudar a otros a encontrar tu comunidad.
-          </Text>
+            {isSearching && (
+              <View style={styles.searchingContainer}>
+                <ActivityIndicator color="#7c3aed" size="small" />
+                <Text style={styles.searchingText}>Buscando...</Text>
+              </View>
+            )}
 
-          <View style={styles.tagsInputWrapper}>
-            <TextInput
-              placeholder="Escribe una etiqueta"
-              placeholderTextColor="#9CA3AF"
-              value={inputValue}
-              onChangeText={(text) => {
-                setInputValue(text);
-                setTagError(null);
-              }}
-              onSubmitEditing={() => {
-                const trimmed = inputValue.trim();
-                if (trimmed) {
-                  handleAddTag(trimmed);
-                }
-              }}
-              returnKeyType="done"
-              blurOnSubmit={false}
-              style={styles.input}
-            />
-            {tagError && <Text style={styles.errorText}>{tagError}</Text>}
-            {errors.tags && <Text style={styles.errorText}>{errors.tags.message}</Text>}
+            {!isSearching && suggestions.length > 0 && (
+              <View style={styles.suggestionsContainer}>
+                <Text style={styles.suggestionsTitle}>Sugerencias:</Text>
+                <View style={styles.suggestionsWrapper}>
+                  {suggestions.slice(0, 8).map((tag) => (
+                    <TouchableOpacity
+                      key={tag}
+                      onPress={() => handleAddTag(tag)}
+                      style={styles.suggestion}
+                    >
+                      <Text style={styles.suggestionText}>{tag}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
 
             {tags.length > 0 && (
-              <Text style={styles.tagCount}>
-                {tags.length} de {maxTags} etiquetas
-              </Text>
+              <View style={styles.selectedTagsContainer}>
+                {tags.map((tag) => (
+                  <View key={tag} style={styles.selectedTag}>
+                    <Text style={styles.selectedTagText}>{tag}</Text>
+                    <TouchableOpacity onPress={() => handleTagRemove(tag)}>
+                      <Text style={styles.removeTag}>✕</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
             )}
           </View>
 
-          {isSearching && (
-            <View style={styles.searchingContainer}>
-              <ActivityIndicator color="#7c3aed" size="small" />
-              <Text style={styles.searchingText}>Buscando...</Text>
-            </View>
-          )}
+          {/* Imágenes */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Imagen de cabecera</Text>
+            <Text style={styles.sectionDescription}>
+              Recomendado: 1200 x 400 px (opcional)
+            </Text>
 
-          {!isSearching && suggestions.length > 0 && (
-            <View style={styles.suggestionsContainer}>
-              <Text style={styles.suggestionsTitle}>Sugerencias:</Text>
-              <View style={styles.suggestionsWrapper}>
-                {suggestions.slice(0, 8).map((tag) => (
-                  <TouchableOpacity
-                    key={tag}
-                    onPress={() => handleAddTag(tag)}
-                    style={styles.suggestion}
-                  >
-                    <Text style={styles.suggestionText}>{tag}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          )}
-
-          {tags.length > 0 && (
-            <View style={styles.selectedTagsContainer}>
-              {tags.map((tag) => (
-                <View key={tag} style={styles.selectedTag}>
-                  <Text style={styles.selectedTagText}>{tag}</Text>
-                  <TouchableOpacity onPress={() => handleTagRemove(tag)}>
-                    <Text style={styles.removeTag}>✕</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </View>
-          )}
-        </View>
-
-        {/* Imágenes */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Imagen de cabecera</Text>
-          <Text style={styles.sectionDescription}>
-            Recomendado: 1200 x 400 px (opcional)
-          </Text>
-
-          <TouchableOpacity
-            onPress={() => openSystemImagePicker("banner")}
-            activeOpacity={0.8}
-            style={styles.bannerUpload}
-          >
-            {isUploadingBanner && (
-              <View style={styles.uploadingOverlay}>
-                <ActivityIndicator color="#fff" size="large" />
-                <Text style={styles.uploadingText}>Subiendo...</Text>
-              </View>
-            )}
-
-            {bannerPreview ? (
-              <Image
-                source={{ uri: bannerPreview }}
-                style={styles.bannerImage}
-                resizeMode="cover"
-              />
-            ) : (
-              !isUploadingBanner && (
-                <View style={styles.uploadPlaceholder}>
-                  <ImageIcon size={40} color="#52525b" />
-                  <Text style={styles.uploadPlaceholderText}>Toca para subir</Text>
-                </View>
-              )
-            )}
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Avatar de la comunidad</Text>
-          <Text style={styles.sectionDescription}>
-            Recomendado: 512 x 512 px (opcional)
-          </Text>
-
-          <TouchableOpacity
-            onPress={() => openSystemImagePicker("avatar")}
-            activeOpacity={0.8}
-            style={styles.avatarUploadContainer}
-          >
-            <View style={styles.avatarBox}>
-              {isUploadingAvatar && (
+            <TouchableOpacity
+              onPress={() => openSystemImagePicker("banner")}
+              activeOpacity={0.8}
+              style={styles.bannerUpload}
+            >
+              {isUploadingBanner && (
                 <View style={styles.uploadingOverlay}>
-                  <ActivityIndicator color="#fff" />
+                  <ActivityIndicator color="#fff" size="large" />
+                  <Text style={styles.uploadingText}>Subiendo...</Text>
                 </View>
               )}
 
-              {avatarPreview && !isUploadingAvatar ? (
+              {bannerPreview ? (
                 <Image
-                  source={{ uri: avatarPreview }}
-                  style={styles.avatarImage}
+                  source={{ uri: bannerPreview }}
+                  style={styles.bannerImage}
                   resizeMode="cover"
                 />
               ) : (
-                !isUploadingAvatar && (
-                  <View style={styles.avatarPlaceholder}>
-                    <ImageIcon size={32} color="#52525b" />
+                !isUploadingBanner && (
+                  <View style={styles.uploadPlaceholder}>
+                    <ImageIcon size={40} color="#52525b" />
+                    <Text style={styles.uploadPlaceholderText}>Toca para subir</Text>
                   </View>
                 )
               )}
-            </View>
-            <Text style={styles.avatarUploadText}>Toca para subir avatar</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Botón de crear */}
-        <TouchableOpacity
-          style={[styles.submitButton, !isFormValid && styles.submitButtonDisabled]}
-          disabled={!isFormValid || isSubmitting}
-          onPress={handleSubmit(submitCreateCommunityForm)}
-        >
-          {isSubmitting ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.submitButtonText}>Crear comunidad</Text>
-          )}
-        </TouchableOpacity>
-
-        {/* Info de validación */}
-        {!isFormValid && (
-          <View style={styles.validationInfo}>
-            {name.trim().length < 4 && (
-              <Text style={styles.validationText}>• Falta el título de la comunidad (mínimo 4 caracteres)</Text>
-            )}
-            {description.trim().length < 10 && (
-              <Text style={styles.validationText}>• Falta la descripción</Text>
-            )}
-            {tags.length < 3 && (
-              <Text style={styles.validationText}>
-                • Faltan {3 - tags.length} etiqueta(s)
-              </Text>
-            )}
+            </TouchableOpacity>
           </View>
-        )}
 
-        {/* Modales */}
-        <CommunitySuccessModal
-          isOpen={isSubmitCorrect}
-          onClose={handleCloseSuccessModal}
-          message="Tu comunidad se ha creado con éxito."
-          communityId={communityId}
-        />
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Avatar de la comunidad</Text>
+            <Text style={styles.sectionDescription}>
+              Recomendado: 512 x 512 px (opcional)
+            </Text>
 
-        <CommunityErrorModal
-          isOpen={!!submissionError}
-          onClose={handleCloseErrorModal}
-          message={submissionError || ""}
-        />
-      </ScrollView>
-    </KeyboardAvoidingView>
+            <TouchableOpacity
+              onPress={() => openSystemImagePicker("avatar")}
+              activeOpacity={0.8}
+              style={styles.avatarUploadContainer}
+            >
+              <View style={styles.avatarBox}>
+                {isUploadingAvatar && (
+                  <View style={styles.uploadingOverlay}>
+                    <ActivityIndicator color="#fff" />
+                  </View>
+                )}
+
+                {avatarPreview && !isUploadingAvatar ? (
+                  <Image
+                    source={{ uri: avatarPreview }}
+                    style={styles.avatarImage}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  !isUploadingAvatar && (
+                    <View style={styles.avatarPlaceholder}>
+                      <ImageIcon size={32} color="#52525b" />
+                    </View>
+                  )
+                )}
+              </View>
+              <Text style={styles.avatarUploadText}>Toca para subir avatar</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Botón de crear */}
+          <TouchableOpacity
+            style={[styles.submitButton, !isFormValid && styles.submitButtonDisabled]}
+            disabled={!isFormValid || isSubmitting}
+            onPress={handleSubmit(submitCreateCommunityForm)}
+          >
+            {isSubmitting ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.submitButtonText}>Crear comunidad</Text>
+            )}
+          </TouchableOpacity>
+
+          {/* Info de validación */}
+          {!isFormValid && (
+            <View style={styles.validationInfo}>
+              {name.trim().length < 4 && (
+                <Text style={styles.validationText}>• Falta el título de la comunidad (mínimo 4 caracteres)</Text>
+              )}
+              {description.trim().length < 10 && (
+                <Text style={styles.validationText}>• Falta la descripción</Text>
+              )}
+              {tags.length < 3 && (
+                <Text style={styles.validationText}>
+                  • Faltan {3 - tags.length} etiqueta(s)
+                </Text>
+              )}
+            </View>
+          )}
+
+          {/* Modales */}
+          <CommunitySuccessModal
+            isOpen={isSubmitCorrect}
+            onClose={handleCloseSuccessModal}
+            message="Tu comunidad se ha creado con éxito."
+            communityId={communityId}
+          />
+
+          <CommunityErrorModal
+            isOpen={!!submissionError}
+            onClose={handleCloseErrorModal}
+            message={submissionError || ""}
+          />
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      <BottomTabs />
+    </View>
   );
 }
+
+const containerStyles = {
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+};

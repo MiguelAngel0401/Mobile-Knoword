@@ -16,8 +16,8 @@ export const useAuthStore = create<AuthState>()(
         clearAuth: () => set({ isAuthenticated: false }),
       }),
       {
-        name: "auth-storage", // nombre de la clave en sessionStorage
-        storage: createJSONStorage(() => sessionStorage), // especifica sessionStorage
+        name: "auth-storage", 
+        storage: createJSONStorage(() => sessionStorage),
       },
     ),
   ),

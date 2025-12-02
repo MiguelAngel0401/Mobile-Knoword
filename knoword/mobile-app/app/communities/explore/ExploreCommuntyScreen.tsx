@@ -11,6 +11,7 @@ import {
 import { useRouter } from "expo-router";
 
 import ErrorMessageScreen from "../../../components/shared/ErrorMessageScreen";
+import BottomTabs from "../../../src/components/profile/BottomTabs";
 import { exploreCommunities } from "@shared/services/community/communityServices";
 import { Community } from "@shared/types/community";
 import { styles } from "./styles";
@@ -51,7 +52,7 @@ export default function ExploreCommunitiesScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={containerStyles.loadingContainer}>
         <ActivityIndicator size="large" color="#3B82F6" />
       </View>
     );
@@ -62,59 +63,76 @@ export default function ExploreCommunitiesScreen() {
   }
 
   return (
-    <ScrollView style={styles.screen}>
-      <Text style={styles.title}>Explorar Comunidades 🌍</Text>
+    <View style={containerStyles.container}>
+      <ScrollView style={styles.screen}>
+        <Text style={styles.title}>Explorar Comunidades 🌍</Text>
 
-      <View style={styles.section}>
-        {tagToCommunitiesData.map((tag, index) => (
-          <View key={index}>
-            <View style={styles.header}>
-              <Text style={styles.categoryTitle}>
-                {tag.name.charAt(0).toUpperCase() + tag.name.slice(1)}
-              </Text>
-              <TouchableOpacity
-                onPress={() =>
-                  router.push(`/communities/${tag.name.toLowerCase()}` as any)
-                }
-              >
-                <Text style={styles.viewAll}>Ver todo →</Text>
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.carousel}
-            >
-              {tag.communities.map((community, idx) => (
+        <View style={styles.section}>
+          {tagToCommunitiesData.map((tag, index) => (
+            <View key={index}>
+              <View style={styles.header}>
+                <Text style={styles.categoryTitle}>
+                  {tag.name.charAt(0).toUpperCase() + tag.name.slice(1)}
+                </Text>
                 <TouchableOpacity
-                  key={idx}
                   onPress={() =>
-                    router.push(`/communities/community/${community.id}` as any)
+                    router.push(`/communities/${tag.name.toLowerCase()}` as any)
                   }
-                  style={styles.card}
-                  activeOpacity={0.8}
                 >
-                  {community.banner ? (
-                    <Image
-                      source={{ uri: community.banner }}
-                      style={styles.image}
-                      resizeMode="cover"
-                    />
-                  ) : (
-                    <View style={styles.imageFallback} />
-                  )}
-                  <View style={styles.overlay}>
-                    <Text style={styles.communityName}>
-                      {community.name}
-                    </Text>
-                  </View>
+                  <Text style={styles.viewAll}>Ver todo →</Text>
                 </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        ))}
-      </View>
-    </ScrollView>
+              </View>
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.carousel}
+              >
+                {tag.communities.map((community, idx) => (
+                  <TouchableOpacity
+                    key={idx}
+                    onPress={() =>
+                      router.push(`/communities/community/${community.id}` as any)
+                    }
+                    style={styles.card}
+                    activeOpacity={0.8}
+                  >
+                    {community.banner ? (
+                      <Image
+                        source={{ uri: community.banner }}
+                        style={styles.image}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View style={styles.imageFallback} />
+                    )}
+                    <View style={styles.overlay}>
+                      <Text style={styles.communityName}>
+                        {community.name}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+
+      <BottomTabs />
+    </View>
   );
 }
+
+const containerStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000",
+  },
+});

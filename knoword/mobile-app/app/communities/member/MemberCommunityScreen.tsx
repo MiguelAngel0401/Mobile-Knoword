@@ -11,6 +11,7 @@ import {
 import { useRouter } from "expo-router";
 
 import ErrorMessageScreen from "../../../components/shared/ErrorMessageScreen";
+import BottomTabs from "../../../src/components/profile/BottomTabs";
 import { Community } from "@shared/types/community";
 import { getUserCommunities } from "@shared/services/community/communityServices";
 
@@ -51,7 +52,7 @@ export default function MemberCommunitiesScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={containerStyles.loadingContainer}>
         <ActivityIndicator size="large" color="#3B82F6" />
       </View>
     );
@@ -62,111 +63,122 @@ export default function MemberCommunitiesScreen() {
   }
 
   return (
-    <ScrollView style={styles.screen}>
-      <Text style={styles.title}>
-        Comunidades a las que pertenezco ({communities.length})
-      </Text>
+    <View style={containerStyles.container}>
+      <ScrollView style={styles.screen}>
+        <Text style={styles.title}>
+          Comunidades a las que pertenezco ({communities.length})
+        </Text>
 
-      {communities.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <View style={styles.emptyIcon} />
-          <Text style={styles.emptyTitle}>
-            Aún no perteneces a comunidades
-          </Text>
-          <Text style={styles.emptySubtitle}>
-            Únete a comunidades para empezar a colaborar
-          </Text>
-        </View>
-      ) : (
-        <View style={styles.list}>
-          {communities.map((community) => (
-            <TouchableOpacity
-              key={community.id}
-              onPress={() =>
-                router.push(`/communities/community/${community.id}` as any)
-              }
-              style={styles.card}
-              activeOpacity={0.8}
-            >
-              <View style={styles.banner}>
-                {community.banner ? (
-                  <Image
-                    source={{ uri: community.banner.trim() }}
-                    style={styles.bannerImage}
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <View style={styles.bannerFallback} />
-                )}
-                <View style={styles.avatarContainer}>
-                  {community.avatar ? (
+        {communities.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIcon} />
+            <Text style={styles.emptyTitle}>
+              Aún no perteneces a comunidades
+            </Text>
+            <Text style={styles.emptySubtitle}>
+              Únete a comunidades para empezar a colaborar
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.list}>
+            {communities.map((community) => (
+              <TouchableOpacity
+                key={community.id}
+                onPress={() =>
+                  router.push(`/communities/community/${community.id}` as any)
+                }
+                style={styles.card}
+                activeOpacity={0.8}
+              >
+                <View style={styles.banner}>
+                  {community.banner ? (
                     <Image
-                      source={{ uri: community.avatar.trim() }}
-                      style={styles.avatar}
+                      source={{ uri: community.banner.trim() }}
+                      style={styles.bannerImage}
                       resizeMode="cover"
                     />
                   ) : (
-                    <View style={styles.avatarFallback}>
-                      <Text style={styles.avatarFallbackText}>
-                        {community.name.charAt(0).toUpperCase()}
+                    <View style={styles.bannerFallback} />
+                  )}
+                  <View style={styles.avatarContainer}>
+                    {community.avatar ? (
+                      <Image
+                        source={{ uri: community.avatar.trim() }}
+                        style={styles.avatar}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View style={styles.avatarFallback}>
+                        <Text style={styles.avatarFallbackText}>
+                          {community.name.charAt(0).toUpperCase()}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+
+                <View style={styles.content}>
+                  <View style={styles.header}>
+                    <Text style={styles.communityName}>
+                      {community.name}
+                    </Text>
+                    {community.isPrivate && (
+                      <Text style={styles.privateBadge}>Privada</Text>
+                    )}
+                  </View>
+
+                  <Text style={styles.description} numberOfLines={2}>
+                    {community.description}
+                  </Text>
+
+                  <View style={styles.tagsContainer}>
+                    {community.tags.slice(0, 3).map((tag) => (
+                      <Text key={tag.id} style={styles.tag}>
+                        {tag.name}
                       </Text>
-                    </View>
-                  )}
-                </View>
-              </View>
+                    ))}
+                    {community.tags.length > 3 && (
+                      <Text style={styles.moreTags}>
+                        +{community.tags.length - 3}
+                      </Text>
+                    )}
+                  </View>
 
-              <View style={styles.content}>
-                <View style={styles.header}>
-                  <Text style={styles.communityName}>
-                    {community.name}
-                  </Text>
-                  {community.isPrivate && (
-                    <Text style={styles.privateBadge}>Privada</Text>
-                  )}
-                </View>
-
-                <Text style={styles.description} numberOfLines={2}>
-                  {community.description}
-                </Text>
-
-                <View style={styles.tagsContainer}>
-                  {community.tags.slice(0, 3).map((tag) => (
-                    <Text key={tag.id} style={styles.tag}>
-                      {tag.name}
+                  <View style={styles.footer}>
+                    <Text style={styles.footerText}>
+                      Creada: {formatDate(community.createdAt)}
                     </Text>
-                  ))}
-                  {community.tags.length > 3 && (
-                    <Text style={styles.moreTags}>
-                      +{community.tags.length - 3}
+                    <Text style={styles.footerText}>
+                      👥 {community.memberCount} miembro
+                      {community.memberCount !== 1 ? "s" : ""}
                     </Text>
-                  )}
+                  </View>
                 </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </ScrollView>
 
-                <View style={styles.footer}>
-                  <Text style={styles.footerText}>
-                    Creada: {formatDate(community.createdAt)}
-                  </Text>
-                  <Text style={styles.footerText}>
-                    👥 {community.memberCount} miembro
-                    {community.memberCount !== 1 ? "s" : ""}
-                  </Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
-    </ScrollView>
+      <BottomTabs />
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
+const containerStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#000",
   },
+});
+
+const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#000",

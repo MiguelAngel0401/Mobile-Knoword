@@ -1,9 +1,4 @@
 import { z } from "zod";
-
-/**
- * Esquema de validación para la creación de comunidades
- * IMPORTANTE: Sincronizado con CreateCommunityDto del backend
- */
 export const createCommunitySchema = z.object({
   name: z
     .string()

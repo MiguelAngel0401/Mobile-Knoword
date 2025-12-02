@@ -21,7 +21,7 @@ import { User } from "../../../../../shared-core/src/types/users/user";
 import { uploadToCloudinary } from "../../../../../shared-core/src/services/cloudinary/upload";
 import client from "../../../lib/axios";
 import ErrorMessageScreen from "../../../../components/shared/ErrorMessageScreen";
-import BottomTabs from "../../../../src/components/profile/BottomTabs"; 
+import BottomTabs from "../../../../src/components/profile/BottomTabs";
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
@@ -179,99 +179,98 @@ export default function ProfileScreen() {
   }
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.wrapper}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-    >
-      <ScrollView 
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+    <View style={{ flex: 1, backgroundColor: "#000" }}>
+      <KeyboardAvoidingView 
+        style={styles.wrapper}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       >
-        <View style={styles.header}>
-          <Text style={styles.title}>{isEditing ? "Editar Perfil" : "Perfil"}</Text>
-          {!isEditing ? (
-            <TouchableOpacity onPress={() => setIsEditing(true)}>
-              <Text style={styles.editButton}>Editar</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              onPress={() => {
-                reset();
-                setAvatarPreview(user?.avatar || null);
-                setIsEditing(false);
-                setSubmissionError(null);
-              }}
-            >
-              <Text style={styles.cancelButton}>Cancelar</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        <View style={styles.avatarSection}>
-          {isUploadingImage ? (
-            <View style={styles.avatarLoading}>
-              <ActivityIndicator size="large" color="#3B82F6" />
-              <Text style={styles.uploadingText}>Subiendo imagen...</Text>
-            </View>
-          ) : (
-            <Avatar
-              src={avatarPreview || user?.avatar || ""}
-              size="lg"
-              editable={isEditing}
-            />
-          )}
-          
-          {isEditing && (
-            <View style={styles.uploadSection}>
+        <ScrollView 
+          contentContainerStyle={styles.container}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.header}>
+            <Text style={styles.title}>{isEditing ? "Editar Perfil" : "Perfil"}</Text>
+            {!isEditing ? (
+              <TouchableOpacity onPress={() => setIsEditing(true)}>
+                <Text style={styles.editButton}>Editar</Text>
+              </TouchableOpacity>
+            ) : (
               <TouchableOpacity
-                onPress={handleImageUpload}
-                disabled={isSubmitting || isUploadingImage}
+                onPress={() => {
+                  reset();
+                  setAvatarPreview(user?.avatar || null);
+                  setIsEditing(false);
+                  setSubmissionError(null);
+                }}
+              >
+                <Text style={styles.cancelButton}>Cancelar</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <View style={styles.avatarSection}>
+            {isUploadingImage ? (
+              <View style={styles.avatarLoading}>
+                <ActivityIndicator size="large" color="#3B82F6" />
+                <Text style={styles.uploadingText}>Subiendo imagen...</Text>
+              </View>
+            ) : (
+              <Avatar
+                src={avatarPreview || user?.avatar || ""}
+                size="lg"
+                editable={isEditing}
+              />
+            )}
+            
+            {isEditing && (
+              <View style={styles.uploadSection}>
+                <TouchableOpacity
+                  onPress={handleImageUpload}
+                  disabled={isSubmitting || isUploadingImage}
+                  style={[
+                    styles.uploadButton,
+                    (isSubmitting || isUploadingImage) && styles.uploadButtonDisabled
+                  ]}
+                >
+                  <Text style={styles.uploadText}>
+                    {isUploadingImage ? "Subiendo..." : "Subir nueva imagen"}
+                  </Text>
+                </TouchableOpacity>
+                {submissionError && <Text style={styles.error}>{submissionError}</Text>}
+                <Text style={styles.hint}>
+                  Recomendamos una imagen de al menos 800×800 pixeles.{"\n"}Formato JPG o PNG
+                </Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.form}>
+            {renderField("Nombre Completo", "realName")}
+            {renderField("Correo Electrónico", "email")}
+            {renderField("Nombre de usuario", "username")}
+            {renderField("Biografía", "bio", true)}
+
+            {isEditing && (
+              <TouchableOpacity
+                onPress={handleSubmit(onSubmit)}
+                disabled={!isDirty || isSubmitting || isUploadingImage}
                 style={[
-                  styles.uploadButton,
-                  (isSubmitting || isUploadingImage) && styles.uploadButtonDisabled
+                  styles.saveButton,
+                  (!isDirty || isSubmitting || isUploadingImage) && styles.disabledButton,
                 ]}
               >
-                <Text style={styles.uploadText}>
-                  {isUploadingImage ? "Subiendo..." : "Subir nueva imagen"}
+                <Text style={styles.saveText}>
+                  {isSubmitting ? "Guardando..." : "Guardar Cambios"}
                 </Text>
               </TouchableOpacity>
-              {submissionError && <Text style={styles.error}>{submissionError}</Text>}
-              <Text style={styles.hint}>
-                Recomendamos una imagen de al menos 800×800 pixeles.{"\n"}Formato JPG o PNG
-              </Text>
-            </View>
-          )}
-        </View>
+            )}
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
-        <View style={styles.form}>
-          {renderField("Nombre Completo", "realName")}
-          {renderField("Correo Electrónico", "email")}
-          {renderField("Nombre de usuario", "username")}
-          {renderField("Biografía", "bio", true)}
-
-          {isEditing && (
-            <TouchableOpacity
-              onPress={handleSubmit(onSubmit)}
-              disabled={!isDirty || isSubmitting || isUploadingImage}
-              style={[
-                styles.saveButton,
-                (!isDirty || isSubmitting || isUploadingImage) && styles.disabledButton,
-              ]}
-            >
-              <Text style={styles.saveText}>
-                {isSubmitting ? "Guardando..." : "Guardar Cambios"}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </ScrollView>
-
-      {/* BottomTabs flotante */}
-      <View style={styles.tabsWrapper}>
-        <BottomTabs />
-      </View>
+      <BottomTabs />
 
       <Modal visible={isOpen} transparent animationType="fade">
         <View style={styles.modalOverlay}>
@@ -289,7 +288,7 @@ export default function ProfileScreen() {
           </View>
         </View>
       </Modal>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -428,12 +427,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
     fontSize: 16,
-  },
-  tabsWrapper: {
-    position: "absolute",
-    bottom: 20, 
-    left: 0,
-    right: 0,
   },
   modalOverlay: {
     flex: 1,

@@ -10,6 +10,7 @@ import {
 import { Link } from "expo-router";
 
 import BlogPreview from "./components/BlogPreview";
+import BottomTabs from "../../../src/components/profile/BottomTabs";
 import { getBlogPosts } from "../../../../shared-core/src/blog/api";
 import { BlogPost } from "../../../../shared-core/src/blog/types";
 
@@ -33,23 +34,31 @@ export default function BlogFeedScreen() {
   }
 
   return (
-    <ScrollView style={styles.screen}>
-      <Link href="/post/blog/create/CreatePostScreen" asChild>
-        <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>Crear nuevo post</Text>
-        </Pressable>
-      </Link>
+    <View style={styles.container}>
+      <ScrollView style={styles.screen}>
+        <Link href="/post/blog/create/CreatePostScreen" asChild>
+          <Pressable style={styles.button}>
+            <Text style={styles.buttonText}>Crear nuevo post</Text>
+          </Pressable>
+        </Link>
 
-      {posts.map((post) => (
-        <View key={post.id} style={styles.card}>
-          <BlogPreview title={post.title} content={post.content} />
-        </View>
-      ))}
-    </ScrollView>
+        {posts.map((post) => (
+          <View key={post.id} style={styles.card}>
+            <BlogPreview title={post.title} content={post.content} />
+          </View>
+        ))}
+      </ScrollView>
+
+      <BottomTabs />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
   screen: {
     flex: 1,
     backgroundColor: "#000",

@@ -11,7 +11,7 @@ export default function BottomTabs() {
     <View style={styles.container}>
       <TouchableOpacity
         style={styles.tab}
-        onPress={() => router.push("/profile/index")}
+        onPress={() => router.push("/profile")}
       >
         <Home
           size={28}
@@ -34,12 +34,13 @@ export default function BottomTabs() {
 
       <TouchableOpacity
         style={styles.tab}
-        onPress={() => router.push("/communities/my/index")}
+        onPress={() => router.push("/communities/my")}
       >
         <Users
           size={28}
           color={
-            pathname?.includes("/communities") || pathname?.includes("/explore")
+            pathname?.includes("/communities/my") ||
+            pathname?.includes("/communities")
               ? "#3B82F6"
               : "#9CA3AF"
           }
@@ -47,8 +48,8 @@ export default function BottomTabs() {
         <Text
           style={[
             styles.label,
-            (pathname?.includes("/communities") ||
-              pathname?.includes("/explore")) &&
+            (pathname?.includes("/communities/my") ||
+              pathname?.includes("/communities")) &&
               styles.labelActive,
           ]}
         >

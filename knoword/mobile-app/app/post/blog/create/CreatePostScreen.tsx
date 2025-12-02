@@ -13,6 +13,7 @@ import { useRouter } from "expo-router";
 import CreateBlogHeader from "../components/CreateBlogHeader";
 import BlogPreview from "../components/BlogPreview";
 import RichHtmlBlogEditor from "../components/RichHTMLBlogEditor";
+import BottomTabs from "../../../../src/components/profile/BottomTabs";
 import { useDebounce } from "../../../../../mobile-app/src/hooks/useDebounce";
 import { createBlogPost } from "../../../../../shared-core/src/blog/api";
 
@@ -114,43 +115,51 @@ export default function CreatePostScreen() {
   };
 
   return (
-    <ScrollView style={styles.screen}>
-      <CreateBlogHeader
-        onSubmit={handleSubmit}
-        onSave={handleSave}
-        onCancel={handleCancel}
-        onTogglePreview={handleTogglePreview}
-        isPreviewMode={isPreviewMode}
-      />
-
-      <View style={styles.titleContainer}>
-        <View style={styles.titleHeader}>
-          <Text style={styles.titleLabel}>Título del blog</Text>
-          {savingStatus !== "idle" && (
-            <Text style={styles.savingStatus}>
-              {savingStatusText[savingStatus]}
-            </Text>
-          )}
-        </View>
-        <TextInput
-          value={title}
-          onChangeText={setTitle}
-          placeholder="Escribe el título de tu blog..."
-          placeholderTextColor="#9CA3AF"
-          style={styles.input}
+    <View style={styles.container}>
+      <ScrollView style={styles.screen}>
+        <CreateBlogHeader
+          onSubmit={handleSubmit}
+          onSave={handleSave}
+          onCancel={handleCancel}
+          onTogglePreview={handleTogglePreview}
+          isPreviewMode={isPreviewMode}
         />
-      </View>
 
-      {isPreviewMode ? (
-        <BlogPreview title={title} content={content} />
-      ) : (
-        <RichHtmlBlogEditor content={content} onChange={handleContentChange} />
-      )}
-    </ScrollView>
+        <View style={styles.titleContainer}>
+          <View style={styles.titleHeader}>
+            <Text style={styles.titleLabel}>Título del blog</Text>
+            {savingStatus !== "idle" && (
+              <Text style={styles.savingStatus}>
+                {savingStatusText[savingStatus]}
+              </Text>
+            )}
+          </View>
+          <TextInput
+            value={title}
+            onChangeText={setTitle}
+            placeholder="Escribe el título de tu blog..."
+            placeholderTextColor="#9CA3AF"
+            style={styles.input}
+          />
+        </View>
+
+        {isPreviewMode ? (
+          <BlogPreview title={title} content={content} />
+        ) : (
+          <RichHtmlBlogEditor content={content} onChange={handleContentChange} />
+        )}
+      </ScrollView>
+
+      <BottomTabs />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
   screen: {
     flex: 1,
     backgroundColor: "#000",
