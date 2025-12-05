@@ -12,7 +12,6 @@ const isValidEmail = (email: string): boolean => {
 };
 
 export const checkEmail = async (email: string): Promise<CheckAvailabilityResponse> => {
-  // ✅ No hacer petición si el email no es válido
   if (!isValidEmail(email)) {
     return { 
       available: false, 
